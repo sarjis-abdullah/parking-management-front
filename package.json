@@ -21,7 +21,8 @@
     "vue": "^3.4.21",
     "vue-recaptcha-v3": "^2.0.1",
     "vue-router": "^4.3.0",
-    "vue3-toastify": "^0.2.1"
+    "vue3-toastify": "^0.2.1",
+    "@heroicons/vue": "^2.0.13"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.18",

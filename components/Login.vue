@@ -63,7 +63,6 @@
 
 <script setup>
 import { ref } from "vue";
-import Default from "../layouts/Default.vue";
 import Login from "../components/Login.vue";
 // import AccountStorage from "../storage/Index";
 
@@ -119,7 +118,7 @@ const submitForm = () => {
         localStorage.setItem("LOGIN_ACCOUNT", JSON.stringify(data.user));
         localStorage.setItem("ACCESS_TOKEN", data.accessToken);
         isLogin.value = true;
-        router.push("/customer-list");
+        router.push("/dashboard");
         // Reload the page
         // window.location.reload();
       }
