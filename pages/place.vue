@@ -18,7 +18,7 @@ import * as yup from "yup";
 import { ref } from "vue";
 const formRef = ref(null);
 
-const schema = storeSchema
+const schema = storeSchema;
 const onSubmit = (values) => {
   console.log(values);
   formRef.value?.resetForm();
@@ -29,27 +29,33 @@ const inputClass =
 
 <template>
   <AuthLayout>
-    <section class="max-w-96">
+    <section class="max-w-2xl">
       <Form
         v-slot="{ values, handleReset }"
         ref="formRef"
         @submit="onSubmit"
         :validation-schema="schema"
-        class="grid gap-3"
+        class="grid grid-cols-1 gap-3"
       >
         <div class="grid gap-2">
-          <label class="text-gray-500">Email</label>
+          <label class="text-gray-500">Name</label>
           <Field :class="inputClass" name="email" placeholder="email" />
           <ErrorMessage class="text-red-500" name="email" />
         </div>
-        <div>
-          <label class="text-gray-500">Password</label>
+        <div class="grid gap-2">
+          <label class="text-gray-500">Description</label>
           <Field :class="inputClass" name="password" placeholder="password" />
           <ErrorMessage class="text-red-500" name="password" />
         </div>
+        <div></div>
         <div class="flex justify-end gap-2">
-          <button type="submit" class="bg-indigo-600 text-white px-2 py-1 rounded-md">Submit</button>
-          <button type="button" @click="handleReset">Reset</button>
+          <button type="button" class="bg-gray-400 text-white px-2 py-1 rounded-md" @click="handleReset">Reset</button>
+          <button
+            type="submit"
+            class="bg-indigo-600 text-white px-2 py-1 rounded-md"
+          >
+            Submit
+          </button>
         </div>
       </Form>
     </section>

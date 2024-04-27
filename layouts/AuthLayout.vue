@@ -390,18 +390,34 @@ import {
   XMarkIcon,
 } from "@heroicons/vue/24/outline";
 import { ChevronDownIcon, MagnifyingGlassIcon } from "@heroicons/vue/20/solid";
+const route = useRoute();
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: HomeIcon, current: true },
-  { name: "User", href: "/user", icon: UsersIcon, current: false },
-  { name: "Place", href: "/place", icon: CalendarIcon, current: false },
-  { name: "Category", href: "/category", icon: DocumentDuplicateIcon, current: false },
-  { name: "Floor", href: "/floor", icon: ChartPieIcon, current: false },
-  { name: "Tariff", href: "/tariff", icon: ChartPieIcon, current: false },
-  { name: "Slot setup", href: "/slot", icon: ChartPieIcon, current: false },
-  { name: "Parking", href: "/parking", icon: ChartPieIcon, current: false },
-  { name: "Reports", href: "/reports", icon: ChartPieIcon, current: false },
-];
+const rawNavigation = computed(() => {
+  return [
+    { name: "Dashboard", href: "/dashboard", icon: HomeIcon, current: true },
+    { name: "User", href: "/user", icon: UsersIcon, current: false },
+    { name: "Place", href: "/place", icon: CalendarIcon, current: false },
+    {
+      name: "Category",
+      href: "/category",
+      icon: DocumentDuplicateIcon,
+      current: false,
+    },
+    { name: "Floor", href: "/floor", icon: ChartPieIcon, current: false },
+    { name: "Tariff", href: "/tariff", icon: ChartPieIcon, current: false },
+    { name: "Slot setup", href: "/slot", icon: ChartPieIcon, current: false },
+    { name: "Parking", href: "/parking", icon: ChartPieIcon, current: false },
+    { name: "Reports", href: "/reports", icon: ChartPieIcon, current: false },
+  ];
+});
+const navigation = computed(() => {
+  return rawNavigation.value.map(item=> {
+    return {
+      ...item,
+      current: !!(item.href == route.path)
+    }
+  })
+});
 const teams = [
   { id: 1, name: "Heroicons", href: "#", initial: "H", current: false },
   { id: 2, name: "Tailwind Labs", href: "#", initial: "T", current: false },
