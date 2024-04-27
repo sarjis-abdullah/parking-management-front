@@ -1,15 +1,3 @@
-<!-- <template>
-  <AuthLayout>
-    <section>hello</section>
-  </AuthLayout>
-</template>
-
-<script setup>
-import AuthLayout from "../layouts/AuthLayout.vue";
-</script>
-
-<style lang="scss" scoped></style> -->
-
 <script setup>
 import AuthLayout from "../layouts/AuthLayout.vue";
 import ErrorMessage from "../components/common/ErrorMessage.vue";
@@ -17,19 +5,25 @@ import storeSchema from "../validationSchema/user/storeSchema";
 // import { Form, Field, ErrorMessage, useForm } from "vee-validate";
 // const { setFieldValue } = useForm();
 import * as yup from "yup";
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted } from "vue";
+// import axios from '../plugins/axios'
 const formRef = ref(null);
 const emailError = ref(null);
 import { useVuelidate } from "@vuelidate/core";
 import { email, required, sameAs, helpers } from "@vuelidate/validators";
+import { split } from "postcss/lib/list";
+const config = useRuntimeConfig();
+const BASE_URL = config.public.BASE_URL;
 
-const state = reactive({
-  name: "",
-  email: "",
-  role: "",
-  password: "",
-  confirmPassword: "",
-});
+const defaultData = {
+  name: "wwww",
+  email: "khalid@gmail.com",
+  role: "www",
+  password: "12345",
+  confirmPassword: "12345",
+};
+const serverErrors = ref({});
+const state = reactive(defaultData);
 const rules = computed(() => {
   return {
     name: { required: helpers.withMessage("Name is required", required) },
@@ -53,15 +47,47 @@ const rules = computed(() => {
 const validator = useVuelidate(rules, state, { $lazy: true });
 
 const schema = storeSchema;
-const onSubmit = async (values) => {
+const token =
+  "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiNTg0NzhkMGRlOTBlMGJmYTBlNDM2MzYxYzc4YzNjNDRkNzdmZWFjOGY2MTg0OGI4NmFlZjI5M2U4NjBjMjU2MWM3NDA2ODVkM2JhYzRmMWYiLCJpYXQiOjE3MTQyMjI5NzYuNDMyNDc5LCJuYmYiOjE3MTQyMjI5NzYuNDMyNDgzLCJleHAiOjE3NDU3NTg5NzYuNDE1MDA4LCJzdWIiOiI0Iiwic2NvcGVzIjpbXX0.A-YTSXfW8-0Ulu6fkQKerul9Wrcp3RBTD1huHt2rIJoRqOnUPfeAEG_VmgeqbEpM2v38DdI7oscx3CuFYiteejTT8SQUuWhWjGZC6S83phKYYcL0grQRylJ4jQ0oS-umxSo-yDN91uHulc683eOjzCuGRcZIWLP_k2BGuJMZnbklAxFfLxSfM2-v_uvVO9e-7U8H7QrmjMZAcgGnIlDkP8kKCTDg4VL3w_4Dh7krXZd-PiVd8aOE9hVudyOLDQAKcjhzJp-8ZIu7ey1gfleZkhUwfSBHypIPNE0KgV4YyxBEa7IT7lOcdtTgvdWiCkrw57AAnPIcf8OexMgf6KK-5F4LjTxV4ywq6J6YIcRkRcSOsqxUbZauQHMohuDdfSgpN-AIHoeBWwCT2qlXYD0qqjCwykRayD2NOMsmoAAALeTbw-rP0zq1Fxo9285U687T3Ma22dGVj5HZ_UyAP--9MGakLVxdGzHaSvz53fNUOLe6vL-xAsyVDUJJcd0ACTNePDELo75k51AvpZXzIQtKp-t9ijSb8tXd4EvcCNwMDa8KFdQwv2xxOdGUBHfUASzeJM5_FR7xPjfDNgMA3Z38DI_5GVrKziaRBHqDnwlwqPHQOdPOkB1Hfq0gL3hpK7CYxiViqdS5MkSB8ZmeMwbffiZcJq4ChpN6SnHe7bQfOhE";
+const postUser = async () => {
+  // const { data } = await useFetch(BASE_URL + 'user')
+  try {
+    await $fetch(BASE_URL + "register", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json", // Adjust content type as needed
+      },
+      body: state,
+    });
+  } catch (error) {
+    if (error.response?._data?.errors) {
+      serverErrors.value = error.response._data.errors;
+    } else if (error.response?.data?.errors) {
+      serverErrors.value = error.response.data.errors;
+    }
+  }
+};
+const onSubmit = async () => {
   console.log(validator.value);
   const r = await validator.value.$validate();
   if (r) {
-    console.log(9999);
+    postUser();
   } else {
-    console.log(777777777);
+    console.log("Please fillup the form!");
   }
 };
+const handleReset = async () => {
+  // for (let key in state) {
+  //   state[key] = '';
+  // }
+  // const r = await validator.value.$reset();
+  formRef.value?.reset();
+};
+
+onMounted(() => {
+  // axios.get('http://localhost:8190/api/v1')
+});
 const inputClass =
   "relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
 </script>
@@ -72,12 +98,14 @@ const inputClass =
       <form
         @submit.prevent="onSubmit"
         :validation-schema="schema"
+        ref="formRef"
         class="grid gap-3"
       >
-        <!-- <pre>
-        {{ validator.name.$errors }}
-      </pre
-        > -->
+        <!-- <ul v-if="serverErrors && Object.keys(serverErrors)">
+          <li v-for="(item, i) in serverErrors" :key="i">
+            {{ item }}
+          </li>
+        </ul> -->
         <section class="grid grid-cols-1 gap-3">
           <div class="grid gap-2">
             <label class="text-gray-500">Name</label>
@@ -152,13 +180,13 @@ const inputClass =
             >
               Reset
             </button>
-            <button
+            <!-- <button
               type="button"
               class="bg-gray-400 text-white px-2 py-1 rounded-md"
               @click="validate"
             >
               validate
-            </button>
+            </button> -->
             <button
               type="submit"
               class="bg-indigo-600 text-white px-2 py-1 rounded-md"

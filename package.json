@@ -16,17 +16,14 @@
     "@vonage/server-sdk": "^3.13.1",
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
+    "axios": "^1.6.8",
     "lodash.debounce": "^4.0.8",
-    "mongodb": "^6.2.0",
-    "mongoose": "^7.4.4",
     "nuxt": "^3.11.1",
     "twilio": "^5.0.1",
-    "vee-validate": "^4.12.6",
     "vue": "^3.4.21",
     "vue-recaptcha-v3": "^2.0.1",
     "vue-router": "^4.3.0",
-    "vue3-toastify": "^0.2.1",
-    "yup": "^1.4.0"
+    "vue3-toastify": "^0.2.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.18",
