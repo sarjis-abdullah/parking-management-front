@@ -9,6 +9,13 @@ export class PlaceService {
       throw err;
     }
   }
+  static async create(data) {
+    try {
+      return await HttpRequester.post('place', data);
+    } catch (err) {
+      throw err;
+    }
+  }
   // public static setAccount(account:Account){
   //             this.account = account;
   // }

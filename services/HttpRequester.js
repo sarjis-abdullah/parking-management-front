@@ -23,9 +23,9 @@ export class HttpRequester extends BaseHttpRequester {
     }
   }
   static async post(url, data) {
-    const response = await fetch(url, {
+    const response = await fetch(this.BASE_URL + url, {
       method: "POST",
-      headers: this.getHeaders(),
+      ...this.getHeaders(),
       body: JSON.stringify(data),
     });
     if (response.ok) {
@@ -35,7 +35,7 @@ export class HttpRequester extends BaseHttpRequester {
     }
   }
   static async put(url, data) {
-    const response = await fetch(url, {
+    const response = await fetch(this.BASE_URL + url, {
       method: "PUT",
       headers: this.getHeaders(),
       body: JSON.stringify(data),
@@ -47,7 +47,7 @@ export class HttpRequester extends BaseHttpRequester {
     }
   }
   static async delete(url) {
-    const response = await fetch(url, {
+    const response = await fetch(this.BASE_URL + url, {
       method: "DELETE",
       headers: this.getHeaders(),
     });
@@ -93,7 +93,7 @@ export class HttpRequester extends BaseHttpRequester {
     // return new ServerErrorException(error);
   }
   static async getFile(url) {
-    const response = await fetch(url, { headers: this.getHeaders() });
+    const response = await fetch(this.BASE_URL + url, { headers: this.getHeaders() });
     if (response.ok) {
       return await response.blob();
     } else {

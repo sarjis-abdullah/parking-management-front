@@ -8,7 +8,7 @@ export class BaseHttpRequester {
     return {
       headers: {
         Authorization: `Bearer ${token}`,
-        // "Content-Type": "application/json", // Adjust content type as needed
+        "Content-Type": "application/json", // Adjust content type as needed
       },
     };
   }

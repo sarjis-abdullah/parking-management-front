@@ -5,8 +5,7 @@ import { ref, reactive, onMounted } from "vue";
 const formRef = ref(null);
 import { useVuelidate } from "@vuelidate/core";
 import { email, required, sameAs, helpers } from "@vuelidate/validators";
-const config = useRuntimeConfig();
-const BASE_URL = config.public.BASE_URL;
+import {UserService} from "@/services/UserService.js";
 
 definePageMeta({
   layout:"auth-layout",
@@ -44,8 +43,6 @@ const validator = useVuelidate(rules, state, { $lazy: true });
 
 const loading = ref(false);
 
-const token =
-  "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiNTg0NzhkMGRlOTBlMGJmYTBlNDM2MzYxYzc4YzNjNDRkNzdmZWFjOGY2MTg0OGI4NmFlZjI5M2U4NjBjMjU2MWM3NDA2ODVkM2JhYzRmMWYiLCJpYXQiOjE3MTQyMjI5NzYuNDMyNDc5LCJuYmYiOjE3MTQyMjI5NzYuNDMyNDgzLCJleHAiOjE3NDU3NTg5NzYuNDE1MDA4LCJzdWIiOiI0Iiwic2NvcGVzIjpbXX0.A-YTSXfW8-0Ulu6fkQKerul9Wrcp3RBTD1huHt2rIJoRqOnUPfeAEG_VmgeqbEpM2v38DdI7oscx3CuFYiteejTT8SQUuWhWjGZC6S83phKYYcL0grQRylJ4jQ0oS-umxSo-yDN91uHulc683eOjzCuGRcZIWLP_k2BGuJMZnbklAxFfLxSfM2-v_uvVO9e-7U8H7QrmjMZAcgGnIlDkP8kKCTDg4VL3w_4Dh7krXZd-PiVd8aOE9hVudyOLDQAKcjhzJp-8ZIu7ey1gfleZkhUwfSBHypIPNE0KgV4YyxBEa7IT7lOcdtTgvdWiCkrw57AAnPIcf8OexMgf6KK-5F4LjTxV4ywq6J6YIcRkRcSOsqxUbZauQHMohuDdfSgpN-AIHoeBWwCT2qlXYD0qqjCwykRayD2NOMsmoAAALeTbw-rP0zq1Fxo9285U687T3Ma22dGVj5HZ_UyAP--9MGakLVxdGzHaSvz53fNUOLe6vL-xAsyVDUJJcd0ACTNePDELo75k51AvpZXzIQtKp-t9ijSb8tXd4EvcCNwMDa8KFdQwv2xxOdGUBHfUASzeJM5_FR7xPjfDNgMA3Z38DI_5GVrKziaRBHqDnwlwqPHQOdPOkB1Hfq0gL3hpK7CYxiViqdS5MkSB8ZmeMwbffiZcJq4ChpN6SnHe7bQfOhE";
 const handleReset = async () => {
   await validator.value.$reset();
   for (let key in state) {
@@ -55,17 +52,9 @@ const handleReset = async () => {
   console.log('handleReset');
 };
 const postUser = async () => {
-  // const { data } = await useFetch(BASE_URL + 'user')
   try {
-    loading.value = true;
-    await $fetch(BASE_URL + "register", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json", // Adjust content type as needed
-      },
-      body: state,
-    });
+    loading.value = true
+    await UserService.create(state)
     serverErrors.value = {};
     handleReset()
   } catch (error) {
@@ -79,7 +68,6 @@ const postUser = async () => {
   }
 };
 const onSubmit = async () => {
-  console.log(validator.value);
   const r = await validator.value.$validate();
   if (r) {
     postUser();

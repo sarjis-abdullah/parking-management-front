@@ -9,6 +9,13 @@ export class UserService {
       throw err;
     }
   }
+  static async create(data) {
+    try {
+      return await HttpRequester.post('register', data);
+    } catch (err) {
+      throw err;
+    }
+  }
   // public static setAccount(account:Account){
   //             this.account = account;
   // }
