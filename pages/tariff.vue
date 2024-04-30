@@ -115,7 +115,7 @@ import { onMounted } from "vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
-import { CategoryService } from "@/services/CategoryService.js";
+import { TariffService } from "@/services/TariffService.js";
 
 const list = ref([]);
 const loadingError = ref(null);
@@ -124,7 +124,7 @@ const serverErrors = ref(null);
 
 //pagination
 const page = ref(1);
-const perPage = ref(10);
+const perPage = ref(2);
 const lastPage = ref(null);
 const total = ref(null);
 const totalPerPage = ref(null);
@@ -136,7 +136,7 @@ const searchQuery = computed(() => {
 const loadData = async () => {
   try {
     isLoading.value = true;
-    const { meta, data } = await CategoryService.getAll(searchQuery.value);
+    const { meta, data } = await TariffService.getAll(searchQuery.value);
     list.value = data;
 
     page.value = meta.current_page;
