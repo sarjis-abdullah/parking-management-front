@@ -121,6 +121,8 @@ import { onMounted } from "vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
+import {UserService} from "@/services/UserService.js";
+
 
 const users = ref([]);
 const loadingError = ref(null);
@@ -146,13 +148,7 @@ const loadData = async () => {
   // const { data } = await useFetch(BASE_URL + 'user')
   try {
     isLoading.value = true;
-    const {meta, data} = await $fetch(BASE_URL + "user" + searchQuery.value, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        // "Content-Type": "application/json", // Adjust content type as needed
-      },
-    });
+    const {meta, data} = await UserService.getAll(searchQuery.value)
     users.value = data;
     console.log(meta, meta.current_page);
 
