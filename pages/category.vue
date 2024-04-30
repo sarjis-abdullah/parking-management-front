@@ -13,7 +13,7 @@
         /> -->
           <header class="flex justify-between text-gray-900 mb-3 text-xl">
             <h6>{{ "Place List" }}</h6>
-            <Link to="/add/place"> Add Place </Link>
+            <Link to="/add/category"> Add Category </Link>
           </header>
           <!-- <pre>
           {{ list }}
