@@ -1,5 +1,4 @@
 <template>
-  <AuthLayout>
     <div class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
       <div class="mt-8 flow-root">
         <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -116,7 +115,6 @@
         @onChange="onPageChanged"
       />
     </div>
-  </AuthLayout>
 </template>
 <script setup>
 import { onMounted } from "vue";

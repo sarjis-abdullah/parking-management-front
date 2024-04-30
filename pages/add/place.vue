@@ -93,7 +93,5 @@ const inputClass =
 </script>
 
 <template>
-  <AuthLayout>
     hell
-  </AuthLayout>
 </template>

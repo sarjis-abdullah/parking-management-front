@@ -447,9 +447,9 @@ const rawNavigation = ref([
 ]);
 const navigation = computed(() => {
   return rawNavigation.value.map((item) => {
-    console.log(route.name, item.href);
+    // console.log(route.name, item.href);
     const href = item.href.split("/")[1];
-    console.log(href);
+    // console.log(href);
     return {
       ...item,
       // show: false,
@@ -477,7 +477,7 @@ const userNavigation = [
 ];
 const showChild = (key) => {
   rawNavigation.value = rawNavigation.value.map((item) => {
-    console.log(item.href, 7777, key);
+    // console.log(item.href, 7777, key);
     if (item.href == key) {
       return {
         ...item,
@@ -493,6 +493,6 @@ const showChild = (key) => {
 
 const sidebarOpen = ref(false);
 onMounted(() => {
-  console.log(123, 'auth layout');
+  console.log(123, 'default layout');
 })
 </script>
