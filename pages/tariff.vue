@@ -49,7 +49,7 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200 bg-white">
-                <tr v-for="SingleData in list" :key="SingleData.id">
+                <tr v-for="singleData in list" :key="singleData.id">
                   <td class="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
                     <div class="flex items-center">
                       <div class="h-10 w-10 flex-shrink-0">
@@ -61,7 +61,7 @@
                       </div>
                       <div class="ml-4">
                         <div class="font-medium text-gray-900">
-                          {{ SingleData.name }}
+                          {{ singleData.name }}
                         </div>
                         <div class="mt-1 text-gray-500">
                           <!-- {{ $d(getExecutionDate(order)) }} -->
@@ -70,10 +70,10 @@
                     </div>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
-                    <span class="text-gray-900">{{ SingleData.description }}</span>
+                    <span class="text-gray-900">{{ singleData.description }}</span>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                    {{ SingleData?.place?.name }}
+                    {{ singleData?.place?.name }}
                   </td>
                   <td
                     class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
