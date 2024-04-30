@@ -108,7 +108,7 @@
                               ]"
                               aria-hidden="true"
                             />
-                            {{ item.name }}
+                            {{ item.name }}eeee
                           </nuxt-link>
                         </li>
                       </ul>
@@ -185,7 +185,7 @@
             <li>
               <ul role="list" class="-mx-2 space-y-1">
                 <li v-for="item in navigation" :key="item.name">
-                  <nuxt-link
+                  <span
                     :to="item.href"
                     :class="[
                       item.current
@@ -204,8 +204,28 @@
                       ]"
                       aria-hidden="true"
                     />
-                    {{ item.name }}
-                  </nuxt-link>
+                    <span class="cursor-pointer border px-2 py-1" @click="showChild(item.href)">
+                      {{ item.name }}</span
+                    >
+                  </span>
+                  <div
+                    class="ml-16"
+                    v-if="item.show"
+                    v-for="child in item.children"
+                    :key="child.href"
+                  >
+                    <nuxt-link
+                      :class="[
+                        child.current
+                          ? 'text-indigo-600'
+                          : 'text-gray-400 group-hover:text-indigo-600',
+                        'h-6 w-6 shrink-0',
+                      ]"
+                      :to="child.href"
+                    >
+                      {{ child.name }}
+                    </nuxt-link>
+                  </div>
                 </li>
               </ul>
             </li>
@@ -392,31 +412,100 @@ import {
 import { ChevronDownIcon, MagnifyingGlassIcon } from "@heroicons/vue/20/solid";
 const route = useRoute();
 
-const rawNavigation = computed(() => {
-  return [
-    { name: "Dashboard", href: "/dashboard", icon: HomeIcon, current: true },
-    { name: "User", href: "/user", icon: UsersIcon, current: false },
-    { name: "Place", href: "/place", icon: CalendarIcon, current: false },
-    {
-      name: "Category",
-      href: "/category",
-      icon: DocumentDuplicateIcon,
-      current: false,
-    },
-    { name: "Floor", href: "/floor", icon: ChartPieIcon, current: false },
-    { name: "Tariff", href: "/tariff", icon: ChartPieIcon, current: false },
-    { name: "Slot setup", href: "/slot", icon: ChartPieIcon, current: false },
-    { name: "Parking", href: "/parking", icon: ChartPieIcon, current: false },
-    { name: "Reports", href: "/reports", icon: ChartPieIcon, current: false },
-  ];
-});
+const rawNavigation = ref([
+  { name: "Dashboard", href: "/dashboard", icon: HomeIcon, show: false },
+  {
+    name: "User",
+    href: "/user",
+    icon: UsersIcon,
+    show: true,
+    children: [
+      { name: "Add", href: "/add/user" },
+      { name: "List", href: "/user" },
+    ],
+  },
+  {
+    name: "Place",
+    href: "/place",
+    icon: CalendarIcon,
+    show: false,
+    children: [
+      { name: "Add", href: "/add/place" },
+      { name: "List", href: "/place" },
+    ],
+  },
+  {
+    name: "Category",
+    href: "/category",
+    icon: DocumentDuplicateIcon,
+    show: false,
+    children: [
+      { name: "Add", href: "/add/category" },
+      { name: "List", href: "/category" },
+    ],
+  },
+  {
+    name: "Floor",
+    href: "/floor",
+    icon: ChartPieIcon,
+    show: false,
+    children: [
+      { name: "Add", href: "/add/floor" },
+      { name: "List", href: "/floor" },
+    ],
+  },
+  {
+    name: "Tariff",
+    href: "/tariff",
+    icon: ChartPieIcon,
+    show: false,
+    children: [
+      { name: "Add", href: "/add/tariff" },
+      { name: "List", href: "/tariff" },
+    ],
+  },
+  {
+    name: "Slot setup",
+    href: "/slot",
+    icon: ChartPieIcon,
+    show: false,
+    children: [
+      { name: "Add", href: "/add/slot" },
+      { name: "List", href: "/slot" },
+    ],
+  },
+  {
+    name: "Parking",
+    href: "/parking",
+    icon: ChartPieIcon,
+    show: false,
+    children: [
+      { name: "Add", href: "/add/parking" },
+      { name: "List", href: "/parking" },
+    ],
+  },
+  { name: "Reports", href: "/reports", icon: ChartPieIcon, show: false },
+]);
 const navigation = computed(() => {
-  return rawNavigation.value.map(item=> {
+  return rawNavigation.value.map((item) => {
+    console.log(route.name, item.href);
+    const href = item.href.split("/")[1];
+    console.log(href);
     return {
       ...item,
-      current: !!(item.href == route.path)
-    }
-  })
+      // show: false,
+      current: route.name.includes(href),
+      children: item?.children?.length
+        ? item.children.map((child) => {
+            const href = item.href.split("/")[1];
+            return {
+              ...child,
+              current: !!(child.href == route.path),
+            };
+          })
+        : [],
+    };
+  });
 });
 const teams = [
   { id: 1, name: "Heroicons", href: "#", initial: "H", current: false },
@@ -427,6 +516,21 @@ const userNavigation = [
   { name: "Your profile", href: "#" },
   { name: "Sign out", href: "#" },
 ];
+const showChild = (key) => {
+  rawNavigation.value = rawNavigation.value.map((item) => {
+    console.log(item.href, 7777, key);
+    if (item.href == key) {
+      return {
+        ...item,
+        show: !item.show,
+      };
+    }
+    return {
+      ...item,
+      show: false,
+    };
+  });
+};
 
 const sidebarOpen = ref(false);
 </script>

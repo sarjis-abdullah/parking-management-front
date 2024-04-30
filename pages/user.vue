@@ -115,11 +115,6 @@
         :totalPerPage="totalPerPage"
         @onChange="onPageChanged"
       />
-      <!-- <OrderDetails
-      :showDetails="showDetails"
-      :order="selectedOrder"
-      @onClose="closeDetails"
-    /> -->
     </div>
   </AuthLayout>
 </template>
