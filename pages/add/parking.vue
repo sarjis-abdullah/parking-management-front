@@ -5,25 +5,37 @@ import { ref, reactive, onMounted } from "vue";
 const formRef = ref(null);
 import { useVuelidate } from "@vuelidate/core";
 import { email, required, sameAs, helpers } from "@vuelidate/validators";
-import {CategoryService} from "@/services/CategoryService.js";
+import {ParkingService} from "@/services/ParkingService.js";
 import {PlaceService} from "@/services/PlaceService.js";
+import { SlotService } from "~/services/SlotService";
+import { CategoryService } from "~/services/CategoryService";
 
 definePageMeta({
   layout:"auth-layout",
 });
 const defaultData = {
-  name: "",
+  vehicleNumber: "",
+  driverName: "",
+  driverMobile: "",
   place: "",
-  description: "",
+  slot: "",
+  category: "",
 };
 const serverErrors = ref({});
 const state = reactive(defaultData);
 const rules = computed(() => {
   return {
-    name: { required: helpers.withMessage("Name is required", required) },
-    place: { required: helpers.withMessage("Place is required", required) },
-    description: {
-      required: helpers.withMessage("Description is required", required),
+    vehicleNumber: { required: helpers.withMessage("Vehicle Number is required", required) },
+    driverName: {  },
+    driverMobile: {  },
+    place: {
+      required: helpers.withMessage("place is required", required),
+    },
+    category: {
+      required: helpers.withMessage("category is required", required),
+    },
+    slot: {
+      required: helpers.withMessage("slot is required", required),
     },
   };
 });
@@ -39,12 +51,20 @@ const handleReset = async () => {
   // formRef.value?.reset();
   console.log('handleReset');
 };
+const parkingData = computed(()=> {
+  return {
+    vehicle_no: state.vehicleNumber,
+    driver_name: state.driverName,
+    driver_mobile: state.driverMobile,
+    place_id: state.place,
+    category_id: state.category,
+    slot_id: state.slot,
+  }
+})
 const postItem = async () => {
   try {
     loading.value = true
-    const obj = {...state, place_id: state.place}
-    delete obj.place
-    await CategoryService.create(obj)
+    await ParkingService.create(parkingData.value)
     serverErrors.value = {};
     handleReset()
   } catch (error) {
@@ -69,6 +89,20 @@ const places = ref([])
 const getPlaces = async () => {
   const {data} = await PlaceService.getAll('')
   places.value = data
+}
+const slots = ref([])
+const getSlots = async () => {
+  const {data} = await SlotService.getAll(`?category_id=${state.category}`)
+  slots.value = data
+}
+const categories = ref([])
+const getCategories = async () => {
+  const {data} = await CategoryService.getAll(`?place_id=${state.place}`)
+  categories.value = data
+}
+const handlePlaceChange = () => {
+  getCategories()
+  // getFloors()
 }
 onMounted(() => {
   getPlaces()
@@ -97,21 +131,31 @@ const inputClass =
             <label class="text-gray-500">Name</label>
             <input
               :class="inputClass"
-              v-model="state.name"
+              v-model="state.vehicleNumber"
+              type="text"
+              placeholder="e.g. Ka-12345"
+            />
+            <ErrorMessage :errors="validator.vehicleNumber.$errors" />
+          </div>
+          <div class="grid gap-2">
+            <label class="text-gray-500">driverName</label>
+            <input
+              :class="inputClass"
+              v-model="state.driverName"
               type="text"
               placeholder="e.g. John Doe"
             />
-            <ErrorMessage :errors="validator.name.$errors" />
+            <ErrorMessage :errors="validator.driverName.$errors" />
           </div>
           <div class="grid gap-2">
-            <label class="text-gray-500">Description</label>
+            <label class="text-gray-500">driverMobile</label>
             <input
               :class="inputClass"
-              v-model="state.description"
+              v-model="state.driverMobile"
               type="text"
-              placeholder="e.g. description"
+              placeholder="e.g. 01587616484"
             />
-            <ErrorMessage :errors="validator.description.$errors" />
+            <ErrorMessage :errors="validator.driverMobile.$errors" />
           </div>
           <div class="grid gap-2">
             <label class="text-gray-500">Place</label>
@@ -121,7 +165,7 @@ const inputClass =
                 style="background: none"
                 name="place"
                 v-model="state.place"
-                :key="state.place"
+                @change="handlePlaceChange"
               >
                 <option disabled :value="''">Select place name</option>
                 <option v-for="place in places" :key="place.id" :value="place.id">
@@ -129,6 +173,39 @@ const inputClass =
                 <!-- Add more options as needed -->
               </select>
               <ErrorMessage :errors="validator.place.$errors" />
+          </div>
+          <div class="grid gap-2">
+            <label class="text-gray-500">Category</label>
+            <select
+                class="focus:outline-none bg-none"
+                :class="inputClass"
+                style="background: none"
+                name="place"
+                v-model="state.category"
+                @change="getSlots"
+              >
+                <option disabled :value="''">Select place name</option>
+                <option v-for="category in categories" :key="category.id" :value="category.id">
+                {{ category.name }}</option>
+                <!-- Add more options as needed -->
+              </select>
+              <ErrorMessage :errors="validator.category.$errors" />
+          </div>
+          <div class="grid gap-2">
+            <label class="text-gray-500">Slot</label>
+            <select
+                class="focus:outline-none bg-none"
+                :class="inputClass"
+                style="background: none"
+                name="place"
+                v-model="state.slot"
+              >
+                <option disabled :value="''">Select place name</option>
+                <option v-for="slot in slots" :key="slot.id" :value="slot.id">
+                {{ slot.name }}</option>
+                <!-- Add more options as needed -->
+              </select>
+              <ErrorMessage :errors="validator.slot.$errors" />
           </div>
         </section>
         <section>

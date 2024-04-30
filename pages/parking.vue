@@ -29,19 +29,44 @@
                     scope="col"
                     class="py-3.5 pl-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
                   >
-                    Name
+                    Barcode
                   </th>
                   <th
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Descripton
+                    Vehicle number
                   </th>
                   <th
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Place
+                    In time
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
+                    Out time
+                  </th>
+
+                  <th
+                    scope="col"
+                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
+                    Driver Info
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
+                    Payment status
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
+                    Payment method
                   </th>
                   <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                     Action
@@ -61,7 +86,7 @@
                       </div>
                       <div class="ml-4">
                         <div class="font-medium text-gray-900">
-                          {{ singleData.name }}
+                          {{ singleData.barcode }}
                         </div>
                         <div class="mt-1 text-gray-500">
                           <!-- {{ $d(getExecutionDate(order)) }} -->
@@ -70,10 +95,19 @@
                     </div>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
-                    <span class="text-gray-900">{{ singleData.description }}</span>
+                    <span class="text-gray-900">{{
+                      singleData.vehicle_no
+                    }}</span>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                    {{ singleData?.place?.name }}
+                    {{ singleData?.in_time }}
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    {{ singleData?.out_time }}
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    <div>{{ singleData?.driver_name }}</div>
+                    <div>{{ singleData?.driver_mobile }}</div>
                   </td>
                   <td
                     class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
@@ -115,7 +149,7 @@ import { onMounted } from "vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
-import { CategoryService } from "@/services/CategoryService.js";
+import { ParkingService } from "@/services/ParkingService.js";
 
 const list = ref([]);
 const loadingError = ref(null);
@@ -124,7 +158,7 @@ const serverErrors = ref(null);
 
 //pagination
 const page = ref(1);
-const perPage = ref(10);
+const perPage = ref(1);
 const lastPage = ref(null);
 const total = ref(null);
 const totalPerPage = ref(null);
@@ -136,7 +170,7 @@ const searchQuery = computed(() => {
 const loadData = async () => {
   try {
     isLoading.value = true;
-    const { meta, data } = await CategoryService.getAll(searchQuery.value);
+    const { meta, data } = await ParkingService.getAll(searchQuery.value);
     list.value = data;
 
     page.value = meta.current_page;
