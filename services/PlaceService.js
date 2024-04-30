@@ -1,6 +1,6 @@
 import { HttpRequester } from "./HttpRequester";
 
-export class UserService {
+export class PlaceService {
   static requester = HttpRequester.httpRequester();
   static async getAll(query='') {
     try {
