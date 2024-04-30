@@ -1,14 +1,6 @@
-// import { BadInputException } from './../exceptions/BadInputException';
-// import { UnauthenticatedException } from './../exceptions/UnauthenticatedException';
-// import { HttpResponse } from './HttpResponse';
-// import { HttpHeader } from "./HttpHeader";
-// import { ServerErrorException } from "../exceptions/ServerErrorException";
-// import { UnauthorizedException } from '../exceptions/UnauthorizedException';
-// import { MissingInformationException } from '../exceptions/MissingInformationException';
-// import { UnauthenticatedEvent } from '../events';
-export class HttpRequester {
+import {BaseHttpRequester} from './BaseHttpRequester'
+export class HttpRequester extends BaseHttpRequester {
   static instance;
-  static BASE_URL = "http://localhost:8190/api/v1/";
   static httpRequester() {
     if (!HttpRequester.instance) {
       HttpRequester.instance = new HttpRequester();
@@ -18,7 +10,7 @@ export class HttpRequester {
   }
   static async get(url, headers) {
     try {
-      const token = localStorage.getItem("ACCESS_TOKEN");
+      const token = this.getToken()
 
       const response = await fetch(this.BASE_URL + url, {
         headers: {
