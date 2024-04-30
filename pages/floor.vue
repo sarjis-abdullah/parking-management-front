@@ -12,7 +12,7 @@
           @downloadOrderStatement="downloadOrderStatement"
         /> -->
           <header class="flex justify-between text-gray-900 mb-3 text-xl">
-            <h6>{{ "Place List" }}</h6>
+            <h6>{{ "Floor List" }}</h6>
             <Link to="/add/floor"> Add Floor </Link>
           </header>
           <!-- <pre>
