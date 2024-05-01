@@ -1,7 +1,5 @@
 <template>
-  <AuthLayout>
     <section>hello</section>
-  </AuthLayout>
 </template>
 
 <script setup>

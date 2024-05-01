@@ -66,9 +66,6 @@ import { ref } from "vue";
 import Login from "../components/Login.vue";
 // import AccountStorage from "../storage/Index";
 
-definePageMeta({
-  // layout: "Default",
-});
 const route = useRoute();
 const router = useRouter();
 
