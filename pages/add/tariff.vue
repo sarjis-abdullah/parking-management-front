@@ -125,17 +125,17 @@ const inputClass =
       </ul>
       <section class="grid grid-cols-1 gap-3">
         <div class="grid gap-2">
-          <label class="text-gray-500">Name</label>
+          <label class="text-gray-500">Name<span class="text-red-500">*</span></label>
           <input
             :class="inputClass"
             v-model="state.name"
             type="text"
-            placeholder="e.g. John Doe"
+            placeholder="e.g. Tariff: Eid parking"
           />
           <ErrorMessage :errors="validator.name.$errors" />
         </div>
         <div class="grid gap-2">
-          <label class="text-gray-500">Place</label>
+          <label class="text-gray-500">Place<span class="text-red-500">*</span></label>
           <select
             class="focus:outline-none bg-none"
             :class="inputClass"
@@ -154,7 +154,7 @@ const inputClass =
           <ErrorMessage :errors="validator.place.$errors" />
         </div>
         <div class="grid gap-2">
-          <label class="text-gray-500">Category</label>
+          <label class="text-gray-500">Category<span class="text-red-500">*</span></label>
           <select
             class="focus:outline-none bg-none"
             :class="inputClass"
@@ -175,7 +175,7 @@ const inputClass =
           <ErrorMessage :errors="validator.category.$errors" />
         </div>
         <div class="grid gap-2">
-          <label class="text-gray-500">Start date</label>
+          <label class="text-gray-500">Start date<span class="text-red-500">*</span></label>
           <input
             :class="inputClass"
             v-model="state.startDate"
@@ -211,7 +211,7 @@ const inputClass =
             :disabled="loading"
             class="bg-indigo-600 text-white px-2 py-1 rounded-md"
           >
-            Submit
+            {{ loading ? "Processing" : "Submit" }}
           </button>
         </div>
       </section>

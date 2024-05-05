@@ -5,10 +5,10 @@ import { ref, reactive, onMounted } from "vue";
 const formRef = ref(null);
 import { useVuelidate } from "@vuelidate/core";
 import { email, required, sameAs, helpers } from "@vuelidate/validators";
-import {UserService} from "@/services/UserService.js";
+import { UserService } from "@/services/UserService.js";
 
 definePageMeta({
-  layout:"auth-layout",
+  layout: "auth-layout",
 });
 const defaultData = {
   name: "",
@@ -46,17 +46,17 @@ const loading = ref(false);
 const handleReset = async () => {
   await validator.value.$reset();
   for (let key in state) {
-    state[key] = '';
+    state[key] = "";
   }
   // formRef.value?.reset();
-  console.log('handleReset');
+  console.log("handleReset");
 };
 const postUser = async () => {
   try {
-    loading.value = true
-    await UserService.create(state)
+    loading.value = true;
+    await UserService.create(state);
     serverErrors.value = {};
-    handleReset()
+    handleReset();
   } catch (error) {
     if (error.response?._data?.errors) {
       serverErrors.value = error.response._data.errors;
@@ -81,110 +81,112 @@ const inputClass =
 </script>
 
 <template>
-    <section class="max-w-2xl">
-      <form
-        @submit.prevent="onSubmit"
-        ref="formRef"
-        class="grid gap-3"
-      >
-        <ul>
-          <li v-for="item in serverErrors" :key="item">
-            <span class="text-red-500">
-              -{{ item?.length ? item.toString() : 2 }}
-            </span>
-          </li>
-        </ul>
-        <section class="grid grid-cols-1 gap-3">
-          <div class="grid gap-2">
-            <label class="text-gray-500">Name</label>
-            <input
+  <section class="max-w-2xl">
+    <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
+      <ul>
+        <li v-for="item in serverErrors" :key="item">
+          <span class="text-red-500">
+            -{{ item?.length ? item.toString() : 2 }}
+          </span>
+        </li>
+      </ul>
+      <section class="grid grid-cols-1 gap-3">
+        <div class="grid gap-2">
+          <label class="text-gray-500"
+            >Name<span class="text-red-500">*</span></label
+          >
+          <input
+            :class="inputClass"
+            v-model="state.name"
+            type="text"
+            placeholder="e.g. John Doe"
+          />
+          <ErrorMessage :errors="validator.name.$errors" />
+        </div>
+        <div class="grid gap-2">
+          <label class="text-gray-500"
+            >Email<span class="text-red-500">*</span></label
+          >
+          <input
+            :class="inputClass"
+            v-model="state.email"
+            type="email"
+            placeholder="e.g. john@mail.co"
+          />
+          <ErrorMessage :errors="validator.email.$errors" />
+        </div>
+        <div class="grid gap-2">
+          <label class="text-gray-500"
+            >Role<span class="text-red-500">*</span></label
+          >
+          <div class="grid gap-2" :style="''">
+            <select
+              class="focus:outline-none bg-none"
               :class="inputClass"
-              v-model="state.name"
-              type="text"
-              placeholder="e.g. John Doe"
-            />
-            <ErrorMessage :errors="validator.name.$errors" />
-          </div>
-        </section>
-        <section class="grid grid-cols-2 gap-3">
-          <div class="grid gap-2">
-            <label class="text-gray-500">Email</label>
-            <input
-              :class="inputClass"
-              v-model="state.email"
-              type="email"
-              placeholder="e.g. john@mail.co"
-            />
-            <ErrorMessage :errors="validator.email.$errors" />
-          </div>
-          <div class="grid gap-2">
-            <label class="text-gray-500">Role</label>
-            <div class="grid gap-2" :style="''">
-              <select
-                class="focus:outline-none bg-none"
-                :class="inputClass"
-                style="background: none"
-                name="role"
-                v-model="state.role"
-                :key="state.role"
-              >
-                <option disabled :value="''">Select a role</option>
-                <option value="1-3">1-3</option>
-                <option value="4-6">4-6</option>
-                <option value="7-Above">7-Above</option>
-                <!-- Add more options as needed -->
-              </select>
-              <ErrorMessage :errors="validator.role.$errors" />
-            </div>
-          </div>
-        </section>
-        <section class="grid grid-cols-1 gap-3">
-          <div class="grid gap-2">
-            <label class="text-gray-500">Password</label>
-            <input
-              :class="inputClass"
-              v-model="state.password"
-              placeholder="password"
-              type="password"
-            />
-            <ErrorMessage :errors="validator.password.$errors" />
-          </div>
-          <div class="grid gap-2">
-            <label class="text-gray-500">Confirm Password</label>
-            <input
-              :class="inputClass"
-              v-model="state.confirmPassword"
-              placeholder="confirm password"
-              type="password"
-            />
-            <ErrorMessage :errors="validator.confirmPassword.$errors" />
-          </div>
-        </section>
-        <section>
-          <div class="flex justify-end gap-2">
-            <button
-              type="button"
-              class="bg-gray-400 text-white px-2 py-1 rounded-md"
-              @click="handleReset"
+              style="background: none"
+              name="role"
+              v-model="state.role"
+              :key="state.role"
             >
-              Reset
-            </button>
-            <!-- <button
+              <option disabled :value="''">Select a role</option>
+              <option value="1-3">1-3</option>
+              <option value="4-6">4-6</option>
+              <option value="7-Above">7-Above</option>
+              <!-- Add more options as needed -->
+            </select>
+            <ErrorMessage :errors="validator.role.$errors" />
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <label class="text-gray-500"
+            >Password<span class="text-red-500">*</span></label
+          >
+          <input
+            :class="inputClass"
+            v-model="state.password"
+            placeholder="password"
+            type="password"
+          />
+          <ErrorMessage :errors="validator.password.$errors" />
+        </div>
+        <div class="grid gap-2">
+          <label class="text-gray-500"
+            >Confirm Password<span class="text-red-500">*</span></label
+          >
+          <input
+            :class="inputClass"
+            v-model="state.confirmPassword"
+            placeholder="confirm password"
+            type="password"
+          />
+          <ErrorMessage :errors="validator.confirmPassword.$errors" />
+        </div>
+      </section>
+      <section>
+        <div class="flex justify-end gap-2">
+          <button
+            type="button"
+            class="bg-gray-400 text-white px-2 py-1 rounded-md"
+            @click="handleReset"
+          >
+            Reset
+          </button>
+          <!-- <button
               type="button"
               class="bg-gray-400 text-white px-2 py-1 rounded-md"
               @click="validate"
             >
               validate
             </button> -->
-            <button
-              type="submit"
-              :disabled="loading"
-              class="bg-indigo-600 text-white px-2 py-1 rounded-md"
-            >
-              Submit
-            </button>
-          </div>
-        </section>
-      </form>
-    </section>
+          <button
+            type="submit"
+            :disabled="loading"
+            class="bg-indigo-600 text-white px-2 py-1 rounded-md"
+          >
+            {{ loading ? "Processing" : "Submit" }}
+          </button>
+        </div>
+      </section>
+    </form>
+  </section>
 </template>

@@ -31,9 +31,8 @@ const rules = computed(() => {
       required: helpers.withMessage("Category is required", required),
     },
     floor: { required: helpers.withMessage("Floor is required", required) },
-    remarks: {
-      required: helpers.withMessage("remarks is required", required),
-    },
+    remarks: {},
+    identity: {},
   };
 });
 const validator = useVuelidate(rules, state, { $lazy: true });
@@ -51,7 +50,12 @@ const handleReset = async () => {
 const postItem = async () => {
   try {
     loading.value = true;
-    const obj = { ...state, place_id: state.place, category_id: state.category, floor_id: state.floor };
+    const obj = {
+      ...state,
+      place_id: state.place,
+      category_id: state.category,
+      floor_id: state.floor,
+    };
     delete obj.place;
     delete obj.category;
     delete obj.floor;
@@ -92,9 +96,9 @@ const getFloors = async () => {
   floors.value = data;
 };
 const handlePlaceChange = () => {
-  getCategories()
-  getFloors()
-}
+  getCategories();
+  getFloors();
+};
 onMounted(() => {
   getPlaces();
 });
@@ -115,27 +119,21 @@ const inputClass =
       </ul>
       <section class="grid grid-cols-1 gap-3">
         <div class="grid gap-2">
-          <label class="text-gray-500">Name</label>
+          <label class="text-gray-500"
+            >Name<span class="text-red-500">*</span></label
+          >
           <input
             :class="inputClass"
             v-model="state.name"
             type="text"
-            placeholder="e.g. John Doe"
+            placeholder="e.g. slot no 1"
           />
           <ErrorMessage :errors="validator.name.$errors" />
         </div>
         <div class="grid gap-2">
-          <label class="text-gray-500">Remarks</label>
-          <input
-            :class="inputClass"
-            v-model="state.remarks"
-            type="text"
-            placeholder="e.g. remarks"
-          />
-          <ErrorMessage :errors="validator.remarks.$errors" />
-        </div>
-        <div class="grid gap-2">
-          <label class="text-gray-500">Place</label>
+          <label class="text-gray-500"
+            >Place<span class="text-red-500">*</span></label
+          >
           <select
             class="focus:outline-none bg-none"
             :class="inputClass"
@@ -154,7 +152,9 @@ const inputClass =
           <ErrorMessage :errors="validator.place.$errors" />
         </div>
         <div class="grid gap-2">
-          <label class="text-gray-500">Category</label>
+          <label class="text-gray-500"
+            >Category<span class="text-red-500">*</span></label
+          >
           <select
             class="focus:outline-none bg-none"
             :class="inputClass"
@@ -163,7 +163,11 @@ const inputClass =
             v-model="state.category"
           >
             <option disabled :value="''">Select category name</option>
-            <option v-for="category in categories" :key="category.id" :value="category.id">
+            <option
+              v-for="category in categories"
+              :key="category.id"
+              :value="category.id"
+            >
               {{ category.name }}
             </option>
             <!-- Add more options as needed -->
@@ -171,7 +175,9 @@ const inputClass =
           <ErrorMessage :errors="validator.category.$errors" />
         </div>
         <div class="grid gap-2">
-          <label class="text-gray-500">Floor</label>
+          <label class="text-gray-500"
+            >Floor<span class="text-red-500">*</span></label
+          >
           <select
             class="focus:outline-none bg-none"
             :class="inputClass"
@@ -188,14 +194,24 @@ const inputClass =
           <ErrorMessage :errors="validator.floor.$errors" />
         </div>
         <div class="grid gap-2">
-          <label class="text-gray-500">identity</label>
+          <label class="text-gray-500">Identity</label>
           <input
             :class="inputClass"
             v-model="state.identity"
             type="text"
+            placeholder="e.g. corrola 2012 model"
+          />
+          <ErrorMessage :errors="validator.identity.$errors" />
+        </div>
+        <div class="grid gap-2">
+          <label class="text-gray-500">Remarks</label>
+          <input
+            :class="inputClass"
+            v-model="state.remarks"
+            type="text"
             placeholder="e.g. remarks"
           />
-          <ErrorMessage :errors="validator.place.$errors" />
+          <ErrorMessage :errors="validator.remarks.$errors" />
         </div>
       </section>
       <section>
@@ -212,7 +228,7 @@ const inputClass =
             :disabled="loading"
             class="bg-indigo-600 text-white px-2 py-1 rounded-md"
           >
-            Submit
+            {{ loading ? "Processing" : "Submit" }}
           </button>
         </div>
       </section>

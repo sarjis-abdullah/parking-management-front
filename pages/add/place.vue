@@ -19,9 +19,7 @@ const state = reactive(defaultData);
 const rules = computed(() => {
   return {
     name: { required: helpers.withMessage("Name is required", required) },
-    description: {
-      required: helpers.withMessage("Description is required", required),
-    },
+    description: {},
   };
 });
 const validator = useVuelidate(rules, state, { $lazy: true });
@@ -81,12 +79,14 @@ const inputClass =
         </ul>
         <section class="grid grid-cols-1 gap-3">
           <div class="grid gap-2">
-            <label class="text-gray-500">Name</label>
+            <label class="text-gray-500">
+              Name<span class="text-red-500">*</span>
+            </label>
             <input
               :class="inputClass"
               v-model="state.name"
               type="text"
-              placeholder="e.g. John Doe"
+              placeholder="e.g. Khulshi town center"
             />
             <ErrorMessage :errors="validator.name.$errors" />
           </div>
@@ -115,7 +115,7 @@ const inputClass =
               :disabled="loading"
               class="bg-indigo-600 text-white px-2 py-1 rounded-md"
             >
-              Submit
+              {{loading ? 'Processing' : 'Submit'}}
             </button>
           </div>
         </section>

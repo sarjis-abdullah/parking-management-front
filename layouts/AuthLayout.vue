@@ -394,7 +394,7 @@ const rawNavigation = ref([
     ],
   },
   {
-    name: "Category",
+    name: "Vehicle Category",
     href: "/category",
     icon: DocumentDuplicateIcon,
     show: false,

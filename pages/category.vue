@@ -12,8 +12,8 @@
           @downloadOrderStatement="downloadOrderStatement"
         /> -->
           <header class="flex justify-between text-gray-900 mb-3 text-xl">
-            <h6>{{ "Place List" }}</h6>
-            <Link to="/add/category"> Add Category </Link>
+            <h6>{{ "Vehicle List" }}</h6>
+            <Link to="/add/category"> Add Vehicle Category </Link>
           </header>
           <!-- <pre>
           {{ list }}
