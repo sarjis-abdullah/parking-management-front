@@ -49,6 +49,12 @@
                   >
                     Category
                   </th>
+                  <th
+                    scope="col"
+                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
+                    Status
+                  </th>
                   <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                     Action
                   </th>
@@ -88,6 +94,9 @@
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
                     {{ singleData?.category?.name }}
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    {{ singleData?.status }}
                   </td>
                   <td
                     class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
@@ -131,6 +140,9 @@ import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { SlotService } from "@/services/SlotService.js";
 
+definePageMeta({
+  layout: "auth-layout",
+});
 const list = ref([]);
 const loadingError = ref(null);
 const isLoading = ref(false);

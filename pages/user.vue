@@ -123,7 +123,9 @@ import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import {UserService} from "@/services/UserService.js";
 
-
+definePageMeta({
+  layout: "auth-layout",
+});
 const users = ref([]);
 const loadingError = ref(null);
 const isLoading = ref(false);

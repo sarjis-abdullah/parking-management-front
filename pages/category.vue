@@ -116,6 +116,9 @@ import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { CategoryService } from "@/services/CategoryService.js";
+definePageMeta({
+  layout: "auth-layout",
+});
 
 const list = ref([]);
 const loadingError = ref(null);

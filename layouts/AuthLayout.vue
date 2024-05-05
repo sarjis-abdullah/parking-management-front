@@ -222,23 +222,25 @@
           <div class="h-6 w-px bg-gray-200 lg:hidden" aria-hidden="true" />
 
           <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-            <form class="relative flex flex-1" action="#" method="GET">
+            <form class="relative flex flex-1" @submit.stop="">
               <label for="search-field" class="sr-only">Search</label>
               <MagnifyingGlassIcon
                 class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400"
                 aria-hidden="true"
               />
               <input
-                id="search-field"
-                class="block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
-                placeholder="Search..."
-                type="search"
+                :class="inputClass"
+                placeholder="Scan/Search/Type barcode here"
+                type="text"
                 name="search"
+                v-model="barcode"
+                @keyup.enter="checkout"
               />
             </form>
             <div class="flex items-center gap-x-4 lg:gap-x-6">
               <button
                 type="button"
+                @click="checkout"
                 class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500"
               >
                 <span class="sr-only">View notifications</span>
@@ -341,6 +343,9 @@ import {
 } from "@heroicons/vue/24/outline";
 import { ChevronDownIcon, MagnifyingGlassIcon } from "@heroicons/vue/20/solid";
 const route = useRoute();
+const inputClass =
+  "relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
+
 
 const rawNavigation = ref([
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon, show: false },
@@ -460,6 +465,14 @@ const showChild = (key) => {
       show: false,
     };
   });
+};
+const barcode = ref('')
+const checkout = () => {
+  // window.location.href='/parking-checkout/'
+  console.log(barcode.value, 12345);
+
+  const router = useRouter()
+  router.push(`/parking-checkout/${barcode.value}`);
 };
 
 const sidebarOpen = ref(false);
