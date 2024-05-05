@@ -1,4 +1,6 @@
 import { BaseHttpRequester } from "./BaseHttpRequester";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 export class HttpRequester extends BaseHttpRequester {
   static instance;
   static httpRequester() {
@@ -29,7 +31,9 @@ export class HttpRequester extends BaseHttpRequester {
       body: JSON.stringify(data),
     });
     if (response.ok) {
-      return await response.json();
+      const res = await response.json();
+      this.handleMessage(url + " created successfully.")
+      return res
     } else {
       throw await this.handleError(response);
     }
@@ -41,7 +45,9 @@ export class HttpRequester extends BaseHttpRequester {
       body: JSON.stringify(data),
     });
     if (response.ok) {
-      return await response.json();
+      const res = await response.json();
+      this.handleMessage(url + " updated successfully.")
+      return res
     } else {
       throw await this.handleError(response);
     }
@@ -52,45 +58,53 @@ export class HttpRequester extends BaseHttpRequester {
       headers: this.getHeaders(),
     });
     if (response.ok) {
+      this.handleMessage(url + " deleted successfully.")
       return true;
     } else {
       throw await this.handleError(response);
+    }
+  }
+  static handleMessage(msg, success = true) {
+    if (success) {
+      toast.success(msg, {
+        autoClose: 2000,
+      });
+    } else {
+      toast.error(msg, {
+        autoClose: 2000,
+      });
     }
   }
   static async handleError(response) {
     let status = response.status;
     let error = "";
     try {
-      let errorJson = await response.json();
+      let errorJson = await response?.json();
 
-      if (errorJson.errors && errorJson.errors.message)
+      if (errorJson?.errors && errorJson?.errors.message)
         error = errorJson.errors.message;
-      else if (errorJson.data && errorJson.data.message)
+      else if (errorJson?.data && errorJson?.data?.message)
         error = errorJson.data.message;
       else error = errorJson.message;
     } catch (err) {
-      error = await response.text();
+      error = await response?.text();
     }
     if (status == 401) {
-      //   const event = new UnauthenticatedEvent();
-      console.log("UnauthenticatedEvent");
-
-      //return new UnauthenticatedException(error);
+      this.handleMessage('Un-authenticated!', false)
     }
     if (status == 403) {
-      //   return new UnauthorizedException(error);
-      console.log("UnauthorizedException");
+      this.handleMessage('Un-authorized', false)
     }
     if (status == 422) {
-      console.log("BadInputException");
+      this.handleMessage('Bad input', false)
       return new BadInputException(error);
     }
     if (status >= 400 && status < 500) {
-      console.log("MissingInformationException");
-      //   return new MissingInformationException(error);
+      this.handleMessage('You probably missed any information', false)
+      return
     }
-    console.log("ServerErrorException");
-    // return new ServerErrorException(error);
+    console.log(response);
+    this.handleMessage('Something went wrong!', false)
   }
   static async getFile(url) {
     const response = await fetch(this.BASE_URL + url, { headers: this.getHeaders() });
