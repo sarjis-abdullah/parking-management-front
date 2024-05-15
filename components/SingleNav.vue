@@ -19,31 +19,41 @@
         ]"
         aria-hidden="true"
       />
-      <span class="cursor-pointer border px-2 py-1" @click="show = !show">
+      <nuxt-link
+      v-if="!item.children.length"
+      :class="[
+        item.current
+          ? 'text-indigo-600'
+          : 'text-gray-400 group-hover:text-indigo-600',
+        'h-6 w-6 shrink-0',
+      ]"
+      :to="item.href"
+    >
+      {{ item.name }}
+    </nuxt-link>
+      <span v-else class="cursor-pointer border px-2 py-1" @click="show = !show">
         {{ item.name }}
         <!-- current: {{ item.current }}
         show: {{ item.show }} -->
-        </span
-      >
+      </span>
     </span>
-    <div
-      class="ml-16"
-      v-if="show || item.current"
-      v-for="child in item.children"
-      :key="child.href"
-    >
-      <nuxt-link
-        :class="[
-          child.current
-            ? 'text-indigo-600'
-            : 'text-gray-400 group-hover:text-indigo-600',
-          'h-6 w-6 shrink-0',
-        ]"
-        :to="child.href"
-      >
-        {{ child.name }}
-      </nuxt-link>
-    </div>
+    <template v-if="item.children.length">
+      <template v-if="show || item.current">
+        <div class="ml-16" v-for="child in item.children" :key="child.href">
+          <nuxt-link
+            :class="[
+              child.current
+                ? 'text-indigo-600'
+                : 'text-gray-400 group-hover:text-indigo-600',
+              'h-6 w-6 shrink-0',
+            ]"
+            :to="child.href"
+          >
+            {{ child.name }}
+          </nuxt-link>
+        </div>
+      </template>
+    </template>
   </li>
 </template>
 
