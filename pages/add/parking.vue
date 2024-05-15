@@ -63,10 +63,15 @@ const parkingData = computed(() => {
     slot_id: state.slot,
   };
 });
+const router = useRouter()
+
 const postItem = async () => {
   try {
     loading.value = true;
-    await ParkingService.create(parkingData.value);
+    const response = await ParkingService.create(parkingData.value);
+    if (response?.data?.barcode) {
+      router.push('/parking-checkin/' + response.data.barcode)
+    }
     serverErrors.value = {};
     handleReset();
   } catch (error) {

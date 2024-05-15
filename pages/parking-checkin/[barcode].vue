@@ -57,7 +57,7 @@
                             color: #111827;
                           "
                         >
-                          {{ key == "In-Time" ? formatDate(value) : value }}
+                        {{ key == "In-Time" ? formatDate(value) : value }}
                         </dd>
                       </div>
                     </dl>
@@ -99,7 +99,7 @@ import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { ParkingService } from "~/services/ParkingService";
-import { formatDate } from "@/utils/index";
+import {formatDate} from '@/utils/index'
 
 const list = ref([]);
 const loadingError = ref(null);
