@@ -9,9 +9,7 @@
               class="grid grid-cols-2 justify-center"
             >
               <div>
-                <div
-                  class="mt-1 rounded-lg bg-gray-50 px-4 py-2"
-                >
+                <div class="mt-1 rounded-lg bg-gray-50 px-4 py-2">
                   <div class="relative w-full">
                     <img
                       :src="'data:image/png;base64,' + barcodeImage"
@@ -28,9 +26,9 @@
                     :key="index"
                   >
                     <div
-                      class="flex items-center justify-between border-t border-gray-200 pt-4"
                       v-for="(value, key) in item"
                       :key="key"
+                      class="flex items-center justify-between border-t border-gray-200 pt-4"
                     >
                       <dt class="text-sm text-gray-600">
                         {{ key }}
@@ -75,18 +73,62 @@
         </div>
       </div>
     </div>
-    <!-- <Pagination
-      class="mt-6"
-      :perPage="perPage"
-      :lastPage="lastPage"
-      :total="total"
-      :totalPerPage="totalPerPage"
-      @onChange="onPageChanged"
-    /> -->
+    <div>
+      <button @click="print">Print</button>
+      <div ref="emailTemplate" style="max-width: 40rem; margin: auto">
+        <div
+          style="
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            background-color: #f3f4f6;
+            padding: 0.75rem 1rem;
+          "
+        >
+          <div style="position: relative; width: 100%">
+            <img
+              :src="'data:image/png;base64,' + barcodeImage"
+              alt=""
+              style="width: 100%"
+            />
+            <div
+              style="
+                position: absolute;
+                inset: 0;
+                border-radius: 1rem;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+              "
+            ></div>
+          </div>
+
+          <dl
+            style="margin-top: 0.75rem"
+            v-for="(item, index) in list"
+            :key="index"
+          >
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-top: 1px solid #e5e7eb;
+                padding-top: 1rem;
+              "
+              v-for="(value, key) in item"
+              :key="key"
+            >
+              <dt style="font-size: 0.875rem; color: #6b7280">{{ key }}</dt>
+              <dd style="font-size: 0.875rem; font-weight: 500; color: #111827">
+                {{ value }}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, nextTick } from "vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
@@ -131,9 +173,8 @@ const loadData = async () => {
       });
       barcodeImage.value = data[0].barcode_image;
       serverErrors.value = {};
-
-    }else {
-        serverErrors.value = 'No data available for this barcode'
+    } else {
+      serverErrors.value = "No data available for this barcode";
     }
 
     // page.value = meta.current_page;
@@ -154,11 +195,99 @@ const loadData = async () => {
   }
 };
 
-const onPageChanged = (p) => {
-  page.value = p;
-  loadData();
+const emailTemplate = ref(null);
+const print = () => {
+  const emailT = emailTemplate.value.innerHTML;
+
+  const printWindow = window.open(
+    "",
+    "",
+    "left=0,top=0,right=0,width=800,height=900,toolbar=0,scrollbars=0,status=0"
+  );
+  //   printWindow.document.open();
+  printWindow.document.write(`
+        <html>
+          <head>
+            <title>Mart technologies Ltd.</title>
+            <style>
+              /* Add CSS styles for printing */
+              body {
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+              }
+              h1 {
+                color: #333;
+              }
+              p {
+                margin-bottom: 10px;
+              }
+            </style>
+          </head>
+          <body>
+            <section style="max-width: 40rem; margin: auto;">
+            ${emailT}
+          </section>
+            </body>
+        </html>
+      `);
+
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+  //   printWindow.close();
 };
+// const emailTemplate = ref(null);
+// const print = () => {
+//     nextTick(()=> {
+//         console.log(emailTemplate.value);
+//     })
+
+//   return;
+//   const emailTemplate = emailTemplate.value.innerHTML;
+//   const printWindow = window.open("", "_blank");
+//   printWindow.document.open();
+//   printWindow.document.write(`
+//         <html>
+//           <head>
+//             <title>Email Template</title>
+//             <style>
+//               /* Add CSS styles for printing */
+//               body {
+//                 font-family: Arial, sans-serif;
+//                 font-size: 14px;
+//               }
+//               h1 {
+//                 color: #333;
+//               }
+//               p {
+//                 margin-bottom: 10px;
+//               }
+//             </style>
+//           </head>
+//           <body>
+//             ${emailTemplate.value}
+//           </body>
+//         </html>
+//       `);
+//   printWindow.document.close();
+//   printWindow.print();
+// };
 onMounted(() => {
   loadData();
 });
 </script>
+<style scoped>
+@page {
+  size: 13in 13in;
+}
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+  }
+}
+@media all {
+  .no-print {
+    display: none !important;
+  }
+}
+</style>
