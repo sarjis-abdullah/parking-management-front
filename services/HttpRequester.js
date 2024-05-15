@@ -25,17 +25,31 @@ export class HttpRequester extends BaseHttpRequester {
     }
   }
   static async post(url, data) {
-    const response = await fetch(this.BASE_URL + url, {
-      method: "POST",
-      ...this.getHeaders(),
-      body: JSON.stringify(data),
-    });
-    if (response.ok) {
-      const res = await response.json();
-      this.handleMessage(url + " created successfully.")
-      return res
-    } else {
-      throw await this.handleError(response);
+    try {
+      const response = await fetch(this.BASE_URL + url, {
+        method: "POST",
+        ...this.getHeaders(),
+        body: JSON.stringify(data),
+      });
+      console.log(3456787654567);
+      if (response.ok) {
+        const res = await response.json();
+        this.handleMessage(url + " created successfully.");
+        return res;
+      } else {
+        const responseBody = await response.text(); // Get response body as text
+        const error = new Error(response.statusText);
+        error.response = {
+          ...response,
+          body: responseBody, // Attach response body to the error object
+        };
+        this.handleError(response);
+        throw error;
+      }
+    } catch (error) {
+      console.log(error, error.response.body);
+      console.dir(error);
+      return Promise.reject(error);
     }
   }
   static async put(url, data) {
@@ -46,10 +60,17 @@ export class HttpRequester extends BaseHttpRequester {
     });
     if (response.ok) {
       const res = await response.json();
-      this.handleMessage(url + " updated successfully.")
-      return res
+      this.handleMessage(url + " updated successfully.");
+      return res;
     } else {
-      throw await this.handleError(response);
+      const responseBody = await response.text(); // Get response body as text
+      const error = new Error(response.statusText);
+      error.response = {
+        ...response,
+        body: responseBody, // Attach response body to the error object
+      };
+      this.handleError(response);
+      throw error;
     }
   }
   static async delete(url) {
@@ -58,7 +79,7 @@ export class HttpRequester extends BaseHttpRequester {
       headers: this.getHeaders(),
     });
     if (response.ok) {
-      this.handleMessage(url + " deleted successfully.")
+      this.handleMessage(url + " deleted successfully.");
       return true;
     } else {
       throw await this.handleError(response);
@@ -78,36 +99,20 @@ export class HttpRequester extends BaseHttpRequester {
   static async handleError(response) {
     let status = response.status;
     let error = "";
-    try {
-      let errorJson = await response?.json();
-
-      if (errorJson?.errors && errorJson?.errors.message)
-        error = errorJson.errors.message;
-      else if (errorJson?.data && errorJson?.data?.message)
-        error = errorJson.data.message;
-      else error = errorJson.message;
-    } catch (err) {
-      error = await response?.text();
-    }
     if (status == 401) {
-      this.handleMessage('Un-authenticated!', false)
-    }
-    if (status == 403) {
-      this.handleMessage('Un-authorized', false)
-    }
-    if (status == 422) {
-      this.handleMessage('Bad input', false)
-      return new BadInputException(error);
-    }
-    if (status >= 400 && status < 500) {
-      this.handleMessage('You probably missed any information', false)
-      return
-    }
-    console.log(response);
-    this.handleMessage('Something went wrong!', false)
+      this.handleMessage("Un-authenticated!", false);
+    } else if (status == 403) {
+      this.handleMessage("Un-authorized", false);
+    } else if (status == 422) {
+      this.handleMessage("Bad input", false);
+    } else if (status >= 400 && status < 500) {
+      this.handleMessage("You probably missed any information", false);
+    } else this.handleMessage("Something went wrong!", false);
   }
   static async getFile(url) {
-    const response = await fetch(this.BASE_URL + url, { headers: this.getHeaders() });
+    const response = await fetch(this.BASE_URL + url, {
+      headers: this.getHeaders(),
+    });
     if (response.ok) {
       return await response.blob();
     } else {
