@@ -1,5 +1,6 @@
 <script setup>
 import AuthLayout from "../layouts/AuthLayout.vue";
+import Loading from "@/components/common/Loading.vue";
 import ErrorMessage from "../components/common/ErrorMessage.vue";
 import { ref, reactive, onMounted } from "vue";
 const formRef = ref(null);
@@ -55,7 +56,7 @@ const handleReset = async () => {
   for (let key in state) {
     state[key] = "";
   }
-  selectedSlot.value = null
+  selectedSlot.value = null;
   // formRef.value?.reset();
   console.log("handleReset");
 };
@@ -99,8 +100,14 @@ const onSubmit = async () => {
 };
 const places = ref([]);
 const getPlaces = async () => {
-  const { data } = await PlaceService.getAll("");
-  places.value = data;
+  try {
+    loading.value = true;
+    const { data } = await PlaceService.getAll("");
+    places.value = data;
+  } catch (error) {
+  } finally {
+    loading.value = false;
+  }
 };
 const slots = ref([]);
 
@@ -110,52 +117,64 @@ const getSlots = async () => {
 };
 const categories = ref([]);
 const getCategories = async () => {
-  state.category = ''
-  const { data } = await CategoryService.getAll(`?place_id=${state.place}`);
-  categories.value = data;
+  loading.value = true;
+  try {
+    state.category = "";
+    const { data } = await CategoryService.getAll(`?place_id=${state.place}`);
+    categories.value = data;
+  } catch (error) {
+  } finally {
+    loading.value = false;
+  }
 };
 const floors = ref([]);
 
 const getFloors = async () => {
-  let query = `?include=f.slots`
-  if(state.place){
-    query += `&place_id=${state.place}`
+  let query = `?include=f.slots`;
+  if (state.place) {
+    query += `&place_id=${state.place}`;
   }
-  const { data } = await FloorService.getAll(query);
-  floors.value = data;
+  try {
+    loading.value = true;
+    const { data } = await FloorService.getAll(query);
+    floors.value = data;
+  } catch (error) {
+  } finally {
+    loading.value = false;
+  }
 };
 const handlePlaceChange = () => {
   getCategories();
   getFloors();
 };
-const getSlotClasses = (slot)=> {
-  let className = ''
-  if (slot.status == 'available') {
+const getSlotClasses = (slot) => {
+  let className = "";
+  if (slot.status == "available") {
     if (selectedSlot.value && selectedSlot.value.id == slot.id) {
-      className = 'bg-blue-500'
-    }else {
-      className = 'bg-green-500'
+      className = "bg-blue-500";
+    } else {
+      className = "bg-green-500";
     }
-    className += ' cursor-pointer'
-  }else {
-    className = 'bg-yellow-500 pointer-events-none cursor-not-allowed'
+    className += " cursor-pointer";
+  } else {
+    className = "bg-yellow-500 pointer-events-none cursor-not-allowed";
   }
-  return className
-}
-const handleSelectedSlot = (slot)=> {
-  if(selectedSlot.value && selectedSlot.value.id == slot.id){
-    selectedSlot.value = null
-    state.slot = null
-    state.floor = null
-  }else {
-    selectedSlot.value = slot
-      state.slot = slot.id
-      state.floor = slot.floor_id
+  return className;
+};
+const handleSelectedSlot = (slot) => {
+  if (selectedSlot.value && selectedSlot.value.id == slot.id) {
+    selectedSlot.value = null;
+    state.slot = null;
+    state.floor = null;
+  } else {
+    selectedSlot.value = slot;
+    state.slot = slot.id;
+    state.floor = slot.floor_id;
   }
-}
+};
 onMounted(() => {
   getPlaces();
-  getFloors()
+  getFloors();
 });
 
 const inputClass =
@@ -164,6 +183,7 @@ const inputClass =
 
 <template>
   <section class="max-w-2xl">
+    <Loading v-if="loading" />
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
       <section class="grid grid-cols-1 gap-3">
         <div class="grid gap-2">
@@ -247,15 +267,25 @@ const inputClass =
             >Slot<span class="text-red-500">*</span></label
           >
           <ul class="grid gap-2">
-            <li v-for="(floor, index) in floors" :key="floor.id" >
+            <li v-for="(floor, index) in floors" :key="floor.id">
               <ul class="grid grid-cols-6 gap-2">
-                <li v-for="(slot, i) in floor.slots" :key="slot.id" class="flex flex-col gap-1 items-center p-4 border text-white rounded-md" :class="getSlotClasses(slot)" @click="handleSelectedSlot(slot)">
+                <li
+                  v-for="(slot, i) in floor.slots"
+                  :key="slot.id"
+                  class="flex flex-col gap-1 items-center p-4 border text-white rounded-md"
+                  :class="getSlotClasses(slot)"
+                  @click="handleSelectedSlot(slot)"
+                >
                   <div>{{ slot.name }}</div>
                   <div>
-                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <svg
+                      class="h-6 w-6"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                    >
                       <title>car-select</title>
                       <path
-                      fill="white"
+                        fill="white"
                         d="M5 13L6.5 8.5H17.5L19 13M17.5 18C16.7 18 16 17.3 16 16.5S16.7 15 17.5 15 19 15.7 19 16.5 18.3 18 17.5 18M6.5 18C5.7 18 5 17.3 5 16.5S5.7 15 6.5 15 8 15.7 8 16.5 7.3 18 6.5 18M18.9 8C18.7 7.4 18.1 7 17.5 7H6.5C5.8 7 5.3 7.4 5.1 8L3 14V22C3 22.6 3.4 23 4 23H5C5.6 23 6 22.6 6 22V21H18V22C18 22.6 18.4 23 19 23H20C20.6 23 21 22.6 21 22V14M8 1L12 5.5L16 1Z"
                       />
                     </svg>
@@ -278,7 +308,6 @@ const inputClass =
           </select> -->
           <ErrorMessage :errors="validator.slot.$errors" />
         </div>
-        
       </section>
       <ul>
         <li v-for="item in serverErrors" :key="item">
