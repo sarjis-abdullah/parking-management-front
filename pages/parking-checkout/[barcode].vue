@@ -4,55 +4,73 @@
       <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
           <div v-if="!loadingError && !isLoading">
-            <div
-              v-if="list && list?.length > 0"
-              class="grid grid-cols-2 justify-center"
-            >
-              <div>
-                <div class="mt-1 rounded-lg bg-gray-50 px-4 py-2">
-                  <div class="relative w-full">
-                    <img
-                      :src="'data:image/png;base64,' + barcodeImage"
-                      alt=""
-                    />
-                    <div
-                      class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10"
-                    />
-                  </div>
-
-                  <dl
-                    class="mt-6 space-y-4"
-                    v-for="(item, index) in list"
-                    :key="index"
+            <div v-if="list && list?.length > 0" class="flex justify-center">
+              <div style="max-width: 40rem; margin: auto">
+                <div ref="emailTemplate" style="max-width: 40rem; margin: auto">
+                  <div
+                    style="
+                      margin-top: 1rem;
+                      border-radius: 0.5rem;
+                      background-color: #f3f4f6;
+                      padding: 0.75rem 1rem;
+                    "
                   >
-                    <div
-                      v-for="(value, key) in item"
-                      :key="key"
-                      class="flex items-center justify-between border-t border-gray-200 pt-4"
-                    >
-                      <dt class="text-sm text-gray-600">
-                        {{ key }}
-                      </dt>
-                      <dd class="text-sm font-medium text-gray-900">
-                        {{ value }}
-                      </dd>
+                    <div style="position: relative; width: 100%">
+                      <img
+                        :src="'data:image/png;base64,' + barcodeImage"
+                        alt=""
+                        style="width: 100%"
+                      />
+                      <div
+                        style="
+                          position: absolute;
+                          inset: 0;
+                          border-radius: 1rem;
+                          border: 1px solid rgba(0, 0, 0, 0.1);
+                        "
+                      ></div>
                     </div>
-                    <!-- <div
-                      class="flex items-center justify-between border-t border-gray-200 pt-4"
-                    >
-                      
-                    </div> -->
-                  </dl>
 
-                  <div class="mt-6">
-                    <button
-                      type="submit"
-                      class="w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                    <dl
+                      style="margin-top: 0.75rem"
+                      v-for="(item, index) in list"
+                      :key="index"
                     >
-                      Print
-                    </button>
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          border-top: 1px solid #e5e7eb;
+                          padding-top: 1rem;
+                        "
+                        v-for="(value, key) in item"
+                        :key="key"
+                      >
+                        <dt style="font-size: 0.875rem; color: #6b7280">
+                          {{ key }}
+                        </dt>
+                        <dd
+                          style="
+                            font-size: 0.875rem;
+                            font-weight: 500;
+                            color: #111827;
+                          "
+                        >
+                          {{ value }}
+                        </dd>
+                      </div>
+                    </dl>
                   </div>
                 </div>
+                <button
+                  data-v-61884e8b=""
+                  @click="print"
+                  type="submit"
+                  class="mt-6 w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                >
+                  Print
+                </button>
               </div>
             </div>
 
@@ -70,58 +88,6 @@
             Loading error
             <!-- <ListLoadingError :message="'cant_load_orders_list'" /> -->
           </div>
-        </div>
-      </div>
-    </div>
-    <div>
-      <button @click="print">Print</button>
-      <div ref="emailTemplate" style="max-width: 40rem; margin: auto">
-        <div
-          style="
-            margin-top: 1rem;
-            border-radius: 0.5rem;
-            background-color: #f3f4f6;
-            padding: 0.75rem 1rem;
-          "
-        >
-          <div style="position: relative; width: 100%">
-            <img
-              :src="'data:image/png;base64,' + barcodeImage"
-              alt=""
-              style="width: 100%"
-            />
-            <div
-              style="
-                position: absolute;
-                inset: 0;
-                border-radius: 1rem;
-                border: 1px solid rgba(0, 0, 0, 0.1);
-              "
-            ></div>
-          </div>
-
-          <dl
-            style="margin-top: 0.75rem"
-            v-for="(item, index) in list"
-            :key="index"
-          >
-            <div
-              style="
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                border-top: 1px solid #e5e7eb;
-                padding-top: 1rem;
-              "
-              v-for="(value, key) in item"
-              :key="key"
-            >
-              <dt style="font-size: 0.875rem; color: #6b7280">{{ key }}</dt>
-              <dd style="font-size: 0.875rem; font-weight: 500; color: #111827">
-                {{ value }}
-              </dd>
-            </div>
-          </dl>
         </div>
       </div>
     </div>
