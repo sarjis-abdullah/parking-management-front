@@ -13,7 +13,7 @@ export class PlaceService {
     try {
       return await HttpRequester.post('place', data);
     } catch (err) {
-      throw err;
+      return Promise.reject(err);
     }
   }
   // public static setAccount(account:Account){

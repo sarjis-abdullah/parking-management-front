@@ -70,10 +70,8 @@ const postItem = async () => {
     serverErrors.value = {};
     handleReset();
   } catch (error) {
-    if (error.response?._data?.errors) {
-      serverErrors.value = error.response._data.errors;
-    } else if (error.response?.data?.errors) {
-      serverErrors.value = error.response?.data.errors;
+    if (error.errors) {
+      serverErrors.value = error.errors;
     }
   } finally {
     loading.value = false;
@@ -117,13 +115,6 @@ const inputClass =
 <template>
   <section class="max-w-2xl">
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
-      <ul>
-        <li v-for="item in serverErrors" :key="item">
-          <span class="text-red-500">
-            -{{ item?.length ? item.toString() : 2 }}
-          </span>
-        </li>
-      </ul>
       <section class="grid grid-cols-1 gap-3">
         <div class="grid gap-2">
           <label class="text-gray-500"
@@ -221,6 +212,13 @@ const inputClass =
           <ErrorMessage :errors="validator.driverMobile.$errors" />
         </div>
       </section>
+      <ul>
+        <li v-for="item in serverErrors" :key="item">
+          <span class="text-red-500">
+            -{{ item?.length ? item.toString() : 2 }}
+          </span>
+        </li>
+      </ul>
       <section>
         <div class="flex justify-end gap-2">
           <button

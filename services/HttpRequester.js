@@ -47,9 +47,10 @@ export class HttpRequester extends BaseHttpRequester {
         throw error;
       }
     } catch (error) {
-      console.log(error, error.response.body);
-      console.dir(error);
-      return Promise.reject(error);
+      if(error?.response?.body){
+        return Promise.reject(JSON.parse(error.response.body));
+      }
+      
     }
   }
   static async put(url, data) {

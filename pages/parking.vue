@@ -161,7 +161,7 @@ const serverErrors = ref(null);
 
 //pagination
 const page = ref(1);
-const perPage = ref(1);
+const perPage = ref(10);
 const lastPage = ref(null);
 const total = ref(null);
 const totalPerPage = ref(null);

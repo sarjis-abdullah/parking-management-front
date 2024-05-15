@@ -41,11 +41,10 @@ const postItem = async () => {
     serverErrors.value = {};
     handleReset()
   } catch (error) {
-    if (error.response?._data?.errors) {
-      serverErrors.value = error.response._data.errors;
-    } else if (error.response?.data?.errors) {
-      serverErrors.value = error.response?.data.errors;
-    }
+    console.log(error, 'error.response');
+    if (error.errors) {
+      serverErrors.value = error.errors;
+    } 
   } finally {
     loading.value = false;
   }
