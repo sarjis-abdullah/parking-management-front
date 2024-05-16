@@ -60,23 +60,116 @@
                           {{ value }}
                         </dd>
                       </div>
+
+                      <div
+                        data-v-61884e8b=""
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          border-top: 1px solid rgb(229, 231, 235);
+                          padding-top: 1rem;
+                        "
+                      >
+                        <dt
+                          data-v-61884e8b=""
+                          style="font-size: 0.875rem; color: rgb(107, 114, 128)"
+                        >
+                          Payment method
+                        </dt>
+                        <select
+                          class="focus:outline-none bg-none"
+                          :class="inputClass"
+                          style="background: none"
+                          name="place"
+                          v-model="paymentMethod"
+                        >
+                          <option
+                            v-for="category in ['cash', 'bkash', 'visa', 'due']"
+                            :key="category"
+                            :value="category"
+                          >
+                            {{ category }}
+                          </option>
+                        </select>
+                      </div>
+                      <div
+                        data-v-61884e8b=""
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          border-top: 1px solid rgb(229, 231, 235);
+                          padding-top: 1rem;
+                        "
+                      >
+                        <dt
+                          data-v-61884e8b=""
+                          style="font-size: 0.875rem; color: rgb(107, 114, 128)"
+                        >
+                          Received amount
+                        </dt>
+                        <input
+                          class="focus:outline-none bg-none"
+                          :class="inputClass"
+                          type="number"
+                          v-model="receivedAmount"
+                          placeholder="0.00 taka"
+                        />
+                      </div>
+                      <div
+                        data-v-61884e8b=""
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          border-top: 1px solid rgb(229, 231, 235);
+                          padding-top: 1rem;
+                        "
+                      >
+                        <dt
+                          data-v-61884e8b=""
+                          style="font-size: 0.875rem; color: rgb(107, 114, 128)"
+                        >
+                          Return able amount
+                        </dt>
+                        {{ returnableAmount }}
+                      </div>
+                      <!-- <div
+                        data-v-61884e8b=""
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          border-top: 1px solid rgb(229, 231, 235);
+                          padding-top: 1rem;
+                        "
+                      >
+                        <dt
+                          data-v-61884e8b=""
+                          style="font-size: 0.875rem; color: rgb(107, 114, 128)"
+                        >
+                          Payment status
+                        </dt>
+                        <div>
+                          {{ paymentStatus }}
+                        </div>
+                      </div> -->
                     </dl>
                   </div>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex justify-end gap-2">
                   <button
                     data-v-61884e8b=""
                     @click="print"
                     type="submit"
-                    class="mt-6 w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                    class="mt-6 w- rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                   >
                     Print
                   </button>
                   <button
-                    data-v-61884e8b=""
                     @click="checkoutAndprint"
-                    type="submit"
-                    class="mt-6 w-full rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                    class="mt-6 w- rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                   >
                     Checkout & Payment
                   </button>
@@ -104,13 +197,15 @@
   </div>
 </template>
 <script setup>
-import { onMounted, nextTick } from "vue";
+import { onMounted, nextTick, computed, ref } from "vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { ParkingService } from "~/services/ParkingService";
 import { formatDate } from "@/utils/index";
 import moment from "moment";
+const inputClass =
+  "relative appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
 
 const list = ref([]);
 const loadingError = ref(null);
@@ -123,12 +218,35 @@ const perPage = ref(10);
 const lastPage = ref(null);
 const total = ref(null);
 const totalPerPage = ref(null);
+const paymentMethod = ref("cash");
+const receivedAmount = ref();
+const payableAmount = ref(0);
+const parkingId = ref(null);
 
 const route = useRoute();
 const barcode = route.params.barcode;
 
 const searchQuery = computed(() => {
   return `?barcode=${barcode}&include=p.slot,p.category,p.place`;
+});
+const returnableAmount = computed(() => {
+  if (payableAmount.value && receivedAmount.value) {
+    const payable = parseFloat(payableAmount.value)
+    const received = parseFloat(receivedAmount.value)
+    return Math.floor(- payable + received)
+  }
+  return 0
+});
+const currentTime = ref(moment());
+const parkingData = computed(() => {
+  const obj = {
+    out_time: formatDate( currentTime.value, 'YYYY-MM-DD HH:mm:ss'),
+    payment: {
+      method: 'cash',
+      paid_amount: parseFloat(receivedAmount.value),
+    }
+  }
+  return obj
 });
 
 const barcodeImage = ref("");
@@ -138,13 +256,12 @@ const loadData = async () => {
     const { data } = await ParkingService.getAll(searchQuery.value);
     if (data?.length) {
       list.value = data.map((item) => {
-        const currentTime = moment()
-        const duration = moment.duration(currentTime.diff(item.in_time));
+        const duration = moment.duration(currentTime.value.diff(item.in_time));
         const hours = duration.hours();
         const minutes = duration.minutes();
         const seconds = duration.seconds();
-        const totalTime = `${hours}h ${minutes}m`
-
+        const totalTime = `${hours}h ${minutes}m`;
+        payableAmount.value = 20
         return {
           "Vehicle Number": item.vehicle_no,
           Place: item.place?.name,
@@ -154,12 +271,13 @@ const loadData = async () => {
           "Driver Name": item.driver_name,
           "driver Mobile": item.driver_mobile,
           "Check-in-Time": formatDate(item.in_time),
-          "Check-out-Time": formatDate(currentTime),
-          "Duration": totalTime,
-          "Payble Amount": 20,
+          "Check-out-Time": formatDate(currentTime.value),
+          Duration: totalTime,
+          "Payble Amount": payableAmount.value,
         };
       });
       barcodeImage.value = data[0].barcode_image;
+      parkingId.value = data[0].id;
       serverErrors.value = {};
     } else {
       serverErrors.value = "No data available for this barcode";
@@ -172,11 +290,8 @@ const loadData = async () => {
 
     // handleReset();
   } catch (error) {
-    console.log(error);
-    if (error.response?._data?.errors) {
-      serverErrors.value = error.response._data.errors;
-    } else if (error.response?.data?.errors) {
-      serverErrors.value = error.response?.data.errors;
+    if (error.errors) {
+      serverErrors.value = error.errors;
     }
   } finally {
     isLoading.value = false;
@@ -222,11 +337,19 @@ const print = () => {
   printWindow.document.close();
   printWindow.focus();
   printWindow.print();
-  //   printWindow.close();
+  setTimeout(()=> {
+    printWindow.close();
+  }, 1)
+ };
+const checkoutAndprint = async () => {
+  try {
+    console.log(parkingData.value, 'parkingData.value');
+    await ParkingService.update(parkingId.value, parkingData.value)
+    print()
+  } catch (error) {
+    
+  }
 };
-const checkoutAndprint = () => {
-
-}
 onMounted(() => {
   loadData();
 });

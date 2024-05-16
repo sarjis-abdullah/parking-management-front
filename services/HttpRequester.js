@@ -31,7 +31,6 @@ export class HttpRequester extends BaseHttpRequester {
         ...this.getHeaders(),
         body: JSON.stringify(data),
       });
-      console.log(3456787654567);
       if (response.ok) {
         const res = await response.json();
         this.handleMessage(url + " created successfully.");
@@ -54,9 +53,10 @@ export class HttpRequester extends BaseHttpRequester {
     }
   }
   static async put(url, data) {
+    console.log(data, 11222333);
     const response = await fetch(this.BASE_URL + url, {
       method: "PUT",
-      headers: this.getHeaders(),
+      ...this.getHeaders(),
       body: JSON.stringify(data),
     });
     if (response.ok) {
