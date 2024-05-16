@@ -35,12 +35,13 @@
     <td
       class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
     >
-    <select @change="handleActionChange" v-model="selectedAction" class="bg-white relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500">
+    <nuxt-link :to="`/parking-details/${singleData.barcode}`">View</nuxt-link>
+    <!-- <select @change="handleActionChange" v-model="selectedAction" class="bg-white relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500">
         <option :value="''" disabled>Select action</option>
         <option v-for="item in actions" :value="item.name" :key="item.name">
             {{ item.name }}
         </option>
-    </select>
+    </select> -->
     </td>
   </tr>
 </template>

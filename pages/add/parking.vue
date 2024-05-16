@@ -130,6 +130,7 @@ const getCategories = async () => {
 const floors = ref([]);
 
 const getFloors = async () => {
+  selectedSlot.value = null;
   let query = `?include=f.slots`;
   if (state.place) {
     query += `&place_id=${state.place}`;

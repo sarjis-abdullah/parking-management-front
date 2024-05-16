@@ -57,29 +57,28 @@
                             color: #111827;
                           "
                         >
-                          {{ value }}
+                        {{ key == "In-Time" ? formatDate(value) : value }}
                         </dd>
                       </div>
                     </dl>
                   </div>
                 </div>
+                {{ list }}
                 <div class="flex gap-2">
                   <button
-                    data-v-61884e8b=""
-                    @click="print"
-                    type="submit"
-                    class="mt-6 w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
-                  >
-                    Print
-                  </button>
-                  <button
-                    data-v-61884e8b=""
-                    @click="checkoutAndprint"
-                    type="submit"
-                    class="mt-6 w-full rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
-                  >
-                    Checkout & Payment
-                  </button>
+                  data-v-61884e8b=""
+                  @click="print"
+                  type="submit"
+                  class="mt-6 w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                >
+                  Print check-in details
+                </button>
+                <nuxt-link
+                  :to="`/parking-checkout/${barcode}`"
+                  class="mt-6 w-full rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                >
+                  Check-out
+                </nuxt-link>
                 </div>
               </div>
             </div>
@@ -109,8 +108,7 @@ import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { ParkingService } from "~/services/ParkingService";
-import { formatDate } from "@/utils/index";
-import moment from "moment";
+import {formatDate} from '@/utils/index'
 
 const list = ref([]);
 const loadingError = ref(null);
@@ -138,13 +136,6 @@ const loadData = async () => {
     const { data } = await ParkingService.getAll(searchQuery.value);
     if (data?.length) {
       list.value = data.map((item) => {
-        const currentTime = moment()
-        const duration = moment.duration(currentTime.diff(item.in_time));
-        const hours = duration.hours();
-        const minutes = duration.minutes();
-        const seconds = duration.seconds();
-        const totalTime = `${hours}h ${minutes}m`
-
         return {
           "Vehicle Number": item.vehicle_no,
           Place: item.place?.name,
@@ -153,13 +144,11 @@ const loadData = async () => {
           Slot: item.slot?.name,
           "Driver Name": item.driver_name,
           "driver Mobile": item.driver_mobile,
-          "Check-in-Time": formatDate(item.in_time),
-          "Check-out-Time": formatDate(currentTime),
-          "Duration": totalTime,
-          "Payble Amount": 20,
+          "In-Time": item.in_time,
         };
       });
       barcodeImage.value = data[0].barcode_image;
+      barcode.value = data[0].barcode;
       serverErrors.value = {};
     } else {
       serverErrors.value = "No data available for this barcode";
@@ -224,9 +213,42 @@ const print = () => {
   printWindow.print();
   //   printWindow.close();
 };
-const checkoutAndprint = () => {
+// const emailTemplate = ref(null);
+// const print = () => {
+//     nextTick(()=> {
+//         console.log(emailTemplate.value);
+//     })
 
-}
+//   return;
+//   const emailTemplate = emailTemplate.value.innerHTML;
+//   const printWindow = window.open("", "_blank");
+//   printWindow.document.open();
+//   printWindow.document.write(`
+//         <html>
+//           <head>
+//             <title>Email Template</title>
+//             <style>
+//               /* Add CSS styles for printing */
+//               body {
+//                 font-family: Arial, sans-serif;
+//                 font-size: 14px;
+//               }
+//               h1 {
+//                 color: #333;
+//               }
+//               p {
+//                 margin-bottom: 10px;
+//               }
+//             </style>
+//           </head>
+//           <body>
+//             ${emailTemplate.value}
+//           </body>
+//         </html>
+//       `);
+//   printWindow.document.close();
+//   printWindow.print();
+// };
 onMounted(() => {
   loadData();
 });
