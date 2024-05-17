@@ -140,9 +140,13 @@ const loadData = async () => {
       });
       barcodeImage.value = data[0].barcode_image;
       serverErrors.value = {};
+      setTimeout(() => {
+        print()
+      }, 1);
     } else {
       serverErrors.value = "No data available for this barcode";
     }
+    
 
     // page.value = meta.current_page;
     // lastPage.value = meta.last_page;

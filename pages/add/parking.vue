@@ -11,7 +11,7 @@ import { PlaceService } from "@/services/PlaceService.js";
 import { SlotService } from "~/services/SlotService";
 import { CategoryService } from "~/services/CategoryService";
 import { FloorService } from "~/services/FloorService";
-import {useDebounce} from '@/hooks/useDebounce'
+import { useDebounce } from "@/hooks/useDebounce";
 
 definePageMeta({
   layout: "auth-layout",
@@ -73,13 +73,16 @@ const parkingData = computed(() => {
   };
 });
 const router = useRouter();
-const oldParkingId = ref(null)
+const oldParkingId = ref(null);
 const postItem = async () => {
   try {
     loading.value = true;
-    let response = null
+    let response = null;
     if (oldParkingId.value) {
-      response = await ParkingService.update(oldParkingId.value, parkingData.value);
+      response = await ParkingService.update(
+        oldParkingId.value,
+        parkingData.value
+      );
     } else {
       response = await ParkingService.create(parkingData.value);
     }
@@ -89,7 +92,7 @@ const postItem = async () => {
     serverErrors.value = {};
     handleReset();
   } catch (error) {
-  console.log(12345, error);
+    console.log(12345, error);
     if (error.errors) {
       serverErrors.value = error.errors;
     }
@@ -180,18 +183,20 @@ const handleSelectedSlot = (slot) => {
     state.floor = slot.floor_id;
   }
 };
+const vehicleNames = ref([]);
 const search = async () => {
-  let query = '?include=p.category'
+  let query = "?include=p.category";
   if (state.vehicleNumber) {
-    query += `&query=${state.vehicleNumber}`
+    query += `&query=${state.vehicleNumber}`;
   }
-  const result = await ParkingService.getAll(query)
+  const result = await ParkingService.getAll(query);
   if (result?.data?.length) {
-    const data = result.data[0]
-    oldParkingId.value = data.id
-    state.vehicleNumber = data.vehicle_no
-    state.driverName = data.driver_name
-    state.driverMobile = data.driver_mobile
+    vehicleNames.value = result.data;
+    // const data = result.data[0];
+    // oldParkingId.value = data.id;
+    // state.vehicleNumber = data.vehicle_no;
+    // state.driverName = data.driver_name;
+    // state.driverMobile = data.driver_mobile;
     // categories.value.push(data.category)
     // state.category = data.category_id
   }
@@ -203,6 +208,22 @@ const search = async () => {
   //   slot_id: state.slot,
   //   floor_id: state.floor,
   // loadExistingData(searchQuery.value);
+};
+const checkSelection = () => {
+  const data = vehicleNames.value.find(
+    (item) => item.vehicle_no == state.vehicleNumber
+  );
+  if (data) {
+    oldParkingId.value = data.id;
+    state.vehicleNumber = data.vehicle_no;
+    state.driverName = data.driver_name;
+    state.driverMobile = data.driver_mobile;
+    // categories.value.push(data.category);
+    // state.category = data.category_id;
+    console.log("Option selected from list:", state.vehicleNumber);
+  } else {
+    console.log("Typed new value:", state.vehicleNumber);
+  }
 };
 const debouncedSearch = useDebounce(search, 500);
 onMounted(() => {
@@ -228,8 +249,19 @@ const inputClass =
             v-model="state.vehicleNumber"
             type="text"
             @input="debouncedSearch"
+            @change="checkSelection"
             placeholder="e.g. Ka-12345"
+            list="cityname"
           />
+          <!-- <input type="text" name="city" list="cityname" /> -->
+          <datalist id="cityname">
+            <option
+              v-for="item in vehicleNames"
+              :key="item.id"
+              :value="item.vehicle_no"
+            ></option>
+          </datalist>
+
           <ErrorMessage :errors="validator.vehicleNumber.$errors" />
         </div>
         <div class="grid gap-2">
