@@ -26,7 +26,7 @@
       {{ formatDate(singleData?.in_time) }}
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-      <!-- {{ singleData?.out_time ? formatDate(singleData.out_time) : "--" }} -->
+      {{ singleData?.out_time ? formatDate(singleData.out_time) : "--" }}
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
       <div>{{ singleData?.driver_name }}</div>

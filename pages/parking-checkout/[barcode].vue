@@ -176,12 +176,6 @@
                 </div>
               </div>
             </div>
-
-            <div v-else class="text-center py-10">
-              <p class="text-xl text-gray-400">
-                {{ serverErrors }}
-              </p>
-            </div>
           </div>
           <div v-if="!loadingError && isLoading">
             Loading
@@ -190,6 +184,9 @@
           <div v-if="loadingError && !isLoading">
             Loading error
             <!-- <ListLoadingError :message="'cant_load_orders_list'" /> -->
+          </div>
+          <div v-else-if="serverErrors" class="text-center py-10">
+            <Error :error="serverErrors" />
           </div>
         </div>
       </div>
@@ -201,6 +198,7 @@ import { onMounted, nextTick, computed, ref } from "vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
+import Error from "@/components/common/Error.vue";
 import { ParkingService } from "~/services/ParkingService";
 import { formatDate } from "@/utils/index";
 import moment from "moment";
@@ -231,22 +229,22 @@ const searchQuery = computed(() => {
 });
 const returnableAmount = computed(() => {
   if (payableAmount.value && receivedAmount.value) {
-    const payable = parseFloat(payableAmount.value)
-    const received = parseFloat(receivedAmount.value)
-    return Math.floor(- payable + received)
+    const payable = parseFloat(payableAmount.value);
+    const received = parseFloat(receivedAmount.value);
+    return Math.floor(-payable + received);
   }
-  return 0
+  return 0;
 });
 const currentTime = ref(moment());
 const parkingData = computed(() => {
   const obj = {
-    out_time: formatDate( currentTime.value, 'YYYY-MM-DD HH:mm:ss'),
+    out_time: formatDate(currentTime.value, "YYYY-MM-DD HH:mm:ss"),
     payment: {
-      method: 'cash',
+      method: "cash",
       paid_amount: parseFloat(receivedAmount.value),
-    }
-  }
-  return obj
+    },
+  };
+  return obj;
 });
 
 const barcodeImage = ref("");
@@ -261,7 +259,7 @@ const loadData = async () => {
         const minutes = duration.minutes();
         const seconds = duration.seconds();
         const totalTime = `${hours}h ${minutes}m`;
-        payableAmount.value = 20
+        payableAmount.value = 20;
         return {
           "Vehicle Number": item.vehicle_no,
           Place: item.place?.name,
@@ -337,17 +335,18 @@ const print = () => {
   printWindow.document.close();
   printWindow.focus();
   printWindow.print();
-  setTimeout(()=> {
+  setTimeout(() => {
     printWindow.close();
-  }, 1)
- };
+  }, 1);
+};
 const checkoutAndprint = async () => {
   try {
-    console.log(parkingData.value, 'parkingData.value');
-    await ParkingService.handleCheckout(parkingId.value, parkingData.value)
-    print()
+    await ParkingService.handleCheckout(parkingId.value, parkingData.value);
+    print();
   } catch (error) {
-    
+    if (error.errors) {
+      serverErrors.value = error.errors;
+    }
   }
 };
 onMounted(() => {
