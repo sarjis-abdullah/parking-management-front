@@ -46,32 +46,36 @@ export class HttpRequester extends BaseHttpRequester {
         throw error;
       }
     } catch (error) {
-      if(error?.response?.body){
+      if (error?.response?.body) {
         return Promise.reject(JSON.parse(error.response.body));
       }
-      
     }
   }
   static async put(url, data) {
-    console.log(data, 11222333);
-    const response = await fetch(this.BASE_URL + url, {
-      method: "PUT",
-      ...this.getHeaders(),
-      body: JSON.stringify(data),
-    });
-    if (response.ok) {
-      const res = await response.json();
-      this.handleMessage(url + " updated successfully.");
-      return res;
-    } else {
-      const responseBody = await response.text(); // Get response body as text
-      const error = new Error(response.statusText);
-      error.response = {
-        ...response,
-        body: responseBody, // Attach response body to the error object
-      };
-      this.handleError(response);
-      throw error;
+    try {
+      const response = await fetch(this.BASE_URL + url, {
+        method: "PUT",
+        ...this.getHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (response.ok) {
+        const res = await response.json();
+        this.handleMessage(url + " updated successfully.");
+        return res;
+      } else {
+        const responseBody = await response.text(); // Get response body as text
+        const error = new Error(response.statusText);
+        error.response = {
+          ...response,
+          body: responseBody, // Attach response body to the error object
+        };
+        this.handleError(response);
+        throw error;
+      }
+    } catch (error) {
+      if (error?.response?.body) {
+        return Promise.reject(JSON.parse(error.response.body));
+      }
     }
   }
   static async delete(url) {

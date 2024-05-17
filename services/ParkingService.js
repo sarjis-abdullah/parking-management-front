@@ -24,4 +24,12 @@ export class ParkingService {
       throw err;
     }
   }
+  static async handleCheckout(id, data) {
+    try {
+      console.log(data, 'data');
+      return await HttpRequester.put('parking-check-out/' + id, data);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

@@ -11,6 +11,7 @@ import { PlaceService } from "@/services/PlaceService.js";
 import { SlotService } from "~/services/SlotService";
 import { CategoryService } from "~/services/CategoryService";
 import { FloorService } from "~/services/FloorService";
+import {useDebounce} from '@/hooks/useDebounce'
 
 definePageMeta({
   layout: "auth-layout",
@@ -72,17 +73,23 @@ const parkingData = computed(() => {
   };
 });
 const router = useRouter();
-
+const oldParkingId = ref(null)
 const postItem = async () => {
   try {
     loading.value = true;
-    const response = await ParkingService.create(parkingData.value);
+    let response = null
+    if (oldParkingId.value) {
+      response = await ParkingService.update(oldParkingId.value, parkingData.value);
+    } else {
+      response = await ParkingService.create(parkingData.value);
+    }
     if (response?.data?.barcode) {
       router.push("/parking-checkin/" + response.data.barcode);
     }
     serverErrors.value = {};
     handleReset();
   } catch (error) {
+  console.log(12345, error);
     if (error.errors) {
       serverErrors.value = error.errors;
     }
@@ -173,6 +180,31 @@ const handleSelectedSlot = (slot) => {
     state.floor = slot.floor_id;
   }
 };
+const search = async () => {
+  let query = '?include=p.category'
+  if (state.vehicleNumber) {
+    query += `&query=${state.vehicleNumber}`
+  }
+  const result = await ParkingService.getAll(query)
+  if (result?.data?.length) {
+    const data = result.data[0]
+    oldParkingId.value = data.id
+    state.vehicleNumber = data.vehicle_no
+    state.driverName = data.driver_name
+    state.driverMobile = data.driver_mobile
+    // categories.value.push(data.category)
+    // state.category = data.category_id
+  }
+  // vehicle_no: state.vehicleNumber,
+  //   driver_name: state.driverName,
+  //   driver_mobile: state.driverMobile,
+  //   place_id: state.place,
+  //   category_id: state.category,
+  //   slot_id: state.slot,
+  //   floor_id: state.floor,
+  // loadExistingData(searchQuery.value);
+};
+const debouncedSearch = useDebounce(search, 500);
 onMounted(() => {
   getPlaces();
   getFloors();
@@ -189,12 +221,13 @@ const inputClass =
       <section class="grid grid-cols-1 gap-3">
         <div class="grid gap-2">
           <label class="text-gray-500"
-            >Name<span class="text-red-500">*</span></label
+            >Vehicle Number<span class="text-red-500">*</span></label
           >
           <input
             :class="inputClass"
             v-model="state.vehicleNumber"
             type="text"
+            @input="debouncedSearch"
             placeholder="e.g. Ka-12345"
           />
           <ErrorMessage :errors="validator.vehicleNumber.$errors" />
@@ -269,6 +302,7 @@ const inputClass =
           >
           <ul class="grid gap-2">
             <li v-for="(floor, index) in floors" :key="floor.id">
+              {{ floor.name }}
               <ul class="grid grid-cols-6 gap-2">
                 <li
                   v-for="(slot, i) in floor.slots"

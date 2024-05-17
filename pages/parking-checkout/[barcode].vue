@@ -159,19 +159,19 @@
                   </div>
                 </div>
                 <div class="flex justify-end gap-2">
-                  <button
+                  <!-- <button
                     data-v-61884e8b=""
                     @click="print"
                     type="submit"
                     class="mt-6 w- rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                   >
                     Print
-                  </button>
+                  </button> -->
                   <button
                     @click="checkoutAndprint"
                     class="mt-6 w- rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                   >
-                    Checkout & Payment
+                    Checkout
                   </button>
                 </div>
               </div>
@@ -344,7 +344,7 @@ const print = () => {
 const checkoutAndprint = async () => {
   try {
     console.log(parkingData.value, 'parkingData.value');
-    await ParkingService.update(parkingId.value, parkingData.value)
+    await ParkingService.handleCheckout(parkingId.value, parkingData.value)
     print()
   } catch (error) {
     
