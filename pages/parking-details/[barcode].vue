@@ -63,7 +63,6 @@
                     </dl>
                   </div>
                 </div>
-                {{ list }}
                 <div class="flex gap-2">
                   <button
                   data-v-61884e8b=""

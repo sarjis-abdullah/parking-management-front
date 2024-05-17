@@ -128,7 +128,7 @@ const total = ref(null);
 const totalPerPage = ref(null);
 
 const searchQuery = computed(() => {
-  return `?page=${page.value}&per_page=${perPage.value}&include=c.place`;
+  return `?page=${page.value}&per_page=${perPage.value}&include=c.place,p.payment`;
 });
 
 const loadData = async () => {

@@ -25,10 +25,8 @@ const state = reactive(defaultData);
 const rules = computed(() => {
   return {
     name: { required: helpers.withMessage("Name is required", required) },
-    place: { required: helpers.withMessage("Place is required", required) },
-    category: {
-      required: helpers.withMessage("Category is required", required),
-    },
+    place: { },
+    category: {},
     startDate: {
       required: helpers.withMessage("Start date is required", required),
     },
@@ -99,14 +97,15 @@ const getPlaces = async () => {
 };
 const categories = ref([]);
 const getCategories = async () => {
-  const { data } = await CategoryService.getAll(`?place_id=${state.place}`);
+  const { data } = await CategoryService.getAll();
   categories.value = data;
 };
 const handlePlaceChange = () => {
-  getCategories();
+  
 };
 onMounted(() => {
   getPlaces();
+  getCategories();
 });
 
 const inputClass =
@@ -135,7 +134,7 @@ const inputClass =
           <ErrorMessage :errors="validator.name.$errors" />
         </div>
         <div class="grid gap-2">
-          <label class="text-gray-500">Place<span class="text-red-500">*</span></label>
+          <label class="text-gray-500">Place</label>
           <select
             class="focus:outline-none bg-none"
             :class="inputClass"
@@ -154,7 +153,7 @@ const inputClass =
           <ErrorMessage :errors="validator.place.$errors" />
         </div>
         <div class="grid gap-2">
-          <label class="text-gray-500">Category<span class="text-red-500">*</span></label>
+          <label class="text-gray-500">Category</label>
           <select
             class="focus:outline-none bg-none"
             :class="inputClass"

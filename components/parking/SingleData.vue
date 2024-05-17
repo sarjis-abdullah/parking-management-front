@@ -29,6 +29,9 @@
       {{ singleData?.out_time ? formatDate(singleData.out_time) : "--" }}
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+      {{ singleData?.payment?.method }}
+    </td>
+    <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
       <div>{{ singleData?.driver_name }}</div>
       <div>{{ singleData?.driver_mobile }}</div>
     </td>

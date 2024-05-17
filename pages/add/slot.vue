@@ -27,9 +27,7 @@ const rules = computed(() => {
   return {
     name: { required: helpers.withMessage("Name is required", required) },
     place: { required: helpers.withMessage("Place is required", required) },
-    category: {
-      required: helpers.withMessage("Category is required", required),
-    },
+    category: {},
     floor: { required: helpers.withMessage("Floor is required", required) },
     remarks: {},
     identity: {},
@@ -87,7 +85,7 @@ const getPlaces = async () => {
 };
 const categories = ref([]);
 const getCategories = async () => {
-  const { data } = await CategoryService.getAll(`?place_id=${state.place}`);
+  const { data } = await CategoryService.getAll();
   categories.value = data;
 };
 const floors = ref([]);
@@ -96,11 +94,11 @@ const getFloors = async () => {
   floors.value = data;
 };
 const handlePlaceChange = () => {
-  getCategories();
   getFloors();
 };
 onMounted(() => {
   getPlaces();
+  getCategories();
 });
 
 const inputClass =
@@ -153,7 +151,7 @@ const inputClass =
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500"
-            >Category<span class="text-red-500">*</span></label
+            >Category</label
           >
           <select
             class="focus:outline-none bg-none"

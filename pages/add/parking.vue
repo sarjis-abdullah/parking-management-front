@@ -130,7 +130,7 @@ const getCategories = async () => {
   loading.value = true;
   try {
     state.category = "";
-    const { data } = await CategoryService.getAll(`?place_id=${state.place}`);
+    const { data } = await CategoryService.getAll();
     categories.value = data;
   } catch (error) {
   } finally {
@@ -155,7 +155,7 @@ const getFloors = async () => {
   }
 };
 const handlePlaceChange = () => {
-  getCategories();
+  // getCategories();
   getFloors();
 };
 const getSlotClasses = (slot) => {
@@ -219,7 +219,7 @@ const checkSelection = () => {
     state.driverName = data.driver_name;
     state.driverMobile = data.driver_mobile;
     // categories.value.push(data.category);
-    // state.category = data.category_id;
+    state.category = data.category_id;
     console.log("Option selected from list:", state.vehicleNumber);
   } else {
     console.log("Typed new value:", state.vehicleNumber);
@@ -228,6 +228,7 @@ const checkSelection = () => {
 const debouncedSearch = useDebounce(search, 500);
 onMounted(() => {
   getPlaces();
+  getCategories();
   getFloors();
 });
 
@@ -236,10 +237,10 @@ const inputClass =
 </script>
 
 <template>
-  <section class="max-w-2xl">
+  <section class="">
     <Loading v-if="loading" />
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
-      <section class="grid grid-cols-1 gap-3">
+      <section class="grid grid-cols-1 md:grid-cols-5 gap-3">
         <div class="grid gap-2">
           <label class="text-gray-500"
             >Vehicle Number<span class="text-red-500">*</span></label
@@ -328,14 +329,16 @@ const inputClass =
           />
           <ErrorMessage :errors="validator.driverMobile.$errors" />
         </div>
-        <div class="grid gap-2">
+        
+      </section>
+      <div class="grid gap-2" v-if="floors && floors.length">
           <label class="text-gray-500"
             >Slot<span class="text-red-500">*</span></label
           >
           <ul class="grid gap-2">
             <li v-for="(floor, index) in floors" :key="floor.id">
               {{ floor.name }}
-              <ul class="grid grid-cols-6 gap-2">
+              <ul class="grid grid-cols-3 md:grid-cols-6 gap-2">
                 <li
                   v-for="(slot, i) in floor.slots"
                   :key="slot.id"
@@ -375,7 +378,6 @@ const inputClass =
           </select> -->
           <ErrorMessage :errors="validator.slot.$errors" />
         </div>
-      </section>
       <ul>
         <li v-for="item in serverErrors" :key="item">
           <span class="text-red-500">

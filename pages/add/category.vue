@@ -1,6 +1,7 @@
 <script setup>
 import AuthLayout from "../layouts/AuthLayout.vue";
 import ErrorMessage from "../components/common/ErrorMessage.vue";
+import Error from "@/components/common/Error.vue";
 import { ref, reactive, onMounted } from "vue";
 const formRef = ref(null);
 import { useVuelidate } from "@vuelidate/core";
@@ -13,7 +14,6 @@ definePageMeta({
 });
 const defaultData = {
   name: "",
-  place: "",
   description: "",
 };
 const serverErrors = ref({});
@@ -21,7 +21,7 @@ const state = reactive(defaultData);
 const rules = computed(() => {
   return {
     name: { required: helpers.withMessage("Name is required", required) },
-    place: { required: helpers.withMessage("Place is required", required) },
+    // place: { required: helpers.withMessage("Place is required", required) },
     description: {},
   };
 });
@@ -40,17 +40,11 @@ const handleReset = async () => {
 const postItem = async () => {
   try {
     loading.value = true;
-    const obj = { ...state, place_id: state.place };
-    delete obj.place;
-    await CategoryService.create(obj);
+    await CategoryService.create(state);
     serverErrors.value = {};
     handleReset();
   } catch (error) {
-    if (error.response?._data?.errors) {
-      serverErrors.value = error.response._data.errors;
-    } else if (error.response?.data?.errors) {
-      serverErrors.value = error.response?.data.errors;
-    }
+    serverErrors.value = error
   } finally {
     loading.value = false;
   }
@@ -79,13 +73,7 @@ const inputClass =
 <template>
   <section class="max-w-2xl">
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
-      <ul>
-        <li v-for="item in serverErrors" :key="item">
-          <span class="text-red-500">
-            -{{ item?.length ? item.toString() : 2 }}
-          </span>
-        </li>
-      </ul>
+      <Error :error="serverErrors"/>
       <section class="grid grid-cols-1 gap-3">
         <div class="grid gap-2">
           <label class="text-gray-500">
@@ -99,24 +87,7 @@ const inputClass =
           />
           <ErrorMessage :errors="validator.name.$errors" />
         </div>
-        <div class="grid gap-2">
-          <label class="text-gray-500">Place<span class="text-red-500">*</span></label>
-          <select
-            class="focus:outline-none bg-none"
-            :class="inputClass"
-            style="background: none"
-            name="place"
-            v-model="state.place"
-            :key="state.place"
-          >
-            <option disabled :value="''">Select place name</option>
-            <option v-for="place in places" :key="place.id" :value="place.id">
-              {{ place.name }}
-            </option>
-            <!-- Add more options as needed -->
-          </select>
-          <ErrorMessage :errors="validator.place.$errors" />
-        </div>
+        
         <div class="grid gap-2">
           <label class="text-gray-500">Description</label>
           <input
