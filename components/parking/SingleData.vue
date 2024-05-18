@@ -23,7 +23,7 @@
       <span class="text-gray-900">{{ singleData.vehicle_no }}</span>
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-      {{ formatDate(singleData?.in_time) }}
+      {{ singleData?.in_time ? formatDate(singleData?.in_time) : '--' }}
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
       {{ singleData?.out_time ? formatDate(singleData.out_time) : "--" }}

@@ -185,7 +185,7 @@
             Loading error
             <!-- <ListLoadingError :message="'cant_load_orders_list'" /> -->
           </div>
-          <div v-else-if="serverErrors" class="text-center py-10">
+          <div v-else-if="serverErrors  && Object.keys(serverErrors)?.length" class="text-center py-10">
             <Errors :error="serverErrors" />
           </div>
         </div>
@@ -228,7 +228,7 @@ const route = useRoute();
 const barcode = route.params.barcode;
 
 const searchQuery = computed(() => {
-  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.tariff,t.parking_rates`;
+  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.tariff,t.parking_rates`;
 });
 const durationInMinutes = ref(0);
 const totalCost = computed(() => {
@@ -283,6 +283,17 @@ const paidAmount = computed(() => {
 });
 const barcodeImage = ref("");
 const parking_rates = ref([]);
+class CustomError extends Error {
+  constructor(message, errors) {
+    super(message);
+    this.name = 'CustomError';
+    this.errors = errors;
+  }
+
+  toString() {
+    return `${this.name} [${this.code}]: ${this.message}`;
+  }
+}
 const loadData = async () => {
   try {
     isLoading.value = true;
@@ -291,6 +302,7 @@ const loadData = async () => {
       const result = data[0];
       barcodeImage.value = result.barcode_image;
       parkingId.value = result.id;
+      console.log(result);
 
       const differenceInMillis = currentTime.value.diff(result.in_time);
 
@@ -325,7 +337,10 @@ const loadData = async () => {
 
       serverErrors.value = {};
     } else {
-      serverErrors.value = "No data available for this barcode";
+      const errors = {
+        'no_data': [`"No data available for this barcode"`]
+      }
+      throw new CustomError("Data error", errors);
     }
 
     // page.value = meta.current_page;
@@ -386,15 +401,18 @@ const print = () => {
     printWindow.close();
   }, 1);
 };
+
 const checkoutAndprint = async () => {
   try {
     if (paidAmount.value > 0) {
       await ParkingService.handleCheckout(parkingId.value, parkingData.value);
       print();
     }
-    throw new Error("Hello");
+    const errors = {
+        'paidAmount': [`Please pay ${totalCost.value} taka`]
+      }
+    throw new CustomError("Validation error", errors);
   } catch (error) {
-    console.log(error.message, 12345);
     if (error.errors) {
       serverErrors.value = error.errors;
     }
