@@ -186,7 +186,7 @@
             <!-- <ListLoadingError :message="'cant_load_orders_list'" /> -->
           </div>
           <div v-else-if="serverErrors" class="text-center py-10">
-            <Error :error="serverErrors" />
+            <Errors :error="serverErrors" />
           </div>
         </div>
       </div>
@@ -198,7 +198,7 @@ import { onMounted, nextTick, computed, ref } from "vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
-import Error from "@/components/common/Error.vue";
+import Errors from "@/components/common/Error.vue";
 import { ParkingService } from "~/services/ParkingService";
 import { formatDate } from "@/utils/index";
 import moment from "moment";
@@ -269,6 +269,15 @@ const returnableAmount = computed(() => {
     const payable = totalCost.value;
     const received = parseFloat(receivedAmount.value);
     return Math.floor(-payable + received);
+  }
+  return 0;
+});
+const paidAmount = computed(() => {
+  if (totalCost.value == receivedAmount.value) {
+    return totalCost.value
+  }
+  if (totalCost.value && receivedAmount.value && returnableAmount.value && returnableAmount.value > 0) {
+    return parseFloat(receivedAmount.value) - returnableAmount.value;
   }
   return 0;
 });
@@ -379,9 +388,13 @@ const print = () => {
 };
 const checkoutAndprint = async () => {
   try {
-    await ParkingService.handleCheckout(parkingId.value, parkingData.value);
-    print();
+    if (paidAmount.value > 0) {
+      await ParkingService.handleCheckout(parkingId.value, parkingData.value);
+      print();
+    }
+    throw new Error("Hello");
   } catch (error) {
+    console.log(error.message, 12345);
     if (error.errors) {
       serverErrors.value = error.errors;
     }
