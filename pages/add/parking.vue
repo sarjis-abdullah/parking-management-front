@@ -12,6 +12,7 @@ import { SlotService } from "~/services/SlotService";
 import { CategoryService } from "~/services/CategoryService";
 import { FloorService } from "~/services/FloorService";
 import { useDebounce } from "@/hooks/useDebounce";
+import { TariffService } from "~/services/TariffService";
 
 definePageMeta({
   layout: "auth-layout",
@@ -24,6 +25,7 @@ const defaultData = {
   slot: "",
   category: "",
   floor: "",
+  tariff: "",
 };
 const serverErrors = ref({});
 const state = reactive(defaultData);
@@ -34,6 +36,7 @@ const rules = computed(() => {
     },
     driverName: {},
     driverMobile: {},
+    tariff: {},
     place: {
       required: helpers.withMessage("place is required", required),
     },
@@ -70,6 +73,7 @@ const parkingData = computed(() => {
     category_id: state.category,
     slot_id: state.slot,
     floor_id: state.floor,
+    tariff_id: state.tariff,
   };
 });
 const router = useRouter();
@@ -226,10 +230,17 @@ const checkSelection = () => {
   }
 };
 const debouncedSearch = useDebounce(search, 500);
+
+const tariffs = ref([]);
+const geTtariffs = async () => {
+  const { data } = await TariffService.getAll();
+  tariffs.value = data;
+};
 onMounted(() => {
   getPlaces();
   getCategories();
   getFloors();
+  geTtariffs()
 });
 
 const inputClass =
@@ -240,7 +251,7 @@ const inputClass =
   <section class="">
     <Loading v-if="loading" />
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
-      <section class="grid grid-cols-1 md:grid-cols-5 gap-3">
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div class="grid gap-2">
           <label class="text-gray-500"
             >Vehicle Number<span class="text-red-500">*</span></label
@@ -285,6 +296,7 @@ const inputClass =
           </select>
           <ErrorMessage :errors="validator.place.$errors" />
         </div>
+
         <div class="grid gap-2">
           <label class="text-gray-500"
             >Category<span class="text-red-500">*</span></label
@@ -310,6 +322,27 @@ const inputClass =
           <ErrorMessage :errors="validator.category.$errors" />
         </div>
         <div class="grid gap-2">
+          <label class="text-gray-500">Tariff</label>
+          <select
+            class="focus:outline-none bg-none"
+            :class="inputClass"
+            style="background: none"
+            name="place"
+            v-model="state.tariff"
+          >
+            <option disabled :value="''">Select tariff name</option>
+            <option
+              v-for="tariff in tariffs"
+              :key="tariff.id"
+              :value="tariff.id"
+            >
+              {{ tariff.name }}
+            </option>
+            <!-- Add more options as needed -->
+          </select>
+          <ErrorMessage :errors="validator.tariff.$errors" />
+        </div>
+        <div class="grid gap-2">
           <label class="text-gray-500">Driver Name</label>
           <input
             :class="inputClass"
@@ -329,42 +362,41 @@ const inputClass =
           />
           <ErrorMessage :errors="validator.driverMobile.$errors" />
         </div>
-        
       </section>
       <div class="grid gap-2" v-if="floors && floors.length">
-          <label class="text-gray-500"
-            >Slot<span class="text-red-500">*</span></label
-          >
-          <ul class="grid gap-2">
-            <li v-for="(floor, index) in floors" :key="floor.id">
-              {{ floor.name }}
-              <ul class="grid grid-cols-3 md:grid-cols-6 gap-2">
-                <li
-                  v-for="(slot, i) in floor.slots"
-                  :key="slot.id"
-                  class="flex flex-col gap-1 items-center p-4 border text-white rounded-md"
-                  :class="getSlotClasses(slot)"
-                  @click="handleSelectedSlot(slot)"
-                >
-                  <div>{{ slot.name }}</div>
-                  <div>
-                    <svg
-                      class="h-6 w-6"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                    >
-                      <title>car-select</title>
-                      <path
-                        fill="white"
-                        d="M5 13L6.5 8.5H17.5L19 13M17.5 18C16.7 18 16 17.3 16 16.5S16.7 15 17.5 15 19 15.7 19 16.5 18.3 18 17.5 18M6.5 18C5.7 18 5 17.3 5 16.5S5.7 15 6.5 15 8 15.7 8 16.5 7.3 18 6.5 18M18.9 8C18.7 7.4 18.1 7 17.5 7H6.5C5.8 7 5.3 7.4 5.1 8L3 14V22C3 22.6 3.4 23 4 23H5C5.6 23 6 22.6 6 22V21H18V22C18 22.6 18.4 23 19 23H20C20.6 23 21 22.6 21 22V14M8 1L12 5.5L16 1Z"
-                      />
-                    </svg>
-                  </div>
-                </li>
-              </ul>
-            </li>
-          </ul>
-          <!-- <select
+        <label class="text-gray-500"
+          >Slot<span class="text-red-500">*</span></label
+        >
+        <ul class="grid gap-2">
+          <li v-for="(floor, index) in floors" :key="floor.id">
+            {{ floor.name }}
+            <ul class="grid grid-cols-3 md:grid-cols-6 gap-2">
+              <li
+                v-for="(slot, i) in floor.slots"
+                :key="slot.id"
+                class="flex flex-col gap-1 items-center p-4 border text-white rounded-md"
+                :class="getSlotClasses(slot)"
+                @click="handleSelectedSlot(slot)"
+              >
+                <div>{{ slot.name }}</div>
+                <div>
+                  <svg
+                    class="h-6 w-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                  >
+                    <title>car-select</title>
+                    <path
+                      fill="white"
+                      d="M5 13L6.5 8.5H17.5L19 13M17.5 18C16.7 18 16 17.3 16 16.5S16.7 15 17.5 15 19 15.7 19 16.5 18.3 18 17.5 18M6.5 18C5.7 18 5 17.3 5 16.5S5.7 15 6.5 15 8 15.7 8 16.5 7.3 18 6.5 18M18.9 8C18.7 7.4 18.1 7 17.5 7H6.5C5.8 7 5.3 7.4 5.1 8L3 14V22C3 22.6 3.4 23 4 23H5C5.6 23 6 22.6 6 22V21H18V22C18 22.6 18.4 23 19 23H20C20.6 23 21 22.6 21 22V14M8 1L12 5.5L16 1Z"
+                    />
+                  </svg>
+                </div>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <!-- <select
             class="focus:outline-none bg-none"
             :class="inputClass"
             style="background: none"
@@ -376,8 +408,8 @@ const inputClass =
               {{ slot.name }}
             </option>
           </select> -->
-          <ErrorMessage :errors="validator.slot.$errors" />
-        </div>
+        <ErrorMessage :errors="validator.slot.$errors" />
+      </div>
       <ul>
         <li v-for="item in serverErrors" :key="item">
           <span class="text-red-500">

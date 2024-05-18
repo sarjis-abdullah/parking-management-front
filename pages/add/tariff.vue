@@ -18,6 +18,7 @@ const defaultData = {
   place: "",
   category: "",
   startDate: "",
+  tariff: "",
   endDate: "",
 };
 const serverErrors = ref({});
@@ -27,6 +28,7 @@ const rules = computed(() => {
     name: { required: helpers.withMessage("Name is required", required) },
     place: { },
     category: {},
+    tariff: {},
     startDate: {
       required: helpers.withMessage("Start date is required", required),
     },
@@ -62,11 +64,13 @@ const postItem = async () => {
       ...state,
       place_id: state.place,
       category_id: state.category,
+      
       start_date: state.startDate,
       end_date: state.endDate,
     };
     delete obj.place;
     delete obj.category;
+    delete obj.tariff;
     delete obj.startDate;
     delete obj.endDate;
     await TariffService.create(obj);
@@ -100,6 +104,7 @@ const getCategories = async () => {
   const { data } = await CategoryService.getAll();
   categories.value = data;
 };
+
 const handlePlaceChange = () => {
   
 };
@@ -173,6 +178,7 @@ const inputClass =
           </select>
           <ErrorMessage :errors="validator.category.$errors" />
         </div>
+        
         <div class="grid gap-2">
           <label class="text-gray-500">Start date<span class="text-red-500">*</span></label>
           <input

@@ -110,7 +110,7 @@
                           Received amount
                         </dt>
                         <input
-                          class="focus:outline-none bg-none"
+                          class="focus:outline-none bg-none text-right"
                           :class="inputClass"
                           type="number"
                           v-model="receivedAmount"
@@ -202,6 +202,9 @@ import Error from "@/components/common/Error.vue";
 import { ParkingService } from "~/services/ParkingService";
 import { formatDate } from "@/utils/index";
 import moment from "moment";
+definePageMeta({
+  layout:"auth-layout",
+});
 const inputClass =
   "relative appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
 
@@ -225,41 +228,77 @@ const route = useRoute();
 const barcode = route.params.barcode;
 
 const searchQuery = computed(() => {
-  return `?barcode=${barcode}&include=p.slot,p.category,p.place`;
+  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.tariff,t.parking_rates`;
 });
-const returnableAmount = computed(() => {
-  if (payableAmount.value && receivedAmount.value) {
-    const payable = parseFloat(payableAmount.value);
-    const received = parseFloat(receivedAmount.value);
-    return Math.floor(-payable + received);
+const durationInMinutes = ref(0);
+const totalCost = computed(() => {
+  const durations = durationInMinutes.value;
+  const halfHourSegments = Math.ceil(durations / 30); // Number of half-hour segments
+
+  let total = 0.0;
+
+  // Ensure rates are sorted by id or another relevant field
+  // rates.sort((a, b) => a.id - b.id);
+  const rates = parking_rates.value;
+  if (rates.length) {
+    for (let i = 0; i < halfHourSegments; i++) {
+      // Use the last rate if i exceeds the number of rate objects
+      const rate =
+        i < rates.length ? rates[i].rate : rates[rates.length - 1].rate;
+      total += parseFloat(rate);
+    }
   }
-  return 0;
+
+  console.log(total, "totalCost");
+  return Number(total).toFixed(2);
 });
 const currentTime = ref(moment());
 const parkingData = computed(() => {
   const obj = {
     out_time: formatDate(currentTime.value, "YYYY-MM-DD HH:mm:ss"),
+    duration: durationInMinutes.value,
     payment: {
       method: "cash",
-      paid_amount: parseFloat(receivedAmount.value),
+      paid_amount: totalCost.value,
     },
   };
   return obj;
 });
-
+const returnableAmount = computed(() => {
+  if (totalCost.value && receivedAmount.value) {
+    const payable = totalCost.value;
+    const received = parseFloat(receivedAmount.value);
+    return Math.floor(-payable + received);
+  }
+  return 0;
+});
 const barcodeImage = ref("");
+const parking_rates = ref([]);
 const loadData = async () => {
   try {
     isLoading.value = true;
     const { data } = await ParkingService.getAll(searchQuery.value);
     if (data?.length) {
+      const result = data[0];
+      barcodeImage.value = result.barcode_image;
+      parkingId.value = result.id;
+
+      const differenceInMillis = currentTime.value.diff(result.in_time);
+
+      // Create a duration object
+      const duration = moment.duration(differenceInMillis);
+
+      // Extract total time in minutes
+      durationInMinutes.value = Math.ceil(duration.asMinutes());
+
+      parking_rates.value = result.tariff.parking_rates;
+
       list.value = data.map((item) => {
         const duration = moment.duration(currentTime.value.diff(item.in_time));
         const hours = duration.hours();
         const minutes = duration.minutes();
         const seconds = duration.seconds();
         const totalTime = `${hours}h ${minutes}m`;
-        payableAmount.value = 20;
         return {
           "Vehicle Number": item.vehicle_no,
           Place: item.place?.name,
@@ -271,11 +310,10 @@ const loadData = async () => {
           "Check-in-Time": formatDate(item.in_time),
           "Check-out-Time": formatDate(currentTime.value),
           Duration: totalTime,
-          "Payble Amount": payableAmount.value,
+          "Payble Amount": totalCost.value,
         };
       });
-      barcodeImage.value = data[0].barcode_image;
-      parkingId.value = data[0].id;
+
       serverErrors.value = {};
     } else {
       serverErrors.value = "No data available for this barcode";

@@ -106,8 +106,10 @@ export class HttpRequester extends BaseHttpRequester {
     let error = "";
     if (status == 401) {
       this.handleMessage("Un-authenticated!", false);
+      window.location.href = '/'
     } else if (status == 403) {
       this.handleMessage("Un-authorized", false);
+      window.location.href = '/'
     } else if (status == 422) {
       this.handleMessage("Bad input", false);
     } else if (status >= 400 && status < 500) {
