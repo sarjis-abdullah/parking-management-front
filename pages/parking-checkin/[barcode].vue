@@ -117,7 +117,7 @@ const route = useRoute();
 const barcode = route.params.barcode;
 
 const searchQuery = computed(() => {
-  return `?barcode=${barcode}&include=p.slot,p.category,p.place`;
+  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor`;
 });
 
 const barcodeImage = ref("");

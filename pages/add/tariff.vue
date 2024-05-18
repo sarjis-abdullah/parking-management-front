@@ -1,6 +1,4 @@
 <script setup>
-import AuthLayout from "../layouts/AuthLayout.vue";
-import ErrorMessage from "../components/common/ErrorMessage.vue";
 import ClientErrors from "@/components/common/ClientErrors.vue";
 import Error from "@/components/common/Error.vue";
 import { ref, reactive, onMounted } from "vue";
@@ -30,6 +28,7 @@ const defaultData = {
   startDate: "",
   tariff: "",
   endDate: "",
+  default: false,
   paymentRateType: HALF_HOURLY,
   paymentRates: [
     {
@@ -42,7 +41,6 @@ const serverErrors = ref({});
 const state = reactive({...defaultData});
 const addNewPaymentRate = () => {
   state.paymentRates.push({
-    type: "",
     rate: "",
   });
 };
@@ -57,7 +55,7 @@ const rules = computed(() => {
     paymentRateType: {},
     tariff: {},
     startDate: {
-      required: helpers.withMessage("Start date is required", required),
+      
     },
     endDate: {},
     paymentRates: { required },
@@ -83,10 +81,7 @@ const handleReset = async () => {
     state[key] = defaultData[key];
   }
   state.paymentRates = [{rate: ''}]
-  // setTimeout(() => {
-  //   state = defaultData
-  // }, 1);
-  // formRef.value?.reset();
+  serverErrors.value = {}
   console.log("handleReset");
 };
 const tarifData = computed(() => {
@@ -97,6 +92,7 @@ const tarifData = computed(() => {
     start_date: state.startDate,
     end_date: state.endDate,
     type: state.paymentRateType,
+    default: state.default,
     payment_rates: state.paymentRates,
   };
 });
@@ -138,7 +134,7 @@ onMounted(() => {
   getPlaces();
   getCategories();
 });
-
+const notice = "This checkbox sets the current tariff plan as the default. Note that only one default tariff plan is allowed at a time. If this tariff plan is selected as default, it will override any existing default tariff plan, and the most recently updated default tariff plan will take precedence."
 const inputClass =
   "relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
 </script>
@@ -146,7 +142,7 @@ const inputClass =
 <template>
   <section class="">
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
-      <section class="grid grid-cols-5 gap-3">
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div class="grid gap-2">
           <label class="text-gray-500"
             >Name<span class="text-red-500">*</span></label
@@ -157,7 +153,6 @@ const inputClass =
             type="text"
             placeholder="e.g. Tariff: Eid parking"
           />
-          <!-- <ErrorMessage :errors="validator.name.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500">Place</label>
@@ -174,9 +169,7 @@ const inputClass =
             <option v-for="place in places" :key="place.id" :value="place.id">
               {{ place.name }}
             </option>
-            <!-- Add more options as needed -->
           </select>
-          <!-- <ErrorMessage :errors="validator.place.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500">Category</label>
@@ -195,14 +188,12 @@ const inputClass =
             >
               {{ category.name }}
             </option>
-            <!-- Add more options as needed -->
           </select>
-          <!-- <ErrorMessage :errors="validator.category.$errors" /> -->
         </div>
 
         <div class="grid gap-2">
           <label class="text-gray-500"
-            >Start date<span class="text-red-500">*</span></label
+            >Start date</label
           >
           <input
             :class="inputClass"
@@ -211,7 +202,6 @@ const inputClass =
             :min="getTodayDate()"
             placeholder="e.g. 20/01/2024"
           />
-          <!-- <ErrorMessage :errors="validator.startDate.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500">End date</label>
@@ -222,7 +212,6 @@ const inputClass =
             :min="getTodayDate()"
             placeholder="e.g. 20/12/2024"
           />
-          <!-- <ErrorMessage :errors="validator.endDate.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500">Payment rate type</label>
@@ -237,8 +226,9 @@ const inputClass =
             <option value="hourly">Hourly</option>
           </select>
         </div>
+        
       </section>
-      <section>
+      <section class="max-w-sm ml-auto">
         <div class="grid gap-2">
           <div
             class="flex justify-between items-end gap-4"
@@ -293,6 +283,13 @@ const inputClass =
           </div>
         </div>
       </section>
+      <div>
+        <div class="flex items-center gap-2">
+          <input v-model="state.default" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+          <label class="text-gray-500">Marked as default</label>
+        </div>
+        <small class="text-gray-500">{{notice}}</small>
+      </div>
       <Error :error="serverErrors" />
       <ClientErrors :errors="validator.$errors" />
       <section>
