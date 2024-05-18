@@ -2,7 +2,7 @@
   <ul>
     <li v-for="item in error" :key="item">
       <span class="text-red-500">
-        -{{ item?.length ? item.toString() : 2 }}
+        -{{ item?.length ? item.toString() : '' }}
       </span>
     </li>
   </ul>
@@ -11,7 +11,7 @@
 <script setup>
 defineProps({
     error: {
-        type: Object,
+        type: [Object, null],
         required: true
     }
 })

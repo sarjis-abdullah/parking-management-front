@@ -1,10 +1,18 @@
 <script setup>
 import AuthLayout from "../layouts/AuthLayout.vue";
 import ErrorMessage from "../components/common/ErrorMessage.vue";
+import ClientErrors from "@/components/common/ClientErrors.vue";
+import Error from "@/components/common/Error.vue";
 import { ref, reactive, onMounted } from "vue";
 const formRef = ref(null);
 import { useVuelidate } from "@vuelidate/core";
-import { email, required, sameAs, helpers } from "@vuelidate/validators";
+import {
+  email,
+  required,
+  sameAs,
+  helpers,
+  minValue,
+} from "@vuelidate/validators";
 import { PlaceService } from "@/services/PlaceService.js";
 import { SlotService } from "@/services/SlotService.js";
 import { CategoryService } from "~/services/CategoryService";
@@ -13,6 +21,8 @@ import { TariffService } from "~/services/TariffService";
 definePageMeta({
   layout: "auth-layout",
 });
+const HOURLY = 'hourly'
+const HALF_HOURLY = 'half_hourly'
 const defaultData = {
   name: "",
   place: "",
@@ -20,19 +30,37 @@ const defaultData = {
   startDate: "",
   tariff: "",
   endDate: "",
+  paymentRateType: HALF_HOURLY,
+  paymentRates: [
+    {
+      rate: "",
+    },
+  ],
 };
+
 const serverErrors = ref({});
-const state = reactive(defaultData);
+const state = reactive({...defaultData});
+const addNewPaymentRate = () => {
+  state.paymentRates.push({
+    type: "",
+    rate: "",
+  });
+};
+const removePaymentRate = (index) => {
+  state.paymentRates.splice(index, 1);
+};
 const rules = computed(() => {
   return {
     name: { required: helpers.withMessage("Name is required", required) },
-    place: { },
+    place: {},
     category: {},
+    paymentRateType: {},
     tariff: {},
     startDate: {
       required: helpers.withMessage("Start date is required", required),
     },
     endDate: {},
+    paymentRates: { required },
     // remarks: {
     //   required: helpers.withMessage("remarks is required", required),
     // },
@@ -52,36 +80,36 @@ const getTodayDate = () => {
 const handleReset = async () => {
   await validator.value.$reset();
   for (let key in state) {
-    state[key] = "";
+    state[key] = defaultData[key];
   }
+  state.paymentRates = [{rate: ''}]
+  // setTimeout(() => {
+  //   state = defaultData
+  // }, 1);
   // formRef.value?.reset();
   console.log("handleReset");
 };
+const tarifData = computed(() => {
+  return {
+    name: state.name,
+    place_id: state.place,
+    category_id: state.category,
+    start_date: state.startDate,
+    end_date: state.endDate,
+    type: state.paymentRateType,
+    payment_rates: state.paymentRates,
+  };
+});
 const postItem = async () => {
   try {
     loading.value = true;
-    const obj = {
-      ...state,
-      place_id: state.place,
-      category_id: state.category,
-      
-      start_date: state.startDate,
-      end_date: state.endDate,
-    };
-    delete obj.place;
-    delete obj.category;
-    delete obj.tariff;
-    delete obj.startDate;
-    delete obj.endDate;
-    await TariffService.create(obj);
+    await TariffService.create(tarifData.value);
     serverErrors.value = {};
     handleReset();
+    state.paymentRateType = HALF_HOURLY
   } catch (error) {
-    if (error.response?._data?.errors) {
-      serverErrors.value = error.response._data.errors;
-    } else if (error.response?.data?.errors) {
-      serverErrors.value = error.response?.data.errors;
-    }
+    console.log(error, "error");
+    serverErrors.value = error.errors;
   } finally {
     loading.value = false;
   }
@@ -105,9 +133,7 @@ const getCategories = async () => {
   categories.value = data;
 };
 
-const handlePlaceChange = () => {
-  
-};
+const handlePlaceChange = () => {};
 onMounted(() => {
   getPlaces();
   getCategories();
@@ -118,25 +144,20 @@ const inputClass =
 </script>
 
 <template>
-  <section class="max-w-2xl">
+  <section class="">
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
-      <ul>
-        <li v-for="item in serverErrors" :key="item">
-          <span class="text-red-500">
-            -{{ item?.length ? item.toString() : 2 }}
-          </span>
-        </li>
-      </ul>
-      <section class="grid grid-cols-1 gap-3">
+      <section class="grid grid-cols-5 gap-3">
         <div class="grid gap-2">
-          <label class="text-gray-500">Name<span class="text-red-500">*</span></label>
+          <label class="text-gray-500"
+            >Name<span class="text-red-500">*</span></label
+          >
           <input
             :class="inputClass"
             v-model="state.name"
             type="text"
             placeholder="e.g. Tariff: Eid parking"
           />
-          <ErrorMessage :errors="validator.name.$errors" />
+          <!-- <ErrorMessage :errors="validator.name.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500">Place</label>
@@ -155,7 +176,7 @@ const inputClass =
             </option>
             <!-- Add more options as needed -->
           </select>
-          <ErrorMessage :errors="validator.place.$errors" />
+          <!-- <ErrorMessage :errors="validator.place.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500">Category</label>
@@ -176,11 +197,13 @@ const inputClass =
             </option>
             <!-- Add more options as needed -->
           </select>
-          <ErrorMessage :errors="validator.category.$errors" />
+          <!-- <ErrorMessage :errors="validator.category.$errors" /> -->
         </div>
-        
+
         <div class="grid gap-2">
-          <label class="text-gray-500">Start date<span class="text-red-500">*</span></label>
+          <label class="text-gray-500"
+            >Start date<span class="text-red-500">*</span></label
+          >
           <input
             :class="inputClass"
             v-model="state.startDate"
@@ -188,7 +211,7 @@ const inputClass =
             :min="getTodayDate()"
             placeholder="e.g. 20/01/2024"
           />
-          <ErrorMessage :errors="validator.startDate.$errors" />
+          <!-- <ErrorMessage :errors="validator.startDate.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500">End date</label>
@@ -199,9 +222,79 @@ const inputClass =
             :min="getTodayDate()"
             placeholder="e.g. 20/12/2024"
           />
-          <ErrorMessage :errors="validator.endDate.$errors" />
+          <!-- <ErrorMessage :errors="validator.endDate.$errors" /> -->
+        </div>
+        <div class="grid gap-2">
+          <label class="text-gray-500">Payment rate type</label>
+          <select
+            class="focus:outline-none bg-none"
+            :class="inputClass"
+            style="background: none"
+            name="place"
+            v-model="state.paymentRateType"
+          >
+            <option value="half_hourly">Half-hourly</option>
+            <option value="hourly">Hourly</option>
+          </select>
         </div>
       </section>
+      <section>
+        <div class="grid gap-2">
+          <div
+            class="flex justify-between items-end gap-4"
+            v-for="(singleRate, index) in state.paymentRates"
+            :key="index"
+          >
+            <div class="grid gap-2 w-full">
+              <label>
+                <span v-if="state.paymentRates.length == 1">
+                  {{
+                    state.paymentRateType == "half_hourly"
+                      ? "Each half hour"
+                      : "Each hour"
+                  }}
+                  rate
+                </span>
+                <span v-else>
+                  {{ index == 0 ? "First" : "Next" }}
+                  {{
+                    state.paymentRateType == "half_hourly"
+                      ? "half hour"
+                      : "hour"
+                  }}
+                  rate
+                </span>
+                <span class="text-red-500">*</span>
+              </label>
+              <input
+                :class="inputClass"
+                v-model="singleRate.rate"
+                type="number"
+                placeholder="20.00 taka"
+              />
+            </div>
+            <div>
+              <button
+                v-if="index != 0"
+                @click="removePaymentRate(index)"
+                class="bg-red-500 text-white px-2 py-2 rounded-md"
+              >
+                Delete
+              </button>
+              <button
+                v-else
+                type="button"
+                @click="addNewPaymentRate"
+                class="bg-indigo-600 text-white px-2 py-2 rounded-md"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <Error :error="serverErrors" />
+      <ClientErrors :errors="validator.$errors" />
       <section>
         <div class="flex justify-end gap-2">
           <button
