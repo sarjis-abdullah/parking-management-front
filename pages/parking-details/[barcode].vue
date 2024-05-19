@@ -125,7 +125,7 @@ const route = useRoute();
 const barcode = route.params.barcode;
 
 const searchQuery = computed(() => {
-  return `?barcode=${barcode}&include=p.slot,p.category,p.place`;
+  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.vehicle`;
 });
 
 const barcodeImage = ref("");
@@ -136,14 +136,15 @@ const loadData = async () => {
     if (data?.length) {
       list.value = data.map((item) => {
         return {
-          "Vehicle Number": item.vehicle_no,
+          "Vehicle Number": item.vehicle?.number,
           Place: item.place?.name,
           Category: item.category?.name,
           Floor: item.floor?.name,
           Slot: item.slot?.name,
-          "Driver Name": item.driver_name,
-          "driver Mobile": item.driver_mobile,
+          "Driver Name": item.vehicle?.driver_name,
+          "driver Mobile": item.vehicle?.driver_mobile,
           "In-Time": item.in_time,
+          "Status": item.vehicle?.status,
         };
       });
       barcodeImage.value = data[0].barcode_image;

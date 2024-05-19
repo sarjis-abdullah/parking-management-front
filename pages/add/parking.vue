@@ -13,6 +13,7 @@ import { CategoryService } from "~/services/CategoryService";
 import { FloorService } from "~/services/FloorService";
 import { useDebounce } from "@/hooks/useDebounce";
 import { TariffService } from "~/services/TariffService";
+import { VehicleService } from "~/services/VehicleService";
 
 definePageMeta({
   layout: "auth-layout",
@@ -62,7 +63,6 @@ const handleReset = async () => {
   }
   selectedSlot.value = null;
   // formRef.value?.reset();
-  console.log("handleReset");
 };
 const parkingData = computed(() => {
   return {
@@ -81,22 +81,13 @@ const oldParkingId = ref(null);
 const postItem = async () => {
   try {
     loading.value = true;
-    let response = null;
-    if (oldParkingId.value) {
-      response = await ParkingService.update(
-        oldParkingId.value,
-        parkingData.value
-      );
-    } else {
-      response = await ParkingService.create(parkingData.value);
-    }
+    const response = await ParkingService.create(parkingData.value);
     if (response?.data?.barcode) {
       router.push("/parking-checkin/" + response.data.barcode);
     }
     serverErrors.value = {};
     handleReset();
   } catch (error) {
-    console.log(12345, error);
     if (error.errors) {
       serverErrors.value = error.errors;
     }
@@ -193,7 +184,7 @@ const search = async () => {
   if (state.vehicleNumber) {
     query += `&query=${state.vehicleNumber}`;
   }
-  const result = await ParkingService.getAll(query);
+  const result = await VehicleService.getAll(query);
   if (result?.data?.length) {
     vehicleNames.value = result.data;
     // const data = result.data[0];
@@ -215,18 +206,13 @@ const search = async () => {
 };
 const checkSelection = () => {
   const data = vehicleNames.value.find(
-    (item) => item.vehicle_no == state.vehicleNumber
+    (item) => item.number == state.vehicleNumber
   );
   if (data) {
-    oldParkingId.value = data.id;
-    state.vehicleNumber = data.vehicle_no;
+    state.vehicleNumber = data.number;
     state.driverName = data.driver_name;
     state.driverMobile = data.driver_mobile;
-    // categories.value.push(data.category);
     state.category = data.category_id;
-    console.log("Option selected from list:", state.vehicleNumber);
-  } else {
-    console.log("Typed new value:", state.vehicleNumber);
   }
 };
 const debouncedSearch = useDebounce(search, 500);
@@ -270,7 +256,7 @@ const inputClass =
             <option
               v-for="item in vehicleNames"
               :key="item.id"
-              :value="item.vehicle_no"
+              :value="item.number"
             ></option>
           </datalist>
 

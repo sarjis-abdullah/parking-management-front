@@ -228,7 +228,7 @@ const route = useRoute();
 const barcode = route.params.barcode;
 
 const searchQuery = computed(() => {
-  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.tariff,t.parking_rates`;
+  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.vehicle,p.tariff,t.parking_rates`;
 });
 const durationInMinutes = ref(0);
 const totalCost = computed(() => {
@@ -321,15 +321,16 @@ const loadData = async () => {
         const seconds = duration.seconds();
         const totalTime = `${hours}h ${minutes}m`;
         return {
-          "Vehicle Number": item.vehicle_no,
+          "Vehicle Number": item.vehicle?.number,
           Place: item.place?.name,
           Category: item.category?.name,
           Floor: item.floor?.name,
           Slot: item.slot?.name,
-          "Driver Name": item.driver_name,
-          "driver Mobile": item.driver_mobile,
-          "Check-in-Time": formatDate(item.in_time),
+          "Driver Name": item.vehicle?.driver_name,
+          "driver Mobile": item.vehicle?.driver_mobile,
+          "Check-in-Time": item.in_time ? formatDate(item.in_time) : '--',
           "Check-out-Time": formatDate(currentTime.value),
+          "Status": item.vehicle?.status,
           Duration: totalTime,
           "Payble Amount": totalCost.value,
         };
