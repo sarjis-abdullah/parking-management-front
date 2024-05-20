@@ -1,15 +1,17 @@
 <template>
-  <div class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
-    <div class="mt-8 flow-root">
+  <div class="rounded-lg bg-slate-[#A8A8A8] shadow-lg">
+    <div class="flow-root">
       <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+        <div class="inline-block min-w-full align-middle sm:px-6 lg:px-8">
           <div v-if="!loadingError && !isLoading">
-            <div v-if="list && list?.length > 0" class="flex justify-center">
-              <div style="max-width: 40rem; margin: auto">
-                <div ref="emailTemplate" style="max-width: 40rem; margin: auto">
+            <div
+              v-if="list && list?.length > 0"
+              class="grid grid-cols-2 justify-center gap-4"
+            >
+              <div>
+                <div ref="emailTemplate">
                   <div
                     style="
-                      margin-top: 1rem;
                       border-radius: 0.5rem;
                       background-color: #f3f4f6;
                       padding: 0.75rem 1rem;
@@ -169,11 +171,14 @@
                   </button> -->
                   <button
                     @click="checkoutAndprint"
-                    class="mt-6 w- rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                    class="mt-6 w-full rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                   >
                     Checkout
                   </button>
                 </div>
+              </div>
+              <div>
+                <AddMembership :vehicleId="vehicleId"/>
               </div>
             </div>
           </div>
@@ -185,7 +190,10 @@
             Loading error
             <!-- <ListLoadingError :message="'cant_load_orders_list'" /> -->
           </div>
-          <div v-else-if="serverErrors  && Object.keys(serverErrors)?.length" class="text-center py-10">
+          <div
+            v-else-if="serverErrors && Object.keys(serverErrors)?.length"
+            class="text-center py-10"
+          >
             <Errors :error="serverErrors" />
           </div>
         </div>
@@ -198,12 +206,13 @@ import { onMounted, nextTick, computed, ref } from "vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
+import AddMembership from "@/components/membership/AddMembership.vue";
 import Errors from "@/components/common/Error.vue";
 import { ParkingService } from "~/services/ParkingService";
 import { formatDate } from "@/utils/index";
 import moment from "moment";
 definePageMeta({
-  layout:"auth-layout",
+  layout: "auth-layout",
 });
 const inputClass =
   "relative appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
@@ -274,9 +283,14 @@ const returnableAmount = computed(() => {
 });
 const paidAmount = computed(() => {
   if (totalCost.value == receivedAmount.value) {
-    return totalCost.value
+    return totalCost.value;
   }
-  if (totalCost.value && receivedAmount.value && returnableAmount.value && returnableAmount.value > 0) {
+  if (
+    totalCost.value &&
+    receivedAmount.value &&
+    returnableAmount.value &&
+    returnableAmount.value > 0
+  ) {
     return parseFloat(receivedAmount.value) - returnableAmount.value;
   }
   return 0;
@@ -286,7 +300,7 @@ const parking_rates = ref([]);
 class CustomError extends Error {
   constructor(message, errors) {
     super(message);
-    this.name = 'CustomError';
+    this.name = "CustomError";
     this.errors = errors;
   }
 
@@ -294,6 +308,7 @@ class CustomError extends Error {
     return `${this.name} [${this.code}]: ${this.message}`;
   }
 }
+const vehicleId = ref(null)
 const loadData = async () => {
   try {
     isLoading.value = true;
@@ -302,7 +317,7 @@ const loadData = async () => {
       const result = data[0];
       barcodeImage.value = result.barcode_image;
       parkingId.value = result.id;
-      console.log(result);
+      vehicleId.value = result?.vehicle?.id;
 
       const differenceInMillis = currentTime.value.diff(result.in_time);
 
@@ -328,9 +343,9 @@ const loadData = async () => {
           Slot: item.slot?.name,
           "Driver Name": item.vehicle?.driver_name,
           "driver Mobile": item.vehicle?.driver_mobile,
-          "Check-in-Time": item.in_time ? formatDate(item.in_time) : '--',
+          "Check-in-Time": item.in_time ? formatDate(item.in_time) : "--",
           "Check-out-Time": formatDate(currentTime.value),
-          "Status": item.vehicle?.status,
+          Status: item.vehicle?.status,
           Duration: totalTime,
           "Payble Amount": totalCost.value,
         };
@@ -339,8 +354,8 @@ const loadData = async () => {
       serverErrors.value = {};
     } else {
       const errors = {
-        'no_data': [`"No data available for this barcode"`]
-      }
+        no_data: [`"No data available for this barcode"`],
+      };
       throw new CustomError("Data error", errors);
     }
 
@@ -408,11 +423,12 @@ const checkoutAndprint = async () => {
     if (paidAmount.value > 0) {
       await ParkingService.handleCheckout(parkingId.value, parkingData.value);
       print();
+    } else {
+      const errors = {
+        paidAmount: [`Please pay ${totalCost.value} taka`],
+      };
+      throw new CustomError("Validation error", errors);
     }
-    const errors = {
-        'paidAmount': [`Please pay ${totalCost.value} taka`]
-      }
-    throw new CustomError("Validation error", errors);
   } catch (error) {
     if (error.errors) {
       serverErrors.value = error.errors;
