@@ -6,7 +6,7 @@
           <div v-if="!loadingError && !isLoading">
             <div
               v-if="list && list?.length > 0"
-              class="grid grid-cols-2 justify-center gap-4"
+              class="grid md:grid-cols-3 justify-center gap-4"
             >
               <div>
                 <div ref="emailTemplate">
@@ -237,7 +237,7 @@ const route = useRoute();
 const barcode = route.params.barcode;
 
 const searchQuery = computed(() => {
-  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.vehicle,p.tariff,t.parking_rates`;
+  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.vehicle,v.membership,p.tariff,t.parking_rates`;
 });
 const durationInMinutes = ref(0);
 const totalCost = computed(() => {
@@ -335,6 +335,19 @@ const loadData = async () => {
         const minutes = duration.minutes();
         const seconds = duration.seconds();
         const totalTime = `${hours}h ${minutes}m`;
+        let discount = 0
+        if (item?.vehicle?.membership) {
+          const {discount_type, discount_amount} = item.vehicle.membership
+          if (discount_type == 'percentage') {
+            if (discount_amount) {
+              discount = totalCost.value * parseFloat(discount_amount)/100
+            }
+          }else if (discount_type == 'flat') {
+            discount = parseFloat(discount_amount) ?? 0
+          } else {
+            discount = totalCost.value
+          }
+        }
         return {
           "Vehicle Number": item.vehicle?.number,
           Place: item.place?.name,
@@ -347,7 +360,9 @@ const loadData = async () => {
           "Check-out-Time": formatDate(currentTime.value),
           Status: item.vehicle?.status,
           Duration: totalTime,
-          "Payble Amount": totalCost.value,
+          "Total Amount": totalCost.value,
+          "Discount Applied": Number(discount).toFixed(2),
+          "Subtotal": Number(totalCost.value - discount).toFixed(2),
         };
       });
 
