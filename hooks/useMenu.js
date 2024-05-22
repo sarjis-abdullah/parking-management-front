@@ -107,10 +107,10 @@ export const useMenu = () => {
         icon: DocumentChartBarIcon,
         show: false,
         children: [
-          { name: "parking", href: "/reports/parking", icon: ParkingIcon },
+          { name: "parking", href: "/parking-reports", icon: ParkingIcon },
           {
             name: "transaction",
-            href: "/reports/transaction",
+            href: "/transaction-reports",
             icon: BanknotesIcon,
           },
         ],
