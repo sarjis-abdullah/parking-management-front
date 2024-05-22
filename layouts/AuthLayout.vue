@@ -182,22 +182,20 @@
         </div>
         <nav class="flex flex-1 flex-col">
           <ul role="list" class="flex flex-1 flex-col gap-y-7">
-            <li>
-              <ul role="list" class="-mx-2 space-y-1">
-                <SingleNav v-for="item in navigation" :key="item.name" :item="item"></SingleNav>
-              </ul>
-            </li>
-            <li class="mt-auto">
-              <a
-                href="#"
-                class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-              >
-                <Cog6ToothIcon
-                  class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
-                  aria-hidden="true"
-                />
-                Settings
+            <li v-for="(item, index) in state.menuItems" :key="index" class="cursor-pointer">
+              <a @click.prevent="toggleMenu(index)" class="flex gap-2">
+                
+                <!-- Use the icon dynamically -->
+                <component class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600" :is="item.icon"></component>
+                <span>{{ item.name }}</span>
               </a>
+              <ul v-if="item.show && item.children" class="ml-8 mt-4">
+                <li v-for="(child, idx) in item.children" :key="idx" class="flex gap-2">
+                  <component v-if="child.icon" class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600" :is="child.icon"></component>
+                  
+                  <nuxt-link :to="child.href">{{ child.name }}</nuxt-link>
+                </li>
+              </ul>
             </li>
           </ul>
         </nav>
@@ -309,7 +307,7 @@
 
       <main class="py-10">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <NuxtPage/>
+          <NuxtPage />
         </div>
       </main>
     </div>
@@ -318,7 +316,7 @@
 
 <script setup>
 import { ref } from "vue";
-import SingleNav from '@/components/SingleNav.vue'
+import SingleNav from "@/components/SingleNav.vue";
 import {
   Dialog,
   DialogPanel,
@@ -345,8 +343,18 @@ import { ChevronDownIcon, MagnifyingGlassIcon } from "@heroicons/vue/20/solid";
 const route = useRoute();
 const inputClass =
   "relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
+import { useMenu } from "~/hooks/useMenu";
+const { state, toggleMenu, setActiveMenu } = useMenu();
+onMounted(() => {
+  setActiveMenu();
+});
 
-
+watch(
+  () => useRoute().fullPath,
+  () => {
+    setActiveMenu();
+  }
+);
 const rawNavigation = ref([
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon, show: false },
   {
@@ -419,7 +427,16 @@ const rawNavigation = ref([
       { name: "List", href: "/parking" },
     ],
   },
-  { name: "Reports", href: "/reports", icon: ChartPieIcon, show: false },
+  {
+    name: "Reports",
+    href: "/reports",
+    icon: ChartPieIcon,
+    show: false,
+    children: [
+      { name: "parking", href: "/reports/parking" },
+      { name: "transaction", href: "reports/transaction" },
+    ],
+  },
 ]);
 const navigation = computed(() => {
   return rawNavigation.value.map((item) => {
@@ -466,17 +483,17 @@ const showChild = (key) => {
     };
   });
 };
-const barcode = ref('')
+const barcode = ref("");
 const checkout = () => {
   // window.location.href='/parking-checkout/'
   console.log(barcode.value, 12345);
 
-  const router = useRouter()
+  const router = useRouter();
   router.push(`/parking-checkout/${barcode.value}`);
 };
 
 const sidebarOpen = ref(false);
 onMounted(() => {
-  console.log(123, 'auth layout');
-})
+  console.log(123, "auth layout");
+});
 </script>

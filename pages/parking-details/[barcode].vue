@@ -103,7 +103,6 @@
 </template>
 <script setup>
 import { onMounted, nextTick } from "vue";
-import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { ParkingService } from "~/services/ParkingService";
