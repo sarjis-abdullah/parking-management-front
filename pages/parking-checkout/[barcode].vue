@@ -1,7 +1,7 @@
 <template>
   <div class="rounded-lg bg-slate-[#A8A8A8] shadow-lg">
     <div class="flow-root">
-      <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div class="-mx-4 -mt-2 mb-12 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full align-middle sm:px-6 lg:px-8">
           <div v-if="!loadingError && !isLoading">
             <div
@@ -161,24 +161,65 @@
                   </div>
                 </div>
                 <div class="flex justify-end gap-2">
-                  <!-- <button
-                    data-v-61884e8b=""
-                    @click="print"
-                    type="submit"
-                    class="mt-6 w- rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                  <div
+                    v-if="vehicle?.status == 'checked_out'"
+                    class="mt-6 w-full rounded-md border border-transparent bg-yellow-600 px-4 py-3 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                   >
-                    Print
-                  </button> -->
-                  <button
+                    Vehicle is already checked-out
+                  </div>
+                  <!-- <button
+                    v-else
+                    id="mybutton"
                     @click="checkoutAndprint"
-                    class="mt-6 w-full rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                    class=" mt-6 w-full rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                   >
                     Checkout
-                  </button>
+                  </button> -->
+                  <div v-else id="mybutton">
+                    <button
+                      
+                      @click="checkoutAndprint"
+                      class="rounded-md border border-transparent px-3 py-2 bg-green-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                    >
+                      Checkout
+                    </button>
+                  </div>
+                  <!-- <div id="mybutton">
+                    <button class="feedback">Feedback</button>
+                  </div> -->
                 </div>
               </div>
-              <div>
-                <AddMembership :vehicleId="vehicleId"/>
+              <div v-if="vehicle?.membership?.id">
+                <ul class="shadow-lg">
+                  <li
+                    v-if="vehicle.membership?.name"
+                    class="membership-item hover:bg-slate-100"
+                  >
+                    <span>Name:</span>
+                    <span>{{ vehicle.membership.name }}</span>
+                  </li>
+                  <li
+                    v-if="vehicle.membership?.contact_number"
+                    class="membership-item hover:bg-slate-100"
+                  >
+                    <span>Contact number:</span>
+                    <span>{{ vehicle.membership.contact_number }}</span>
+                  </li>
+                  <li
+                    v-if="vehicle.membership?.discount_type"
+                    class="membership-item hover:bg-slate-100"
+                  >
+                    <span>Discount type:</span>
+                    <span>{{ vehicle.membership.discount_type }}</span>
+                  </li>
+                  <li class="membership-item hover:bg-slate-100">
+                    <span>Discount:</span>
+                    <span>{{ vehicle.membership.discount_amount ?? 0 }}</span>
+                  </li>
+                </ul>
+              </div>
+              <div v-else>
+                <AddMembership :vehicleId="vehicleId" />
               </div>
             </div>
           </div>
@@ -308,7 +349,8 @@ class CustomError extends Error {
     return `${this.name} [${this.code}]: ${this.message}`;
   }
 }
-const vehicleId = ref(null)
+const vehicleId = ref(null);
+const vehicle = ref(null);
 const loadData = async () => {
   try {
     isLoading.value = true;
@@ -318,6 +360,7 @@ const loadData = async () => {
       barcodeImage.value = result.barcode_image;
       parkingId.value = result.id;
       vehicleId.value = result?.vehicle?.id;
+      vehicle.value = result?.vehicle;
 
       const differenceInMillis = currentTime.value.diff(result.in_time);
 
@@ -335,17 +378,17 @@ const loadData = async () => {
         const minutes = duration.minutes();
         const seconds = duration.seconds();
         const totalTime = `${hours}h ${minutes}m`;
-        let discount = 0
+        let discount = 0;
         if (item?.vehicle?.membership) {
-          const {discount_type, discount_amount} = item.vehicle.membership
-          if (discount_type == 'percentage') {
+          const { discount_type, discount_amount } = item.vehicle.membership;
+          if (discount_type == "percentage") {
             if (discount_amount) {
-              discount = totalCost.value * parseFloat(discount_amount)/100
+              discount = (totalCost.value * parseFloat(discount_amount)) / 100;
             }
-          }else if (discount_type == 'flat') {
-            discount = parseFloat(discount_amount) ?? 0
+          } else if (discount_type == "flat") {
+            discount = parseFloat(discount_amount) ?? 0;
           } else {
-            discount = totalCost.value
+            discount = totalCost.value;
           }
         }
         return {
@@ -362,7 +405,7 @@ const loadData = async () => {
           Duration: totalTime,
           "Total Amount": totalCost.value,
           "Discount Applied": Number(discount).toFixed(2),
-          "Subtotal": Number(totalCost.value - discount).toFixed(2),
+          Subtotal: Number(totalCost.value - discount).toFixed(2),
         };
       });
 
@@ -467,5 +510,24 @@ onMounted(() => {
   .no-print {
     display: none !important;
   }
+}
+.membership-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+}
+.feedback {
+  background-color: #31b0d5;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  border-color: #46b8da;
+}
+
+#mybutton {
+  position: fixed;
+  bottom: 6%;
+  right: 50%;
+  left: 50%;
 }
 </style>
