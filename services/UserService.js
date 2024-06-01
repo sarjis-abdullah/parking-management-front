@@ -16,4 +16,11 @@ export class UserService {
       throw err;
     }
   }
+  static async delete(id) {
+    try {
+      return await HttpRequester.delete('user/' + id);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

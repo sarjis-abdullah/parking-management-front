@@ -33,7 +33,7 @@ export class HttpRequester extends BaseHttpRequester {
       });
       if (response.ok) {
         const res = await response.json();
-        this.handleMessage(url + " created successfully.");
+        this.handleMessage("Entry created successfully.");
         return res;
       } else {
         const responseBody = await response.text(); // Get response body as text
@@ -60,7 +60,7 @@ export class HttpRequester extends BaseHttpRequester {
       });
       if (response.ok) {
         const res = await response.json();
-        this.handleMessage(url + " updated successfully.");
+        this.handleMessage("Entry updated successfully.");
         return res;
       } else {
         const responseBody = await response.text(); // Get response body as text
@@ -81,10 +81,10 @@ export class HttpRequester extends BaseHttpRequester {
   static async delete(url) {
     const response = await fetch(this.BASE_URL + url, {
       method: "DELETE",
-      headers: this.getHeaders(),
+      ...this.getHeaders(),
     });
     if (response.ok) {
-      this.handleMessage(url + " deleted successfully.");
+      this.handleMessage("Entry deleted successfully.");
       return true;
     } else {
       throw await this.handleError(response);

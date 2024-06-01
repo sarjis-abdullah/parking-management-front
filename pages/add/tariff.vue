@@ -104,7 +104,6 @@ const postItem = async () => {
     handleReset();
     state.paymentRateType = HALF_HOURLY
   } catch (error) {
-    console.log(error, "error");
     serverErrors.value = error.errors;
   } finally {
     loading.value = false;
