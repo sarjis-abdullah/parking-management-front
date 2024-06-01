@@ -16,4 +16,11 @@ export class CategoryService {
       throw err;
     }
   }
+  static async delete(id) {
+    try {
+      return await HttpRequester.delete('category/' + id);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

@@ -35,7 +35,7 @@
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Descripton
+                    Remarks
                   </th>
                   <th
                     scope="col"
@@ -52,19 +52,9 @@
                 <tr v-for="singleData in list" :key="singleData.id">
                   <td class="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
                     <div class="flex items-center">
-                      <div class="h-10 w-10 flex-shrink-0">
-                        <img
-                          class="h-10 w-10 rounded-full"
-                          src="https://cdn-staging.inaia.cloud/icons/gold-delivery.png"
-                          alt=""
-                        />
-                      </div>
-                      <div class="ml-4">
+                      <div class="">
                         <div class="font-medium text-gray-900">
                           {{ singleData.name }}
-                        </div>
-                        <div class="mt-1 text-gray-500">
-                          <!-- {{ $d(getExecutionDate(order)) }} -->
                         </div>
                       </div>
                     </div>
@@ -78,7 +68,11 @@
                   <td
                     class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
                   >
-                    ...
+                    <TrashIcon
+                      @click="deleteRecord(singleData.id)"
+                      class="h-5 w-5 mx-auto"
+                      aria-hidden="true"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -100,6 +94,7 @@
         </div>
       </div>
     </div>
+    <Loading v-if="isLoading || isDeleting" />
     <Pagination
       class="mt-6"
       :perPage="perPage"
@@ -112,10 +107,11 @@
 </template>
 <script setup>
 import { onMounted } from "vue";
-import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { FloorService } from "@/services/FloorService.js";
+import { TrashIcon } from "@heroicons/vue/20/solid";
+import Loading from "@/components/common/Loading.vue";
 
 definePageMeta({
   layout: "auth-layout",
@@ -151,14 +147,24 @@ const loadData = async () => {
     serverErrors.value = {};
     // handleReset();
   } catch (error) {
-    console.log(error);
-    if (error.response?._data?.errors) {
-      serverErrors.value = error.response._data.errors;
-    } else if (error.response?.data?.errors) {
-      serverErrors.value = error.response?.data.errors;
-    }
+    serverErrors.value = error.errors;
   } finally {
     isLoading.value = false;
+  }
+};
+const isDeleting = ref(false);
+const deleteRecord = async (id) => {
+  try {
+    isDeleting.value = true;
+    const res = await FloorService.delete(id);
+    list.value = list.value.filter((item) => item.id != id);
+
+    serverErrors.value = {};
+    // handleReset();
+  } catch (error) {
+    serverErrors.value = error.errors;
+  } finally {
+    isDeleting.value = false;
   }
 };
 

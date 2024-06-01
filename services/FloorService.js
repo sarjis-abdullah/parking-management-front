@@ -16,4 +16,11 @@ export class FloorService {
       throw err;
     }
   }
+  static async delete(id) {
+    try {
+      return await HttpRequester.delete('floor/' + id);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

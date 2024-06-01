@@ -70,11 +70,6 @@
                     <td class="whitespace-nowrap px-3 py-5 text-sm">
                       <span class="text-gray-900">{{ user.description }}</span>
                     </td>
-                    <!-- <td
-                      class="whitespace-nowrap px-3 py-5 text-sm text-gray-500"
-                    >
-                      {{ user.status }}
-                    </td> -->
                     <td
                     class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0 "
                   >
