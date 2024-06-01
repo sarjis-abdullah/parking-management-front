@@ -1,6 +1,6 @@
 // composables/useMenu.js
 
-import { reactive } from "vue";
+import { reactive, shallowRef } from "vue";
 import { useRouter } from "vue-router";
 import {
   Bars3Icon,
@@ -53,7 +53,7 @@ export const useMenu = () => {
       {
         name: "Category",
         href: "/category",
-        icon: CategoryIcon,
+        icon: shallowRef(CategoryIcon),
         svg: true,
         show: false,
         children: [
@@ -64,7 +64,7 @@ export const useMenu = () => {
       {
         name: "Floor",
         href: "/floor",
-        icon: FloorIcon,
+        icon: shallowRef(FloorIcon),
         show: false,
         children: [
           { name: "Add", href: "/add/floor", icon: PlusIcon },
@@ -74,7 +74,7 @@ export const useMenu = () => {
       {
         name: "Tariff",
         href: "/tariff",
-        icon: TariffIcon,
+        icon: shallowRef(TariffIcon),
         show: false,
         children: [
           { name: "Add", href: "/add/tariff", icon: PlusIcon },
@@ -84,7 +84,7 @@ export const useMenu = () => {
       {
         name: "Slot setup",
         href: "/slot",
-        icon: SlotIcon,
+        icon: shallowRef(SlotIcon),
         show: false,
         children: [
           { name: "Add", href: "/add/slot", icon: PlusIcon },
@@ -94,7 +94,7 @@ export const useMenu = () => {
       {
         name: "Parking",
         href: "/parking",
-        icon: ParkingIcon,
+        icon: shallowRef(ParkingIcon),
         show: false,
         children: [
           { name: "Add", href: "/add/parking", icon: PlusIcon },
@@ -107,7 +107,7 @@ export const useMenu = () => {
         icon: DocumentChartBarIcon,
         show: false,
         children: [
-          { name: "parking", href: "/parking-reports", icon: ParkingIcon },
+          { name: "parking", href: "/parking-reports", icon: shallowRef(ParkingIcon) },
           {
             name: "transaction",
             href: "/transaction-reports",
