@@ -298,6 +298,7 @@ const checkSelection = () => {
   const data = vehicleList.value.find(
     (item) => item.number == state.vehicleNumber
   );
+  alert(data.id)
   if (data) {
     vehicleId = data.id;
   }
@@ -362,8 +363,8 @@ watch(
 );
 
 watch(
-  [startDate, endDate],
-  ([newStartDate, newEndDate], [oldStartDate, oldEndDate]) => {
+  [startDate, endDate, vehicleId],
+  ([newStartDate, newEndDate, newVehicleId], [oldStartDate, oldEndDate, oldVehicleId]) => {
     const newQuery = { ...route.query };
 
     if (newStartDate !== oldStartDate) {
@@ -379,6 +380,13 @@ watch(
         newQuery.end_date = newEndDate;
       } else {
         delete newQuery.end_date;
+      }
+    }
+    if (newVehicleId !== oldVehicleId) {
+      if (newEndDate) {
+        newQuery.vehicle_id = newVehicleId;
+      } else {
+        delete newQuery.vehicle_id;
       }
     }
 
