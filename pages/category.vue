@@ -82,6 +82,7 @@
         </div>
       </div>
     </div>
+    <Error :error="serverErrors" />
     <Loading v-if="isLoading || isDeleting" />
     <Pagination
       class="mt-6"
@@ -101,6 +102,7 @@ import Pagination from "@/components/common/Pagination.vue";
 import { CategoryService } from "@/services/CategoryService.js";
 import { TrashIcon } from "@heroicons/vue/20/solid";
 import Loading from "@/components/common/Loading.vue";
+import Error from "@/components/common/Error.vue";
 
 definePageMeta({
   layout: "auth-layout",

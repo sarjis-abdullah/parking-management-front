@@ -141,7 +141,7 @@ const inputClass =
 <template>
   <section class="">
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
-      <section class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <section class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div class="grid gap-2">
           <label class="text-gray-500"
             >Name<span class="text-red-500">*</span></label
@@ -153,7 +153,7 @@ const inputClass =
             placeholder="e.g. Tariff: Eid parking"
           />
         </div>
-        <div class="grid gap-2">
+        <!-- <div class="grid gap-2">
           <label class="text-gray-500">Place</label>
           <select
             class="focus:outline-none bg-none"
@@ -169,8 +169,8 @@ const inputClass =
               {{ place.name }}
             </option>
           </select>
-        </div>
-        <div class="grid gap-2">
+        </div> -->
+        <!-- <div class="grid gap-2">
           <label class="text-gray-500">Category</label>
           <select
             class="focus:outline-none bg-none"
@@ -188,7 +188,7 @@ const inputClass =
               {{ category.name }}
             </option>
           </select>
-        </div>
+        </div> -->
 
         <div class="grid gap-2">
           <label class="text-gray-500"

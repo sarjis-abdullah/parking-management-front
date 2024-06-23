@@ -16,4 +16,11 @@ export class TariffService {
       throw err;
     }
   }
+  static async delete(id) {
+    try {
+      return await HttpRequester.delete('tariff/' + id);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

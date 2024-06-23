@@ -35,13 +35,19 @@
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Descripton
+                    Start date
                   </th>
                   <th
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Place
+                    End date
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
+                    Status
                   </th>
                   <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                     Action
@@ -52,13 +58,7 @@
                 <tr v-for="singleData in list" :key="singleData.id">
                   <td class="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
                     <div class="flex items-center">
-                      <div class="h-10 w-10 flex-shrink-0">
-                        <img
-                          class="h-10 w-10 rounded-full"
-                          src="https://cdn-staging.inaia.cloud/icons/gold-delivery.png"
-                          alt=""
-                        />
-                      </div>
+                      
                       <div class="ml-4">
                         <div class="font-medium text-gray-900">
                           {{ singleData.name }}
@@ -70,15 +70,22 @@
                     </div>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
-                    <span class="text-gray-900">{{ singleData.description }}</span>
+                    <span class="text-gray-900">{{ singleData?.start_date ? formatDate(singleData.start_date) : '--' }}</span>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                    {{ singleData?.place?.name }}
+                    {{ singleData?.end_date ? formatDate(singleData.end_date) : '--' }}
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    {{ singleData.default ? 'Default' : '' }}
                   </td>
                   <td
                     class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
                   >
-                    ...
+                    <TrashIcon
+                      @click="deleteRecord(singleData.id)"
+                      class="h-5 w-5 mx-auto"
+                      aria-hidden="true"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -100,6 +107,8 @@
         </div>
       </div>
     </div>
+    <Error :error="serverErrors" />
+      <!-- <ClientErrors :errors="validator?.$errors" /> -->
     <Pagination
       class="mt-6"
       :perPage="perPage"
@@ -108,14 +117,19 @@
       :totalPerPage="totalPerPage"
       @onChange="onPageChanged"
     />
+    <Loading v-if="isLoading || isDeleting" />
   </div>
 </template>
 <script setup>
 import { onMounted } from "vue";
-import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { TariffService } from "@/services/TariffService.js";
+import { formatDate } from "@/utils/index";
+import { TrashIcon } from "@heroicons/vue/20/solid";
+import Loading from "@/components/common/Loading.vue";
+import ClientErrors from "@/components/common/ClientErrors.vue";
+import Error from "@/components/common/Error.vue";
 
 definePageMeta({
   layout: "auth-layout",
@@ -150,14 +164,25 @@ const loadData = async () => {
     serverErrors.value = {};
     // handleReset();
   } catch (error) {
-    console.log(error);
-    if (error.response?._data?.errors) {
-      serverErrors.value = error.response._data.errors;
-    } else if (error.response?.data?.errors) {
-      serverErrors.value = error.response?.data.errors;
-    }
+    serverErrors.value = error.errors;
   } finally {
     isLoading.value = false;
+  }
+};
+
+const isDeleting = ref(false);
+const deleteRecord = async (id) => {
+  try {
+    isDeleting.value = true;
+    const res = await TariffService.delete(id);
+    list.value = list.value.filter((item) => item.id != id);
+
+    serverErrors.value = {};
+    // handleReset();
+  } catch (error) {
+    serverErrors.value = error.errors;
+  } finally {
+    isDeleting.value = false;
   }
 };
 

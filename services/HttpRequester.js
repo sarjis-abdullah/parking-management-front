@@ -79,15 +79,29 @@ export class HttpRequester extends BaseHttpRequester {
     }
   }
   static async delete(url) {
-    const response = await fetch(this.BASE_URL + url, {
-      method: "DELETE",
-      ...this.getHeaders(),
-    });
-    if (response.ok) {
-      this.handleMessage("Entry deleted successfully.");
-      return true;
-    } else {
-      throw await this.handleError(response);
+    try {
+      const response = await fetch(this.BASE_URL + url, {
+        method: "DELETE",
+        ...this.getHeaders(),
+      });
+      if (response.ok) {
+        const res = await response.json();
+        this.handleMessage("Entry deleted successfully.");
+        return res;
+      } else {
+        const responseBody = await response.text(); // Get response body as text
+        const error = new Error(response.statusText);
+        error.response = {
+          ...response,
+          body: responseBody, // Attach response body to the error object
+        };
+        this.handleError(response);
+        throw error;
+      }
+    } catch (error) {
+      if (error?.response?.body) {
+        return Promise.reject(JSON.parse(error.response.body));
+      }
     }
   }
   static handleMessage(msg, success = true) {
@@ -106,10 +120,10 @@ export class HttpRequester extends BaseHttpRequester {
     let error = "";
     if (status == 401) {
       this.handleMessage("Un-authenticated!", false);
-      window.location.href = '/'
+      window.location.href = "/";
     } else if (status == 403) {
       this.handleMessage("Un-authorized", false);
-      window.location.href = '/'
+      window.location.href = "/";
     } else if (status == 422) {
       this.handleMessage("Bad input", false);
     } else if (status >= 400 && status < 500) {

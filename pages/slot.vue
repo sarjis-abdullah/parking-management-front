@@ -123,6 +123,7 @@
         </div>
       </div>
     </div>
+    <Error :error="serverErrors" />
     <Pagination
       class="mt-6"
       :perPage="perPage"
@@ -139,6 +140,7 @@ import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { SlotService } from "@/services/SlotService.js";
+import Error from "@/components/common/Error.vue";
 
 definePageMeta({
   layout: "auth-layout",
