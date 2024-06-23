@@ -70,10 +70,10 @@
                     </div>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
-                    <span class="text-gray-900">{{ singleData?.start_date ? formatDate(singleData.start_date) : '--' }}</span>
+                    <span class="text-gray-900">{{ singleData?.start_date ? formatDate(singleData.start_date, 'DD-MM-YYYY') : '--' }}</span>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                    {{ singleData?.end_date ? formatDate(singleData.end_date) : '--' }}
+                    {{ singleData?.end_date ? formatDate(singleData.end_date, 'DD-MM-YYYY') : '--' }}
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
                     {{ singleData.default ? 'Default' : '' }}
