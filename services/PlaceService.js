@@ -23,4 +23,11 @@ export class PlaceService {
       throw err;
     }
   }
+  static async put(id, data) {
+    try {
+      return await HttpRequester.put('place/' + id, data);
+    } catch (err) {
+      throw err;
+    }
+  }
 }
