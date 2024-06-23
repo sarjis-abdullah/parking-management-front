@@ -23,23 +23,34 @@
         <label class="text-gray-500"
           >Vehicle Number<span class="text-red-500">*</span></label
         >
-        <input
-          :class="inputClass"
-          v-model="vehicleNumber"
-          type="text"
-          @input="debouncedSearch"
-          @change="checkSelection"
-          placeholder="e.g. Ka-12345"
-          list="cityname"
-        />
-        <!-- <input type="text" name="city" list="cityname" /> -->
-        <datalist id="cityname">
-          <option
-            v-for="item in vehicleList"
-            :key="item.id"
-            :value="item.number"
-          ></option>
-        </datalist>
+        <div class="flex justify-between items-center gap-2">
+          <div class="w-full">
+            <input
+              :class="inputClass"
+              v-model="vehicleNumber"
+              type="text"
+              @input="debouncedSearch"
+              @change="checkSelection"
+              placeholder="e.g. Ka-12345"
+              list="cityname"
+            />
+            <!-- <input type="text" name="city" list="cityname" /> -->
+            <datalist id="cityname">
+              <option
+                v-for="item in vehicleList"
+                :key="item.id"
+                :value="item.number"
+              ></option>
+            </datalist>
+          </div>
+          <div v-if="vehicleId">
+            <XMarkIcon
+            @click="removeSelectedVehicleId"
+            class="h-6 w-6 shrink-0"
+            aria-hidden="true"
+          />
+          </div>
+        </div>
       </div>
     </section>
     <section class="flex justify-center gap-4 text-center mt-4">
@@ -258,6 +269,9 @@ import { formatDate } from "@/utils/index";
 import { VehicleService } from "~/services/VehicleService";
 import { useDebounce } from "~/hooks/useDebounce";
 import Loading from "@/components/common/Loading.vue";
+import {
+  XMarkIcon,
+} from "@heroicons/vue/24/outline";
 
 definePageMeta({
   layout: "auth-layout",
@@ -273,7 +287,16 @@ const transactions = ref([]);
 const isLoading = ref(false);
 
 function getQueryString(query) {
-  const params = new URLSearchParams(query);
+  const filteredQuery = {};
+
+  // Filter out null and undefined values
+  for (const key in query) {
+    if (query[key] !== null && query[key] !== undefined) {
+      filteredQuery[key] = query[key];
+    }
+  }
+
+  const params = new URLSearchParams(filteredQuery);
   return `?${params.toString()}`;
 }
 
@@ -296,10 +319,10 @@ const search = async () => {
 const vehicleId = ref(null);
 const checkSelection = () => {
   const data = vehicleList.value.find(
-    (item) => item.number == state.vehicleNumber
+    (item) => item.number == vehicleNumber.value
   );
   if (data) {
-    vehicleId = data.id;
+    vehicleId.value = data.id;
   }
 };
 const debouncedSearch = useDebounce(search, 500);
@@ -362,8 +385,11 @@ watch(
 );
 
 watch(
-  [startDate, endDate],
-  ([newStartDate, newEndDate], [oldStartDate, oldEndDate]) => {
+  [startDate, endDate, vehicleId],
+  (
+    [newStartDate, newEndDate, newVehicleId],
+    [oldStartDate, oldEndDate, oldVehicleId]
+  ) => {
     const newQuery = { ...route.query };
 
     if (newStartDate !== oldStartDate) {
@@ -379,6 +405,13 @@ watch(
         newQuery.end_date = newEndDate;
       } else {
         delete newQuery.end_date;
+      }
+    }
+    if (newVehicleId !== oldVehicleId) {
+      if (newVehicleId) {
+        newQuery.vehicle_id = newVehicleId;
+      } else {
+        delete newQuery.vehicle_id;
       }
     }
 
@@ -403,6 +436,19 @@ watch(
 //   },
 //   { deep: true, immediate: true }
 // );
+
+const removeSelectedVehicleId = () => {
+  
+  // let newQuery = {...route.query}
+  
+  // if (newQuery.vehicle_id) {
+  //   delete newQuery.vehicle_id
+  //   alert(111)
+  // }
+  vehicleId.value = null
+  vehicleNumber.value = ''
+  // router.push({ query: newQuery });
+}
 
 onMounted(() => {
   startDate.value = formatDate(moment().subtract(1, "month"), "YYYY-MM-DD");
