@@ -106,14 +106,6 @@ export const useMenu = () => {
         href: "/reports",
         icon: DocumentChartBarIcon,
         show: false,
-        children: [
-          { name: "parking", href: "/parking-reports", icon: shallowRef(ParkingIcon) },
-          {
-            name: "transaction",
-            href: "/transaction-reports",
-            icon: BanknotesIcon,
-          },
-        ],
       },
     ],
   });

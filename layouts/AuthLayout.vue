@@ -187,7 +187,7 @@
                 
                 <!-- Use the icon dynamically -->
                 <component class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600" :is="item.icon"></component>
-                <span>{{ item.name }}</span>
+                <nuxt-link :to="item.href">{{ item.name }}</nuxt-link>
               </a>
               <ul v-if="item.show && item.children" class="ml-8 mt-4">
                 <li v-for="(child, idx) in item.children" :key="idx" class="flex gap-2">
