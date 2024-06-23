@@ -23,4 +23,11 @@ export class TariffService {
       throw err;
     }
   }
+  static async put(id, data) {
+    try {
+      return await HttpRequester.put('tariff/' + id, data);
+    } catch (err) {
+      throw err;
+    }
+  }
 }
