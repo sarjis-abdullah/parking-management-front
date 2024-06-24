@@ -23,4 +23,11 @@ export class CategoryService {
       throw err;
     }
   }
+  static async put(id, data) {
+    try {
+      return await HttpRequester.put('category/' + id, data);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

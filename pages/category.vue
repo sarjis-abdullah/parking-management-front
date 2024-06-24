@@ -12,7 +12,7 @@
           @downloadOrderStatement="downloadOrderStatement"
         /> -->
           <header class="flex justify-between text-gray-900 mb-3 text-xl">
-            <h6>{{ "Vehicle List" }}</h6>
+            <h6>{{ "Category List" }}</h6>
             <Link to="/add/category"> Add Vehicle Category </Link>
           </header>
           <!-- <pre>
@@ -46,21 +46,62 @@
                 <tr v-for="singleData in list" :key="singleData.id">
                   <td class="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
                     <div class="flex items-center">
-                      
                       <div class="">
-                        <div class="font-medium text-gray-900">
+                        <div
+                          v-if="singleData.editMode"
+                          class="mt-1 text-gray-500"
+                        >
+                          <input
+                            :class="inputClass"
+                            v-model="record.name"
+                            type="text"
+                            placeholder="e.g. Place name"
+                          />
+                        </div>
+                        <div v-else class="font-medium text-gray-900">
                           {{ singleData.name }}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
-                    <span class="text-gray-900">{{ singleData.description }}</span>
+                    <div v-if="singleData.editMode" class="mt-1 text-gray-500">
+                      <input
+                        :class="inputClass"
+                        v-model="record.description"
+                        type="text"
+                        placeholder="e.g. Text about place"
+                      />
+                    </div>
+                    <span v-else class="text-gray-900">{{
+                      singleData.description
+                    }}</span>
                   </td>
                   <td
-                    class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0 "
+                    class="flex justify-center gap-1 relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
                   >
-                    <TrashIcon @click="deleteRecord(singleData.id)" class="h-5 w-5 mx-auto" aria-hidden="true" />
+                    <TrashIcon
+                      @click="deleteRecord(singleData.id)"
+                      class="h-5 w-5"
+                      aria-hidden="true"
+                    />
+                    <PencilIcon
+                      @click="editRecord(singleData)"
+                      class="h-5 w-5"
+                      aria-hidden="true"
+                    />
+                    <CheckIcon
+                      v-if="singleData?.editMode"
+                      @click="updateRecord(singleData.id)"
+                      class="h-5 w-5 text-blue-500"
+                      aria-hidden="true"
+                    />
+                    <XMarkIcon
+                      v-if="singleData?.editMode"
+                      @click="cancelUpdatingRecord(singleData.id)"
+                      class="h-5 w-5 text-red-500"
+                      aria-hidden="true"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -83,7 +124,7 @@
       </div>
     </div>
     <Error :error="serverErrors" />
-    <Loading v-if="isLoading || isDeleting" />
+    <Loading v-if="isLoading || isDeleting || isUpdating" />
     <Pagination
       class="mt-6"
       :perPage="perPage"
@@ -100,14 +141,20 @@ import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { CategoryService } from "@/services/CategoryService.js";
-import { TrashIcon } from "@heroicons/vue/20/solid";
+import {
+  TrashIcon,
+  PencilIcon,
+  CheckIcon,
+  XMarkIcon,
+} from "@heroicons/vue/20/solid";
 import Loading from "@/components/common/Loading.vue";
 import Error from "@/components/common/Error.vue";
 
 definePageMeta({
   layout: "auth-layout",
 });
-
+const inputClass =
+  "relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
 const list = ref([]);
 const loadingError = ref(null);
 const isLoading = ref(false);
@@ -138,26 +185,94 @@ const loadData = async () => {
     serverErrors.value = {};
     // handleReset();
   } catch (error) {
-    serverErrors.value = error.errors
+    serverErrors.value = error.errors;
   } finally {
     isLoading.value = false;
   }
 };
-const isDeleting = ref(false)
-const deleteRecord = async (id)=> {
+const isDeleting = ref(false);
+const deleteRecord = async (id) => {
   try {
     isDeleting.value = true;
     const res = await CategoryService.delete(id);
-    list.value = list.value.filter(item=> item.id != id)
+    list.value = list.value.filter((item) => item.id != id);
 
     serverErrors.value = {};
     // handleReset();
   } catch (error) {
-    serverErrors.value = error.errors
+    serverErrors.value = error.errors;
   } finally {
     isDeleting.value = false;
   }
-}
+};
+const record = reactive({
+  id: "",
+  name: "",
+  description: "",
+});
+const formatDateForInput = (date) => {
+  if (!date) {
+    return "";
+  }
+  const match = date.match(/^(\d{4}-\d{2}-\d{2})/);
+  return match ? match[1] : "";
+};
+const editRecord = (props) => {
+  record.id = props.id;
+  record.name = props.name;
+  record.description = props.description;
+  record.startDate = formatDateForInput(props.start_date);
+  record.endDate = formatDateForInput(props.end_date);
+  list.value = list.value.map((item) => {
+    if (item.id == props.id) {
+      return {
+        ...item,
+        editMode: true,
+      };
+    }
+    return {
+      ...item,
+      editMode: false,
+    };
+  });
+};
+const isUpdating = ref(false);
+const updateableRecord = computed(() => {
+  return {
+    name: record.name,
+    description: record.description,
+  };
+});
+const cancelUpdatingRecord = async (id) => {
+  list.value = list.value.map((item) => {
+    return {
+      ...item,
+      editMode: false,
+    };
+  });
+};
+const updateRecord = async (id) => {
+  try {
+    isUpdating.value = true;
+    const res = await CategoryService.put(id, updateableRecord.value);
+    list.value = list.value.map((item) => {
+      if (item.id == id) {
+        item.name = record.name;
+        item.description = record.description;
+        // item.end_date = record.endDate;
+        item.editMode = false;
+        return item;
+      }
+      return item;
+    });
+
+    serverErrors.value = {};
+  } catch (error) {
+    serverErrors.value = error.errors;
+  } finally {
+    isUpdating.value = false;
+  }
+};
 
 const onPageChanged = (p) => {
   page.value = p;

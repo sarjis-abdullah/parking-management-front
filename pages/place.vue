@@ -124,7 +124,7 @@
       </div>
     </div>
     <Error :error="serverErrors" />
-    <Loading v-if="isLoading || isDeleting" />
+    <Loading v-if="isLoading || isDeleting || isUpdating" />
     <Pagination
       class="mt-6"
       :perPage="perPage"
@@ -220,6 +220,7 @@ const formatDateForInput = (date) => {
 const editRecord = (props) => {
   record.id = props.id;
   record.name = props.name;
+  record.description = props.description;
   record.startDate = formatDateForInput(props.start_date);
   record.endDate = formatDateForInput(props.end_date);
   list.value = list.value.map((item) => {
