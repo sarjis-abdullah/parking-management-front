@@ -23,4 +23,11 @@ export class FloorService {
       throw err;
     }
   }
+  static async put(id, data) {
+    try {
+      return await HttpRequester.put('floor/' + id, data);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

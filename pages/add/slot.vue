@@ -191,7 +191,7 @@ const inputClass =
           </select>
           <ErrorMessage :errors="validator.floor.$errors" />
         </div>
-        <div class="grid gap-2">
+        <!-- <div class="grid gap-2">
           <label class="text-gray-500">Identity</label>
           <input
             :class="inputClass"
@@ -200,7 +200,7 @@ const inputClass =
             placeholder="e.g. corrola 2012 model"
           />
           <ErrorMessage :errors="validator.identity.$errors" />
-        </div>
+        </div> -->
         <div class="grid gap-2">
           <label class="text-gray-500">Remarks</label>
           <input

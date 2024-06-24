@@ -53,24 +53,60 @@
                   <td class="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
                     <div class="flex items-center">
                       <div class="">
-                        <div class="font-medium text-gray-900">
+                        <div
+                          v-if="singleData.editMode"
+                          class="mt-1 text-gray-500"
+                        >
+                          <input
+                            :class="inputClass"
+                            v-model="record.name"
+                            type="text"
+                            placeholder="e.g. Floor name"
+                          />
+                        </div>
+                        <div v-else class="font-medium text-gray-900">
                           {{ singleData.name }}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
+                    <div v-if="singleData.editMode" class="mt-1 text-gray-500">
+                      <input
+                        :class="inputClass"
+                        v-model="record.remarks"
+                        type="text"
+                        placeholder="e.g. Text about floor"
+                      />
+                    </div>
                     <span class="text-gray-900">{{ singleData.remarks }}</span>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
                     {{ singleData?.place?.name }}
                   </td>
                   <td
-                    class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
+                    class="flex justify-center gap-1 relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
                   >
                     <TrashIcon
                       @click="deleteRecord(singleData.id)"
-                      class="h-5 w-5 mx-auto"
+                      class="h-5 w-5"
+                      aria-hidden="true"
+                    />
+                    <PencilIcon
+                      @click="editRecord(singleData)"
+                      class="h-5 w-5"
+                      aria-hidden="true"
+                    />
+                    <CheckIcon
+                      v-if="singleData?.editMode"
+                      @click="updateRecord(singleData.id)"
+                      class="h-5 w-5 text-blue-500"
+                      aria-hidden="true"
+                    />
+                    <XMarkIcon
+                      v-if="singleData?.editMode"
+                      @click="cancelUpdatingRecord(singleData.id)"
+                      class="h-5 w-5 text-red-500"
                       aria-hidden="true"
                     />
                   </td>
@@ -95,7 +131,7 @@
       </div>
     </div>
     <Error :error="serverErrors" />
-    <Loading v-if="isLoading || isDeleting" />
+    <Loading v-if="isLoading || isDeleting || isUpdating" />
     <Pagination
       class="mt-6"
       :perPage="perPage"
@@ -111,13 +147,20 @@ import { onMounted } from "vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { FloorService } from "@/services/FloorService.js";
-import { TrashIcon } from "@heroicons/vue/20/solid";
+import {
+  TrashIcon,
+  PencilIcon,
+  CheckIcon,
+  XMarkIcon,
+} from "@heroicons/vue/20/solid";
 import Loading from "@/components/common/Loading.vue";
 import Error from "@/components/common/Error.vue";
 
 definePageMeta({
   layout: "auth-layout",
 });
+const inputClass =
+  "relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
 
 const list = ref([]);
 const loadingError = ref(null);
@@ -167,6 +210,64 @@ const deleteRecord = async (id) => {
     serverErrors.value = error.errors;
   } finally {
     isDeleting.value = false;
+  }
+};
+const record = reactive({
+  id: "",
+  name: "",
+  remarks: "",
+});
+const editRecord = (props) => {
+  record.id = props.id;
+  record.name = props.name;
+  record.remarks = props.remarks;
+  list.value = list.value.map((item) => {
+    if (item.id == props.id) {
+      return {
+        ...item,
+        editMode: true,
+      };
+    }
+    return {
+      ...item,
+      editMode: false,
+    };
+  });
+};
+const isUpdating = ref(false);
+const updateableRecord = computed(() => {
+  return {
+    name: record.name,
+    remarks: record.remarks,
+  };
+});
+const cancelUpdatingRecord = async (id) => {
+  list.value = list.value.map((item) => {
+    return {
+      ...item,
+      editMode: false,
+    };
+  });
+};
+const updateRecord = async (id) => {
+  try {
+    isUpdating.value = true;
+    const res = await FloorService.put(id, updateableRecord.value);
+    list.value = list.value.map((item) => {
+      if (item.id == id) {
+        item.name = record.name;
+        item.remarks = record.remarks;
+        item.editMode = false;
+        return item;
+      }
+      return item;
+    });
+
+    serverErrors.value = {};
+  } catch (error) {
+    serverErrors.value = error.errors;
+  } finally {
+    isUpdating.value = false;
   }
 };
 

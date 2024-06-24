@@ -16,4 +16,18 @@ export class SlotService {
       throw err;
     }
   }
+  static async delete(id) {
+    try {
+      return await HttpRequester.delete('slot/' + id);
+    } catch (err) {
+      throw err;
+    }
+  }
+  static async put(id, data) {
+    try {
+      return await HttpRequester.put('slot/' + id, data);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

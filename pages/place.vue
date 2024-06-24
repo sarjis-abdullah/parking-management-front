@@ -210,19 +210,10 @@ const record = reactive({
   name: "",
   description: "",
 });
-const formatDateForInput = (date) => {
-  if (!date) {
-    return "";
-  }
-  const match = date.match(/^(\d{4}-\d{2}-\d{2})/);
-  return match ? match[1] : "";
-};
 const editRecord = (props) => {
   record.id = props.id;
   record.name = props.name;
   record.description = props.description;
-  record.startDate = formatDateForInput(props.start_date);
-  record.endDate = formatDateForInput(props.end_date);
   list.value = list.value.map((item) => {
     if (item.id == props.id) {
       return {
