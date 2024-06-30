@@ -82,7 +82,6 @@ const handleReset = async () => {
   }
   state.paymentRates = [{rate: ''}]
   serverErrors.value = {}
-  console.log("handleReset");
 };
 const tarifData = computed(() => {
   return {

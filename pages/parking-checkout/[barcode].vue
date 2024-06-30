@@ -202,19 +202,19 @@
                     v-if="vehicle.membership?.contact_number"
                     class="membership-item hover:bg-slate-100"
                   >
-                    <span>Contact number:</span>
+                    <span>Membership number:</span>
                     <span>{{ vehicle.membership.contact_number }}</span>
                   </li>
                   <li
-                    v-if="vehicle.membership?.discount_type"
+                    v-if="vehicle.membership?.membership_type?.discount_type"
                     class="membership-item hover:bg-slate-100"
                   >
                     <span>Discount type:</span>
-                    <span>{{ vehicle.membership.discount_type }}</span>
+                    <span>{{ vehicle.membership.membership_type.discount_type }}</span>
                   </li>
-                  <li class="membership-item hover:bg-slate-100">
+                  <li v-if="vehicle.membership?.membership_type?.discount_amount && vehicle.membership?.membership_type?.discount_type != 'free'" class="membership-item hover:bg-slate-100">
                     <span>Discount:</span>
-                    <span>{{ vehicle.membership.discount_amount ?? 0 }}</span>
+                    <span>{{ vehicle.membership.membership_type.discount_amount ?? 0 }}</span>
                   </li>
                 </ul>
               </div>
@@ -278,7 +278,7 @@ const route = useRoute();
 const barcode = route.params.barcode;
 
 const searchQuery = computed(() => {
-  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.vehicle,v.membership,p.tariff,t.parking_rates`;
+  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.vehicle,v.membership,m.mt,p.tariff,t.parking_rates`;
 });
 const durationInMinutes = ref(0);
 const totalCost = computed(() => {
@@ -379,8 +379,8 @@ const loadData = async () => {
         const seconds = duration.seconds();
         const totalTime = `${hours}h ${minutes}m`;
         let discount = 0;
-        if (item?.vehicle?.membership) {
-          const { discount_type, discount_amount } = item.vehicle.membership;
+        if (item?.vehicle?.membership?.membership_type) {
+          const { discount_type, discount_amount } = item.vehicle.membership.membership_type;
           if (discount_type == "percentage") {
             if (discount_amount) {
               discount = (totalCost.value * parseFloat(discount_amount)) / 100;

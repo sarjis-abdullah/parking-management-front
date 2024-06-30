@@ -12,6 +12,7 @@ import {
   FolderIcon,
   HomeIcon,
   UsersIcon,
+  UserGroupIcon,
   XMarkIcon,
   PlusIcon,
   BuildingOfficeIcon,
@@ -92,6 +93,26 @@ export const useMenu = () => {
         ],
       },
       {
+        name: "Membership group",
+        href: "/membership",
+        icon: shallowRef(UserGroupIcon),
+        show: false,
+        children: [
+          { name: "Add", href: "/add/membership-group", icon: PlusIcon },
+          { name: "List", href: "/membership-group", icon: TableCellsIcon },
+        ],
+      },
+      {
+        name: "Membership",
+        href: "/membership",
+        icon: shallowRef(UserGroupIcon),
+        show: false,
+        children: [
+          // { name: "Add", href: "/add/membership", icon: PlusIcon },
+          { name: "List", href: "/membership", icon: TableCellsIcon },
+        ],
+      },
+      {
         name: "Parking",
         href: "/parking",
         icon: shallowRef(ParkingIcon),
@@ -101,6 +122,7 @@ export const useMenu = () => {
           { name: "List", href: "/parking", icon: TableCellsIcon },
         ],
       },
+      
       {
         name: "Reports",
         href: "/reports",
