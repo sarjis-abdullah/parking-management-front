@@ -64,7 +64,6 @@
                 <tr v-for="singleData in list" :key="singleData.id">
                   <td class="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
                     <div class="flex items-center">
-                  
                       <div class="">
                         <div
                           v-if="singleData.editMode"
@@ -214,17 +213,19 @@ const loadData = async () => {
 };
 const isDeleting = ref(false);
 const deleteRecord = async (id) => {
-  try {
-    isDeleting.value = true;
-    const res = await SlotService.delete(id);
-    list.value = list.value.filter((item) => item.id != id);
+  if (confirm("Are you sure to delete this record?")) {
+    try {
+      isDeleting.value = true;
+      const res = await SlotService.delete(id);
+      list.value = list.value.filter((item) => item.id != id);
 
-    serverErrors.value = {};
-    // handleReset();
-  } catch (error) {
-    serverErrors.value = error.errors;
-  } finally {
-    isDeleting.value = false;
+      serverErrors.value = {};
+      // handleReset();
+    } catch (error) {
+      serverErrors.value = error.errors;
+    } finally {
+      isDeleting.value = false;
+    }
   }
 };
 const record = reactive({

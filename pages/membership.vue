@@ -59,9 +59,7 @@
                   <td class="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
                     <div class="flex items-center">
                       <div class="">
-                        <div
-                          class="font-medium text-gray-900"
-                        >
+                        <div class="font-medium text-gray-900">
                           {{ singleData.contact_number }}
                         </div>
                       </div>
@@ -248,17 +246,19 @@ const loadData = async () => {
 };
 const isDeleting = ref(false);
 const deleteRecord = async (id) => {
-  try {
-    isDeleting.value = true;
-    const res = await MembershipService.delete(id);
-    list.value = list.value.filter((item) => item.id != id);
+  if (confirm("Are you sure to delete this record?")) {
+    try {
+      isDeleting.value = true;
+      const res = await MembershipService.delete(id);
+      list.value = list.value.filter((item) => item.id != id);
 
-    serverErrors.value = {};
-    // handleReset();
-  } catch (error) {
-    serverErrors.value = error.errors;
-  } finally {
-    isDeleting.value = false;
+      serverErrors.value = {};
+      // handleReset();
+    } catch (error) {
+      serverErrors.value = error.errors;
+    } finally {
+      isDeleting.value = false;
+    }
   }
 };
 const record = reactive({
@@ -287,7 +287,7 @@ const isUpdating = ref(false);
 const updateableRecord = computed(() => {
   return {
     name: record.name,
-    membership_type_id: record.membership_type_id
+    membership_type_id: record.membership_type_id,
   };
 });
 const cancelUpdatingRecord = async (id) => {
@@ -301,13 +301,16 @@ const cancelUpdatingRecord = async (id) => {
 const updateRecord = async (id) => {
   try {
     isUpdating.value = true;
-    const res = await MembershipService.put(id+'?include=m.mt', updateableRecord.value);
+    const res = await MembershipService.put(
+      id + "?include=m.mt",
+      updateableRecord.value
+    );
     if (res?.data) {
       list.value = list.value.map((item) => {
         if (item.id == id) {
           item.name = record.name;
           item.membership_type_id = res.data.membership_type_id;
-          item.membership_type = res.data.membership_type
+          item.membership_type = res.data.membership_type;
           item.editMode = false;
           return item;
         }

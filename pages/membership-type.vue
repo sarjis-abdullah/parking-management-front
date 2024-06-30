@@ -12,8 +12,8 @@
           @downloadOrderStatement="downloadOrderStatement"
         /> -->
           <header class="flex justify-between text-gray-900 mb-3 text-xl">
-            <h6>{{ "Membership group list" }}</h6>
-            <Link to="/add/membership-group"> Setup membership hroup</Link>
+            <h6>{{ "Membership type list" }}</h6>
+            <Link to="/add/membership-type"> Setup membership type</Link>
           </header>
           <!-- <pre>
           {{ list }}
@@ -47,7 +47,7 @@
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                  Default Status
+                    Default Status
                   </th>
                   <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                     Action
@@ -114,8 +114,16 @@
                     }}</span>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
-                    <div v-if="singleData.editMode" class="flex items-center gap-1 mt-1 text-gray-500">
-                      <input v-model="record.default" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                    <div
+                      v-if="singleData.editMode"
+                      class="flex items-center gap-1 mt-1 text-gray-500"
+                    >
+                      <input
+                        v-model="record.default"
+                        type="checkbox"
+                        value=""
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                      />
                       <label class="text-gray-500">Marked as default</label>
                       <!-- <input
                         :class="inputClass"
@@ -125,7 +133,7 @@
                       /> -->
                     </div>
                     <span v-else class="text-gray-900">{{
-                      singleData.default ? 'Yes' : 'No'
+                      singleData.default ? "Yes" : "No"
                     }}</span>
                   </td>
                   <td
@@ -244,17 +252,19 @@ const loadData = async () => {
 };
 const isDeleting = ref(false);
 const deleteRecord = async (id) => {
-  try {
-    isDeleting.value = true;
-    const res = await MembershipTypeService.delete(id);
-    list.value = list.value.filter((item) => item.id != id);
+  if (confirm("Are you sure to delete this record?")) {
+    try {
+      isDeleting.value = true;
+      const res = await MembershipTypeService.delete(id);
+      list.value = list.value.filter((item) => item.id != id);
 
-    serverErrors.value = {};
-    // handleReset();
-  } catch (error) {
-    serverErrors.value = error.errors;
-  } finally {
-    isDeleting.value = false;
+      serverErrors.value = {};
+      // handleReset();
+    } catch (error) {
+      serverErrors.value = error.errors;
+    } finally {
+      isDeleting.value = false;
+    }
   }
 };
 const record = reactive({

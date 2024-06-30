@@ -93,12 +93,12 @@ export const useMenu = () => {
         ],
       },
       {
-        name: "Membership group",
+        name: "Membership type",
         href: "/membership",
         icon: shallowRef(UserGroupIcon),
         show: false,
         children: [
-          { name: "Add", href: "/add/membership-group", icon: PlusIcon },
+          { name: "Add", href: "/add/membership-type", icon: PlusIcon },
           { name: "List", href: "/membership-group", icon: TableCellsIcon },
         ],
       },

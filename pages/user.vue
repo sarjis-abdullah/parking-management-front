@@ -78,9 +78,13 @@
                     </span>
                   </td>
                   <td
-                    class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0 "
+                    class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
                   >
-                    <TrashIcon @click="deleteRecord(user.id)" class="h-5 w-5 mx-auto" aria-hidden="true" />
+                    <TrashIcon
+                      @click="deleteRecord(user.id)"
+                      class="h-5 w-5 mx-auto"
+                      aria-hidden="true"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -155,26 +159,28 @@ const loadData = async () => {
     serverErrors.value = {};
     // handleReset();
   } catch (error) {
-    serverErrors.value = error.errors
+    serverErrors.value = error.errors;
   } finally {
     isLoading.value = false;
   }
 };
-const isDeleting = ref(false)
-const deleteRecord = async (id)=> {
-  try {
-    isDeleting.value = true;
-    const res = await UserService.delete(id);
-    users.value = users.value.filter(item=> item.id != id)
+const isDeleting = ref(false);
+const deleteRecord = async (id) => {
+  if (confirm("Are you sure to delete this record?")) {
+    try {
+      isDeleting.value = true;
+      const res = await UserService.delete(id);
+      users.value = users.value.filter((item) => item.id != id);
 
-    serverErrors.value = {};
-    // handleReset();
-  } catch (error) {
-    serverErrors.value = error.errors
-  } finally {
-    isDeleting.value = false;
+      serverErrors.value = {};
+      // handleReset();
+    } catch (error) {
+      serverErrors.value = error.errors;
+    } finally {
+      isDeleting.value = false;
+    }
   }
-}
+};
 
 const onPageChanged = (p) => {
   page.value = p;
