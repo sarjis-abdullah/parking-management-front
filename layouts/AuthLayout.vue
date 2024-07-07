@@ -88,28 +88,44 @@
                   <ul role="list" class="flex flex-1 flex-col gap-y-7">
                     <li>
                       <ul role="list" class="-mx-2 space-y-1">
-                        <li v-for="item in navigation" :key="item.name">
-                          <nuxt-link
-                            :to="item.href"
-                            :class="[
-                              item.current
-                                ? 'bg-gray-50 text-indigo-600'
-                                : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                              'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold',
-                            ]"
+                        <li
+                          v-for="(item, index) in state.menuItems"
+                          :key="index"
+                          class="cursor-pointer"
+                        >
+                          <a
+                            @click.prevent="toggleMenu(index)"
+                            class="flex gap-2 items-center"
                           >
+                            <!-- Use the icon dynamically -->
                             <component
+                              class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
                               :is="item.icon"
-                              :class="[
-                                item.current
-                                  ? 'text-indigo-600'
-                                  : 'text-gray-400 group-hover:text-indigo-600',
-                                'h-6 w-6 shrink-0',
-                              ]"
-                              aria-hidden="true"
-                            />
-                            {{ item.name }}eeee
-                          </nuxt-link>
+                            ></component>
+                            <nuxt-link class="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold" :to="item.href">{{
+                              item.name
+                            }}</nuxt-link>
+                          </a>
+                          <ul
+                            v-if="item.show && item.children"
+                            class="ml-8"
+                          >
+                            <li
+                              v-for="(child, idx) in item.children"
+                              :key="idx"
+                              class="flex gap-2"
+                            >
+                              <component
+                                v-if="child.icon"
+                                class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
+                                :is="child.icon"
+                              ></component>
+
+                              <nuxt-link :to="child.href">{{
+                                child.name
+                              }}</nuxt-link>
+                            </li>
+                          </ul>
                         </li>
                       </ul>
                     </li>
@@ -182,17 +198,31 @@
         </div>
         <nav class="flex flex-1 flex-col">
           <ul role="list" class="flex flex-1 flex-col gap-y-7">
-            <li v-for="(item, index) in state.menuItems" :key="index" class="cursor-pointer">
+            <li
+              v-for="(item, index) in state.menuItems"
+              :key="index"
+              class="cursor-pointer"
+            >
               <a @click.prevent="toggleMenu(index)" class="flex gap-2">
-                
                 <!-- Use the icon dynamically -->
-                <component class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600" :is="item.icon"></component>
+                <component
+                  class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
+                  :is="item.icon"
+                ></component>
                 <nuxt-link :to="item.href">{{ item.name }}</nuxt-link>
               </a>
               <ul v-if="item.show && item.children" class="ml-8 mt-4">
-                <li v-for="(child, idx) in item.children" :key="idx" class="flex gap-2">
-                  <component v-if="child.icon" class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600" :is="child.icon"></component>
-                  
+                <li
+                  v-for="(child, idx) in item.children"
+                  :key="idx"
+                  class="flex gap-2"
+                >
+                  <component
+                    v-if="child.icon"
+                    class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
+                    :is="child.icon"
+                  ></component>
+
                   <nuxt-link :to="child.href">{{ child.name }}</nuxt-link>
                 </li>
               </ul>
@@ -205,7 +235,7 @@
     <div class="lg:pl-72">
       <div class="sticky top-0 z-40 lg:mx-auto lg:max-w-7xl lg:px-8">
         <div
-          class="flex h-16 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-0 lg:shadow-none"
+          class="flex md:hidden h-16 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-0 lg:shadow-none"
         >
           <button
             type="button"
@@ -217,91 +247,8 @@
           </button>
 
           <!-- Separator -->
-          <div class="h-6 w-px bg-gray-200 lg:hidden" aria-hidden="true" />
 
-          <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-            <form class="relative flex flex-1" @submit.stop="">
-              <label for="search-field" class="sr-only">Search</label>
-              <MagnifyingGlassIcon
-                class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400"
-                aria-hidden="true"
-              />
-              <input
-                :class="inputClass"
-                placeholder="Scan/Search/Type barcode here"
-                type="text"
-                name="search"
-                v-model="barcode"
-                @keyup.enter="checkout"
-              />
-            </form>
-            <div class="flex items-center gap-x-4 lg:gap-x-6">
-              <button
-                type="button"
-                @click="checkout"
-                class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500"
-              >
-                <span class="sr-only">View notifications</span>
-                <BellIcon class="h-6 w-6" aria-hidden="true" />
-              </button>
-
-              <!-- Separator -->
-              <div
-                class="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200"
-                aria-hidden="true"
-              />
-
-              <!-- Profile dropdown -->
-              <Menu as="div" class="relative">
-                <MenuButton class="-m-1.5 flex items-center p-1.5">
-                  <span class="sr-only">Open user menu</span>
-                  <img
-                    class="h-8 w-8 rounded-full bg-gray-50"
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                    alt=""
-                  />
-                  <span class="hidden lg:flex lg:items-center">
-                    <span
-                      class="ml-4 text-sm font-semibold leading-6 text-gray-900"
-                      aria-hidden="true"
-                      >Tom Cook</span
-                    >
-                    <ChevronDownIcon
-                      class="ml-2 h-5 w-5 text-gray-400"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </MenuButton>
-                <transition
-                  enter-active-class="transition ease-out duration-100"
-                  enter-from-class="transform opacity-0 scale-95"
-                  enter-to-class="transform opacity-100 scale-100"
-                  leave-active-class="transition ease-in duration-75"
-                  leave-from-class="transform opacity-100 scale-100"
-                  leave-to-class="transform opacity-0 scale-95"
-                >
-                  <MenuItems
-                    class="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none"
-                  >
-                    <MenuItem
-                      v-for="item in userNavigation"
-                      :key="item.name"
-                      v-slot="{ active }"
-                    >
-                      <nuxt-link
-                        :to="item.href"
-                        :class="[
-                          active ? 'bg-gray-50' : '',
-                          'block px-3 py-1 text-sm leading-6 text-gray-900',
-                        ]"
-                        >{{ item.name }}
-                      </nuxt-link>
-                    </MenuItem>
-                  </MenuItems>
-                </transition>
-              </Menu>
-            </div>
-          </div>
+          
         </div>
       </div>
 

@@ -67,7 +67,7 @@
                             :class="inputClass"
                             v-model="record.name"
                             type="text"
-                            placeholder="e.g. Place name"
+                            placeholder="e.g. Membership type name"
                           />
                         </div>
                         <div v-else class="font-medium text-gray-900">

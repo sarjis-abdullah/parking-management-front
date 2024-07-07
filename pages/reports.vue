@@ -1,6 +1,6 @@
 <template>
   <section>
-    <section class="grid grid-cols-3 gap-2">
+    <section class="grid md:grid-cols-3 gap-2">
       <div class="grid gap-2">
         <label class="text-gray-500">Start date</label>
         <input

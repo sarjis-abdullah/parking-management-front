@@ -30,7 +30,7 @@ export const useMenu = () => {
   const router = useRouter();
   const state = reactive({
     menuItems: [
-      { name: "Dashboard", href: "/dashboard", icon: HomeIcon, show: false },
+      // { name: "Dashboard", href: "/dashboard", icon: HomeIcon, show: false },
       {
         name: "User",
         href: "/user",
@@ -99,7 +99,7 @@ export const useMenu = () => {
         show: false,
         children: [
           { name: "Add", href: "/add/membership-type", icon: PlusIcon },
-          { name: "List", href: "/membership-group", icon: TableCellsIcon },
+          { name: "List", href: "/membership-type", icon: TableCellsIcon },
         ],
       },
       {

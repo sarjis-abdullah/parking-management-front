@@ -13,7 +13,24 @@
         /> -->
           <header class="flex justify-between text-gray-900 mb-3 text-xl">
             <h6>{{ "Membership List" }}</h6>
-            <Link to="/add/membership"> Setup membership </Link>
+            <div class="flex items-center gap-2">
+              <input
+                :class="inputClass"
+                v-model="searchText"
+                @input="debouncedSearch"
+                type="text"
+                placeholder="e.g. Search here"
+              />
+              <XMarkIcon
+                v-if="searchText"
+                @click="()=> {
+                  searchText=''
+                  loadData()
+                }"
+                class="h-5 w-5 text-red-500 cursor-pointer"
+                aria-hidden="true"
+              />
+            </div>
           </header>
           <!-- <pre>
           {{ list }}
@@ -169,6 +186,7 @@ import { onMounted } from "vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { MembershipService } from "~/services/MembershipService.js";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
   TrashIcon,
   PencilIcon,
@@ -225,10 +243,10 @@ const loadMembershipTypeData = async () => {
     isLoading.value = false;
   }
 };
-const loadData = async () => {
+const loadData = async (query = searchQuery.value) => {
   try {
     isLoading.value = true;
-    const { meta, data } = await MembershipService.getAll(searchQuery.value);
+    const { meta, data } = await MembershipService.getAll(query);
     list.value = data;
 
     page.value = meta.current_page;
@@ -326,12 +344,22 @@ const updateRecord = async (id) => {
   }
 };
 
+//search
+const searchText = ref("");
+const search = async () => {
+  const q = searchText.value
+    ? searchQuery.value + `&query=${searchText.value}`
+    : searchQuery.value;
+  loadData(q);
+};
+const debouncedSearch = useDebounce(search, 500);
+
 const onPageChanged = (p) => {
   page.value = p;
-  loadData();
+  loadData(searchQuery.value);
 };
 onMounted(() => {
-  loadData();
+  loadData(searchQuery.value);
   loadMembershipTypeData();
 });
 </script>
