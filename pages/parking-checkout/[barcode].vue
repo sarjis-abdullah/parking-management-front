@@ -109,7 +109,7 @@
                           data-v-61884e8b=""
                           style="font-size: 0.875rem; color: rgb(107, 114, 128)"
                         >
-                          Received amount
+                          Received amount {{ receivedAmount }}
                         </dt>
                         <input
                           class="focus:outline-none bg-none text-right"
@@ -119,7 +119,7 @@
                           placeholder="0.00 taka"
                         />
                       </div>
-                      <div
+                      <!-- <div
                         data-v-61884e8b=""
                         style="
                           display: flex;
@@ -136,7 +136,7 @@
                           Return able amount
                         </dt>
                         {{ returnableAmount }}
-                      </div>
+                      </div> -->
                       <!-- <div
                         data-v-61884e8b=""
                         style="
@@ -175,10 +175,9 @@
                   >
                     Checkout
                   </button> -->
-                  <div v-else id="mybutton">
+                  <div v-else>
                     <button
-                      
-                      @click="checkoutAndprint"
+                      @click="checkoutAndprint()"
                       class="rounded-md border border-transparent px-3 py-2 bg-green-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                     >
                       Checkout
@@ -210,11 +209,22 @@
                     class="membership-item hover:bg-slate-100"
                   >
                     <span>Discount type:</span>
-                    <span>{{ vehicle.membership.membership_type.discount_type }}</span>
+                    <span>{{
+                      vehicle.membership.membership_type.discount_type
+                    }}</span>
                   </li>
-                  <li v-if="vehicle.membership?.membership_type?.discount_amount && vehicle.membership?.membership_type?.discount_type != 'free'" class="membership-item hover:bg-slate-100">
+                  <li
+                    v-if="
+                      vehicle.membership?.membership_type?.discount_amount &&
+                      vehicle.membership?.membership_type?.discount_type !=
+                        'free'
+                    "
+                    class="membership-item hover:bg-slate-100"
+                  >
                     <span>Discount:</span>
-                    <span>{{ vehicle.membership.membership_type.discount_amount ?? 0 }}</span>
+                    <span>{{
+                      vehicle.membership.membership_type.discount_amount ?? 0
+                    }}</span>
                   </li>
                 </ul>
               </div>
@@ -270,7 +280,7 @@ const lastPage = ref(null);
 const total = ref(null);
 const totalPerPage = ref(null);
 const paymentMethod = ref("cash");
-const receivedAmount = ref();
+const receivedAmount = ref(0);
 const payableAmount = ref(0);
 const parkingId = ref(null);
 
@@ -280,7 +290,21 @@ const barcode = route.params.barcode;
 const searchQuery = computed(() => {
   return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.vehicle,v.membership,m.mt,p.tariff,t.parking_rates`;
 });
-const durationInMinutes = ref(0);
+const parkingResponse = ref(null);
+const currentTime = ref(moment());
+const durationInMinutes = computed(() => {
+  const result = parkingResponse.value;
+  if (!result) {
+    return 0;
+  }
+  const differenceInMillis = currentTime.value.diff(result.in_time);
+
+  // Create a duration object
+  const duration = moment.duration(differenceInMillis);
+
+  // Extract total time in minutes
+  return Math.ceil(duration.asMinutes());
+});
 const totalCost = computed(() => {
   const durations = durationInMinutes.value;
   const halfHourSegments = Math.ceil(durations / 30); // Number of half-hour segments
@@ -299,43 +323,21 @@ const totalCost = computed(() => {
     }
   }
 
-  console.log(total, "totalCost");
-  return Number(total).toFixed(2);
+  return Math.round(Number(total).toFixed(2));
 });
-const currentTime = ref(moment());
 const parkingData = computed(() => {
   const obj = {
     out_time: formatDate(currentTime.value, "YYYY-MM-DD HH:mm:ss"),
     duration: durationInMinutes.value,
     payment: {
-      method: "cash",
-      paid_amount: totalCost.value,
+      method: paymentMethod.value,
+      paid_amount: Math.round(receivedAmount.value),
+      payable_amount: Math.round(totalCost.value),
     },
   };
   return obj;
 });
-const returnableAmount = computed(() => {
-  if (totalCost.value && receivedAmount.value) {
-    const payable = totalCost.value;
-    const received = parseFloat(receivedAmount.value);
-    return Math.floor(-payable + received);
-  }
-  return 0;
-});
-const paidAmount = computed(() => {
-  if (totalCost.value == receivedAmount.value) {
-    return totalCost.value;
-  }
-  if (
-    totalCost.value &&
-    receivedAmount.value &&
-    returnableAmount.value &&
-    returnableAmount.value > 0
-  ) {
-    return parseFloat(receivedAmount.value) - returnableAmount.value;
-  }
-  return 0;
-});
+
 const barcodeImage = ref("");
 const parking_rates = ref([]);
 class CustomError extends Error {
@@ -357,18 +359,19 @@ const loadData = async () => {
     const { data } = await ParkingService.getAll(searchQuery.value);
     if (data?.length) {
       const result = data[0];
+      parkingResponse.value = data[0];
       barcodeImage.value = result.barcode_image;
       parkingId.value = result.id;
       vehicleId.value = result?.vehicle?.id;
       vehicle.value = result?.vehicle;
 
-      const differenceInMillis = currentTime.value.diff(result.in_time);
+      // const differenceInMillis = currentTime.value.diff(result.in_time);
 
-      // Create a duration object
-      const duration = moment.duration(differenceInMillis);
+      // // Create a duration object
+      // const duration = moment.duration(differenceInMillis);
 
-      // Extract total time in minutes
-      durationInMinutes.value = Math.ceil(duration.asMinutes());
+      // // Extract total time in minutes
+      // durationInMinutes.value = Math.ceil(duration.asMinutes());
 
       parking_rates.value = result.tariff.parking_rates;
 
@@ -380,14 +383,15 @@ const loadData = async () => {
         const totalTime = `${hours}h ${minutes}m`;
         let discount = 0;
         if (item?.vehicle?.membership?.membership_type) {
-          const { discount_type, discount_amount } = item.vehicle.membership.membership_type;
+          const { discount_type, discount_amount } =
+            item.vehicle.membership.membership_type;
           if (discount_type == "percentage") {
             if (discount_amount) {
               discount = (totalCost.value * parseFloat(discount_amount)) / 100;
             }
           } else if (discount_type == "flat") {
             discount = parseFloat(discount_amount) ?? 0;
-          } else {
+          } else if (discount_type == "free") {
             discount = totalCost.value;
           }
         }
@@ -475,17 +479,40 @@ const print = () => {
     printWindow.close();
   }, 1);
 };
+const confirmCheckout = async () => {
+  await ParkingService.handleCheckout(parkingId.value, parkingData.value);
+  print();
+};
 
-const checkoutAndprint = async () => {
+const checkoutAndprint = () => {
   try {
-    if (paidAmount.value > 0) {
-      await ParkingService.handleCheckout(parkingId.value, parkingData.value);
-      print();
+    console.log(totalCost.value, receivedAmount.value);
+
+    const total = totalCost.value;
+    // const receivedAmount = receivedAmount.value;
+    // const rounded = total === receivedAmount;
+    if ((totalCost.value === receivedAmount.value)) {
+      confirmCheckout();
     } else {
-      const errors = {
-        paidAmount: [`Please pay ${totalCost.value} taka`],
-      };
-      throw new CustomError("Validation error", errors);
+      if (total < receivedAmount) {
+        if (confirm("Are you sure receiving more amount than total?")) {
+          confirmCheckout();
+        }
+      } else {
+        
+        const text =
+          "Are you sure receiving less amount than total? Payment will be due.";
+        if (confirm(text)) {
+          paymentMethod.value = "due"
+          confirmCheckout();
+          const errors = {
+            paidAmount: [`Please pay ${totalCost.value} taka`],
+          };
+          throw new CustomError("Validation error", errors);
+        }else {
+          paymentMethod.value = "cash"
+        }
+      }
     }
   } catch (error) {
     if (error.errors) {

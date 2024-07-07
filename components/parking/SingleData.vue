@@ -23,13 +23,58 @@
       <span class="text-gray-900">{{ singleData.vehicle?.number }}</span>
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-      {{ singleData?.in_time ? formatDate(singleData?.in_time) : "--" }}
+      <div>
+        <div class="flex justify gap-2">
+          <span>{{"In"}}:   </span>
+          <span>{{ singleData?.in_time ? formatDate(singleData?.in_time) : "--" }}</span>
+        </div>
+        <div class="flex justify gap-2">
+          <span>Out: </span>
+          <span>{{ singleData?.out_time ? formatDate(singleData?.out_time) : "--" }}</span>
+        </div>
+        <div class="flex justify gap-2">
+          <span>Duration: </span>
+          <span>{{ durationInHours }}</span>
+        </div>
+      </div>
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-      {{ singleData?.out_time ? formatDate(singleData.out_time) : "--" }}
-    </td>
-    <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-      {{ singleData?.payment?.method }}
+      <div
+        class="flex items-center justify-start gap-2"
+        v-if="singleData?.payment?.id"
+      >
+        <div
+          class="p-2 rounded-md text-white"
+          :class="
+            singleData?.payment?.method == 'due'
+              ? 'bg-orange-400'
+              : 'bg-green-400'
+          "
+        >
+          {{ singleData?.payment?.method }}
+        </div>
+        <div>
+          <!-- <div class="flex justify-between gap-2">
+            <span>Method:</span>
+            <span class="font-bold text-right">{{
+              singleData?.payment?.method
+            }}</span>
+          </div> -->
+          <div class="flex justify-between gap-2">
+            <span>Paid:</span>
+            <span class="font-bold text-right"
+              >{{ singleData?.payment?.paid_amount }}৳</span
+            >
+          </div>
+          <div class="flex justify-between gap-2">
+            <span>Payable:</span>
+            <span class="font-bold text-right"
+              >{{ singleData?.payment?.payable_amount }}৳</span
+            >
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center justify-start gap-2" v-else>--</div>
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
       <div>{{ singleData.vehicle?.driver_name }}</div>
@@ -43,7 +88,7 @@
           >Checkin view</nuxt-link
         >
         <nuxt-link :to="`/parking-checkout/${singleData.barcode}`"
-          >Checkout view</nuxt-link
+          >Checkout</nuxt-link
         >
       </div>
       <!-- <select @change="handleActionChange" v-model="selectedAction" class="bg-white relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500">
@@ -60,6 +105,7 @@
 import { formatDate } from "@/utils/index.js";
 import { computed } from "vue";
 import { EllipsisVerticalIcon } from "@heroicons/vue/24/outline";
+import moment from "moment";
 const { singleData } = defineProps({
   singleData: {
     type: Object,
@@ -82,6 +128,30 @@ const actions = computed(() => {
       name: "Check-out",
     },
   ];
+});
+const durationInHours = computed(() => {
+  const result = singleData.id;
+  if (!result) {
+    return 0;
+  }
+  const out_time = moment(singleData.out_time)
+  const in_time = moment(singleData.in_time)
+  const differenceInMillis = out_time.diff(in_time);
+
+  // Create a duration object
+  const duration = moment.duration(differenceInMillis);
+
+  // Extract total time in minutes
+  const inMin = Math.ceil(duration.asMinutes())
+  const inHours = Math.ceil(duration.asHours())
+  const inDays = Math.ceil(duration.asDays())
+  if (inMin < 60) {
+    return inMin + " s"
+  }else if (inHours < 24) {
+    return inHours + ' h'
+  }
+  
+  return inDays + " d";
 });
 const userNavigation = [
   { name: "Your profile", href: "#" },

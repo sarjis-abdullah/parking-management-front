@@ -13,7 +13,29 @@
         /> -->
           <header class="flex justify-between text-gray-900 mb-3 text-xl">
             <h6>{{ "Parking List" }}</h6>
-            <Link to="/add/parking"> Add Parking </Link>
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2">
+                <input
+                  :class="inputClass"
+                  v-model="searchText"
+                  @input="debouncedSearch"
+                  type="text"
+                  placeholder="e.g. Search here"
+                />
+                <XMarkIcon
+                  v-if="searchText"
+                  @click="
+                    () => {
+                      searchText = '';
+                      loadData();
+                    }
+                  "
+                  class="h-5 w-5 text-red-500 cursor-pointer"
+                  aria-hidden="true"
+                />
+              </div>
+              <Link to="/add/parking"> Add Parking </Link>
+            </div>
           </header>
           <!-- <pre>
           {{ list }}
@@ -41,21 +63,21 @@
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    In time
+                    Timing
                   </th>
-                  <th
+                  <!-- <th
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
                     Out time
-                  </th>
+                  </th> -->
 
-                  <th
+                  <!-- <th
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
                     Driver Info
-                  </th>
+                  </th> -->
                   <th
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
@@ -74,7 +96,11 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200 bg-white">
-                <SingleData v-for="singleData in list" :key="singleData.id" :singleData="singleData"></SingleData>
+                <SingleData
+                  v-for="singleData in list"
+                  :key="singleData.id"
+                  :singleData="singleData"
+                ></SingleData>
               </tbody>
             </table>
             <div v-else class="text-center py-10">
@@ -83,10 +109,10 @@
               </p>
             </div>
           </div>
-          <div v-if="!loadingError && isLoading">
+          <!-- <div v-if="!loadingError && isLoading">
             Loading
-            <!-- <ListLoader /> -->
-          </div>
+            <ListLoader />
+          </div> -->
           <div v-if="loadingError && !isLoading">
             Loading error
             <!-- <ListLoadingError :message="'cant_load_orders_list'" /> -->
@@ -94,6 +120,7 @@
         </div>
       </div>
     </div>
+    <Loading v-if="isLoading" />
     <Pagination
       class="mt-6"
       :perPage="perPage"
@@ -109,12 +136,18 @@ import { onMounted } from "vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
+import Loading from "@/components/common/Loading.vue";
 import SingleData from "@/components/parking/SingleData.vue";
 import { ParkingService } from "@/services/ParkingService.js";
+import { XMarkIcon } from "@heroicons/vue/24/outline";
+import { useDebounce } from "~/hooks/useDebounce";
 
 definePageMeta({
   layout: "auth-layout",
 });
+const inputClass =
+  "relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
+
 const list = ref([]);
 const loadingError = ref(null);
 const isLoading = ref(false);
@@ -131,10 +164,10 @@ const searchQuery = computed(() => {
   return `?page=${page.value}&per_page=${perPage.value}&include=c.place,p.payment,p.vehicle`;
 });
 
-const loadData = async () => {
+const loadData = async (query = searchQuery.value) => {
   try {
     isLoading.value = true;
-    const { meta, data } = await ParkingService.getAll(searchQuery.value);
+    const { meta, data } = await ParkingService.getAll(query);
     list.value = data;
 
     page.value = meta.current_page;
@@ -155,6 +188,15 @@ const loadData = async () => {
     isLoading.value = false;
   }
 };
+//search
+const searchText = ref("");
+const search = async () => {
+  const q = searchText.value
+    ? searchQuery.value + `&barcode=${searchText.value}`
+    : searchQuery.value;
+  loadData(q);
+};
+const debouncedSearch = useDebounce(search, 500);
 
 const onPageChanged = (p) => {
   page.value = p;
