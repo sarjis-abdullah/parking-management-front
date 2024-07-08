@@ -96,8 +96,7 @@
               </div>
             </div>
             <div v-if="!loadingError && isLoading">
-              Loading
-              <!-- <ListLoader /> -->
+              <Loading />
             </div>
             <div v-if="loadingError && !isLoading">
               Loading error
@@ -121,11 +120,12 @@ import { onMounted } from "vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
+import Loading from "@/components/common/Loading.vue";
 import {PlaceService} from "@/services/PlaceService.js";
 
 const list = ref([]);
 const loadingError = ref(null);
-const isLoading = ref(false);
+const isLoading = ref(true);
 const serverErrors = ref(null);
 
 //pagination

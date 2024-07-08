@@ -110,7 +110,7 @@ import {formatDate} from '@/utils/index'
 
 const list = ref([]);
 const loadingError = ref(null);
-const isLoading = ref(false);
+const isLoading = ref(true);
 const serverErrors = ref(null);
 
 //pagination

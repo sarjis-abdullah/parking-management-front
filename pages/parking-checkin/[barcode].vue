@@ -57,7 +57,7 @@
                             color: #111827;
                           "
                         >
-                        {{ key == "In-Time" ? formatDate(value) : value }}
+                          {{ key == "In-Time" ? formatDate(value) : value }}
                         </dd>
                       </div>
                     </dl>
@@ -81,8 +81,7 @@
             </div>
           </div>
           <div v-if="!loadingError && isLoading">
-            Loading
-            <!-- <ListLoader /> -->
+            <Loading />
           </div>
           <div v-if="loadingError && !isLoading">
             Loading error
@@ -98,12 +97,16 @@ import { onMounted, nextTick } from "vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
+import Loading from "@/components/common/Loading.vue";
 import { ParkingService } from "~/services/ParkingService";
-import {formatDate} from '@/utils/index'
+import { formatDate } from "@/utils/index";
 
+definePageMeta({
+  layout: "auth-layout",
+});
 const list = ref([]);
 const loadingError = ref(null);
-const isLoading = ref(false);
+const isLoading = ref(true);
 const serverErrors = ref(null);
 
 //pagination
@@ -114,6 +117,9 @@ const total = ref(null);
 const totalPerPage = ref(null);
 
 const route = useRoute();
+const routeQuery = computed(() => {
+  return route.query;
+});
 const barcode = route.params.barcode;
 
 const searchQuery = computed(() => {
@@ -136,18 +142,20 @@ const loadData = async () => {
           "Driver Name": item.vehicle?.driver_name,
           "driver Mobile": item.vehicle?.driver_mobile,
           "In-Time": item.in_time,
-          "Status": item.vehicle?.status,
+          Status: item.vehicle?.status,
         };
       });
       barcodeImage.value = data[0].barcode_image;
       serverErrors.value = {};
-      setTimeout(() => {
-        print()
-      }, 1);
+
+      if (!routeQuery.value.view) {
+        setTimeout(() => {
+          print()
+        }, 1);
+      }
     } else {
       serverErrors.value = "No data available for this barcode";
     }
-    
 
     // page.value = meta.current_page;
     // lastPage.value = meta.last_page;

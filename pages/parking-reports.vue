@@ -154,7 +154,7 @@ const router = useRouter();
 const startDate = ref("");
 const endDate = ref("");
 const reports = ref([]);
-const isLoading = ref(false);
+const isLoading = ref(true);
 
 function getQueryString(query) {
   const params = new URLSearchParams(query);

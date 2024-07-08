@@ -2,13 +2,6 @@
   <tr>
     <td class="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
       <div class="flex items-center">
-        <!-- <div class="h-10 w-10 flex-shrink-0">
-          <img
-            class="h-10 w-10 rounded-full"
-            src="https://cdn-staging.inaia.cloud/icons/gold-delivery.png"
-            alt=""
-          />
-        </div> -->
         <div class="">
           <div class="font-medium text-gray-900">
             {{ singleData.barcode }}
@@ -84,7 +77,7 @@
       class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
     >
       <div class="flex flex-col">
-        <nuxt-link :to="`/parking-checkin/${singleData.barcode}`"
+        <nuxt-link :to="`/parking-checkin/${singleData.barcode}?view=1`"
           >Checkin view</nuxt-link
         >
         <nuxt-link :to="`/parking-checkout/${singleData.barcode}`"

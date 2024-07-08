@@ -119,10 +119,9 @@
               </p>
             </div>
           </div>
-          <!-- <div v-if="!loadingError && isLoading">
-            Loading
-            <ListLoader />
-          </div> -->
+          <div v-if="!loadingError && isLoading">
+            <Loading />
+          </div>
           <div v-if="loadingError && !isLoading">
             Loading error
             <!-- <ListLoadingError :message="'cant_load_orders_list'" /> -->

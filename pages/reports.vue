@@ -284,7 +284,7 @@ const router = useRouter();
 const startDate = ref("");
 const endDate = ref("");
 const transactions = ref([]);
-const isLoading = ref(false);
+const isLoading = ref(true);
 
 function getQueryString(query) {
   const filteredQuery = {};

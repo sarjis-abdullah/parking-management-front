@@ -234,8 +234,7 @@
             </div>
           </div>
           <div v-if="!loadingError && isLoading">
-            Loading
-            <!-- <ListLoader /> -->
+            <Loading />
           </div>
           <div v-if="loadingError && !isLoading">
             Loading error
@@ -249,6 +248,7 @@
           </div>
         </div>
       </div>
+      <Loading v-if="isLoading" />
     </div>
   </div>
 </template>
@@ -257,6 +257,7 @@ import { onMounted, nextTick, computed, ref } from "vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
+import Loading from "@/components/common/Loading.vue";
 import AddMembership from "@/components/membership/AddMembership.vue";
 import Errors from "@/components/common/Error.vue";
 import { ParkingService } from "~/services/ParkingService";
@@ -270,7 +271,7 @@ const inputClass =
 
 const list = ref([]);
 const loadingError = ref(null);
-const isLoading = ref(false);
+const isLoading = ref(true);
 const serverErrors = ref(null);
 
 //pagination

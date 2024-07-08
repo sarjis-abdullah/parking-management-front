@@ -125,7 +125,7 @@ import {PlaceService} from "@/services/PlaceService.js";
 
 const list = ref([]);
 const loadingError = ref(null);
-const isLoading = ref(false);
+const isLoading = ref(true);
 const serverErrors = ref(null);
 
 //pagination

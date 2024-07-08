@@ -120,8 +120,7 @@
             </div>
           </div>
           <div v-if="!loadingError && isLoading">
-            Loading
-            <!-- <ListLoader /> -->
+            <Loading />
           </div>
           <div v-if="loadingError && !isLoading">
             Loading error
@@ -164,7 +163,7 @@ const inputClass =
 
 const list = ref([]);
 const loadingError = ref(null);
-const isLoading = ref(false);
+const isLoading = ref(true);
 const serverErrors = ref(null);
 
 //pagination
