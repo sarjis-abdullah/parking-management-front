@@ -1,7 +1,8 @@
 <template>
-  <div
+  <div class="flex h-screen justify-center items-center">
+    <div
     role="status"
-    class="absolute -translate-x-1/2 -translate-y-1/2 top-2/4 left-[58%]"
+    class=""
   >
     <svg
       aria-hidden="true"
@@ -20,6 +21,7 @@
       />
     </svg>
     <span class="sr-only">Loading...</span>
+  </div>
   </div>
 </template>
 

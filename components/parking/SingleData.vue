@@ -28,11 +28,11 @@
           <span>{{"In"}}:   </span>
           <span>{{ singleData?.in_time ? formatDate(singleData?.in_time) : "--" }}</span>
         </div>
-        <div class="flex justify gap-2">
+        <div v-if="singleData?.out_time" class="flex justify gap-2">
           <span>Out: </span>
           <span>{{ singleData?.out_time ? formatDate(singleData?.out_time) : "--" }}</span>
         </div>
-        <div class="flex justify gap-2">
+        <div v-if="singleData?.out_time" class="flex justify gap-2">
           <span>Duration: </span>
           <span>{{ durationInHours }}</span>
         </div>

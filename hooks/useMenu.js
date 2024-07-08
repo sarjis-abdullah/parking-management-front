@@ -107,10 +107,10 @@ export const useMenu = () => {
         href: "/membership",
         icon: shallowRef(UserGroupIcon),
         show: false,
-        children: [
-          // { name: "Add", href: "/add/membership", icon: PlusIcon },
-          { name: "List", href: "/membership", icon: TableCellsIcon },
-        ],
+        // children: [
+        //   // { name: "Add", href: "/add/membership", icon: PlusIcon },
+        //   { name: "List", href: "/membership", icon: TableCellsIcon },
+        // ],
       },
       {
         name: "Parking",

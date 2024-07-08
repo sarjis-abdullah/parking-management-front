@@ -1,6 +1,6 @@
 <template>
   <div class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
-    <div class="mt-8 flow-root">
+    <div class="md:mt-8 flow-root">
       <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
           <div v-if="!loadingError && !isLoading">

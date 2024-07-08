@@ -80,18 +80,18 @@
                 <div class="flex h-16 shrink-0 items-center">
                   <img
                     class="h-8 w-auto"
-                    src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
+                    src="/assets/khulshi.png"
                     alt="Your Company"
                   />
                 </div>
                 <nav class="flex flex-1 flex-col">
                   <ul role="list" class="flex flex-1 flex-col gap-y-7">
                     <li>
-                      <ul role="list" class="-mx-2 space-y-1">
+                      <ul role="list" class="grid grid-cols-2 gap-2 -mx-2 space-y-1">
                         <li
                           v-for="(item, index) in state.menuItems"
                           :key="index"
-                          class="cursor-pointer"
+                          class="cursor-pointer shadow-md py-4 px-2"
                         >
                           <a
                             @click.prevent="toggleMenu(index)"
@@ -102,17 +102,21 @@
                               class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
                               :is="item.icon"
                             ></component>
-                            <nuxt-link class="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold" :to="item.href">{{
+                            <nuxt-link v-if="!(item?.children?.length)" @click="sidebarOpen = false" class="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md text-sm leading-6 font-semibold" :to="item.href">{{
                               item.name
                             }}</nuxt-link>
+                            <span v-else class="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md text-sm leading-6 font-semibold" :to="item.href">{{
+                              item.name
+                            }}</span>
                           </a>
                           <ul
                             v-if="item.show && item.children"
-                            class="ml-8"
+                            class="ml-8 mt-4"
                           >
                             <li
                               v-for="(child, idx) in item.children"
                               :key="idx"
+                              @click="sidebarOpen = false"
                               class="flex gap-2"
                             >
                               <component
@@ -129,49 +133,6 @@
                         </li>
                       </ul>
                     </li>
-                    <li>
-                      <div
-                        class="text-xs font-semibold leading-6 text-gray-400"
-                      >
-                        Your teams
-                      </div>
-                      <ul role="list" class="-mx-2 mt-2 space-y-1">
-                        <li v-for="team in teams" :key="team.name">
-                          <a
-                            :href="team.href"
-                            :class="[
-                              team.current
-                                ? 'bg-gray-50 text-indigo-600'
-                                : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                              'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold',
-                            ]"
-                          >
-                            <span
-                              :class="[
-                                team.current
-                                  ? 'text-indigo-600 border-indigo-600'
-                                  : 'text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600',
-                                'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white',
-                              ]"
-                              >{{ team.initial }}</span
-                            >
-                            <span class="truncate">{{ team.name }}</span>
-                          </a>
-                        </li>
-                      </ul>
-                    </li>
-                    <li class="mt-auto">
-                      <a
-                        href="#"
-                        class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                      >
-                        <Cog6ToothIcon
-                          class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
-                          aria-hidden="true"
-                        />
-                        Settings
-                      </a>
-                    </li>
                   </ul>
                 </nav>
               </div>
@@ -183,7 +144,7 @@
 
     <!-- Static sidebar for desktop -->
     <div
-      class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col"
+      class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:max-w-72 lg:flex-col"
     >
       <!-- Sidebar component, swap this element with another sidebar if you like -->
       <div
@@ -192,7 +153,7 @@
         <div class="flex h-16 shrink-0 items-center">
           <img
             class="h-8 w-auto"
-            src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
+            src="/assets/khulshi.png"
             alt="Your Company"
           />
         </div>
@@ -209,7 +170,8 @@
                   class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
                   :is="item.icon"
                 ></component>
-                <nuxt-link :to="item.href">{{ item.name }}</nuxt-link>
+                <nuxt-link v-if="!(item?.children?.length)" :to="item.href">{{ item.name }}</nuxt-link>
+                <span v-else>{{ item.name }}</span>
               </a>
               <ul v-if="item.show && item.children" class="ml-8 mt-4">
                 <li
@@ -252,7 +214,7 @@
         </div>
       </div>
 
-      <main class="py-10">
+      <main class="md:py-10">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <NuxtPage />
         </div>

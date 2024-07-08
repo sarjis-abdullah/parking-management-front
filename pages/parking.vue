@@ -1,7 +1,7 @@
 <template>
   <div class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
-    <div class="mt-8 flow-root">
-      <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+    <div v-if="!isLoading && viweOn" class="md:mt-8 flow-root">
+      <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
           <!-- <OrderFilters
           v-if="showFilterButton"
@@ -11,8 +11,18 @@
           @filterOrderBy="filterOrderBy"
           @downloadOrderStatement="downloadOrderStatement"
         /> -->
-          <header class="flex justify-between text-gray-900 mb-3 text-xl">
-            <h6>{{ "Parking List" }}</h6>
+          <header
+            class="flex gap-4 flex-col md:flex-row md:justify-between text-gray-900 mb-3 text-xl"
+          >
+            <h6 class="flex gap-2">
+              <span>{{ "Parking List" }}</span>
+              <Link to="/add/parking" class="md:hidden">
+                <PlusIcon
+                  class="h-5 w-5 bg-indigo-500 cursor-pointer"
+                  aria-hidden="true"
+                />
+              </Link>
+            </h6>
             <div class="flex items-center gap-2">
               <div class="flex items-center gap-2">
                 <input
@@ -34,13 +44,13 @@
                   aria-hidden="true"
                 />
               </div>
-              <Link to="/add/parking"> Add Parking </Link>
+              <Link to="/add/parking" class="hidden md:inline-block"> Add Parking </Link>
             </div>
           </header>
           <!-- <pre>
           {{ list }}
         </pre> -->
-          <div v-if="!loadingError && !isLoading">
+          <div v-if="!loadingError && !isLoading" class="overflow-x-auto">
             <table
               class="min-w-full divide-y divide-gray-300"
               v-if="list && list?.length > 0"
@@ -139,7 +149,7 @@ import Pagination from "@/components/common/Pagination.vue";
 import Loading from "@/components/common/Loading.vue";
 import SingleData from "@/components/parking/SingleData.vue";
 import { ParkingService } from "@/services/ParkingService.js";
-import { XMarkIcon } from "@heroicons/vue/24/outline";
+import { XMarkIcon, PlusIcon } from "@heroicons/vue/24/outline";
 import { useDebounce } from "~/hooks/useDebounce";
 
 definePageMeta({
@@ -150,8 +160,9 @@ const inputClass =
 
 const list = ref([]);
 const loadingError = ref(null);
-const isLoading = ref(false);
+const isLoading = ref(true);
 const serverErrors = ref(null);
+const viweOn = ref(false);
 
 //pagination
 const page = ref(1);
@@ -178,14 +189,10 @@ const loadData = async (query = searchQuery.value) => {
     serverErrors.value = {};
     // handleReset();
   } catch (error) {
-    console.log(error);
-    if (error.response?._data?.errors) {
-      serverErrors.value = error.response._data.errors;
-    } else if (error.response?.data?.errors) {
-      serverErrors.value = error.response?.data.errors;
-    }
+    serverErrors.value = error.errors;
   } finally {
     isLoading.value = false;
+    viweOn.value = true;
   }
 };
 //search
