@@ -109,7 +109,7 @@
                           data-v-61884e8b=""
                           style="font-size: 0.875rem; color: rgb(107, 114, 128)"
                         >
-                          Received amount {{ receivedAmount }}
+                          Received amount
                         </dt>
                         <input
                           class="focus:outline-none bg-none text-right"
@@ -117,6 +117,7 @@
                           type="number"
                           v-model="receivedAmount"
                           placeholder="0.00 taka"
+                          ref="receivedAmountRef"
                         />
                       </div>
                       <!-- <div
@@ -160,13 +161,42 @@
                     </dl>
                   </div>
                 </div>
-                <div class="flex justify-end gap-2">
+                <div class="flex justify-end flex-col gap-2">
                   <div
                     v-if="vehicle?.status == 'checked_out'"
                     class="mt-6 w-full rounded-md border border-transparent bg-yellow-600 px-4 py-3 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                   >
                     Vehicle is already checked-out
                   </div>
+                  <div v-if="hasDuePayment">
+                    <ul>
+                      <li>
+                        <span>Payment status</span>
+                        <span>{{ duePayment.method }}</span>
+                      </li>
+                      <li>
+                        <span>Paid:</span>
+                        <span>{{ duePayment.paid_amount }}</span>
+                      </li>
+                      <li>
+                        <span>Payable</span>
+                        <span>{{
+                          Number(
+                            duePayment.payable_amount -
+                              duePayment.paid_amount -
+                              discountAmount
+                          ).toFixed(2)
+                        }}</span>
+                      </li>
+                    </ul>
+                    <button
+                      @click="payDue()"
+                      class="rounded-md border border-transparent px-3 py-2 bg-green-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                    >
+                      Pay due
+                    </button>
+                  </div>
+
                   <!-- <button
                     v-else
                     id="mybutton"
@@ -175,10 +205,10 @@
                   >
                     Checkout
                   </button> -->
-                  <div v-else>
+                  <div v-if="vehicle?.status != 'checked_out'">
                     <button
                       @click="checkoutAndprint()"
-                      class="rounded-md border border-transparent px-3 py-2 bg-green-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                      class="rounded-md border w-full border-transparent px-3 py-2 bg-green-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                     >
                       Checkout
                     </button>
@@ -323,6 +353,7 @@ import Errors from "@/components/common/Error.vue";
 import { ParkingService } from "~/services/ParkingService";
 import { formatDate } from "@/utils/index";
 import moment from "moment";
+import { PaymentService } from "~/services/PaymentService";
 definePageMeta({
   layout: "auth-layout",
 });
@@ -349,9 +380,10 @@ const route = useRoute();
 const barcode = route.params.barcode;
 
 const searchQuery = computed(() => {
-  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.vehicle,v.membership,m.mt,p.tariff,t.parking_rates`;
+  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.vehicle,v.membership,m.mt,p.tariff,t.parking_rates,p.payment`;
 });
 const parkingResponse = ref(null);
+const receivedAmountRef = ref(null);
 const currentTime = ref(moment());
 const durationInMinutes = computed(() => {
   const result = parkingResponse.value;
@@ -399,6 +431,23 @@ const parkingData = computed(() => {
   };
   return obj;
 });
+const hasDuePayment = computed(() => {
+  if (parkingResponse.value?.payment) {
+    const { paid_amount, payable_amount, method } =
+      parkingResponse.value.payment;
+    if (paid_amount != payable_amount && method == "due") {
+      return true;
+    }
+  }
+
+  return false;
+});
+const duePayment = computed(() => {
+  if (hasDuePayment.value) {
+    return parkingResponse.value.payment;
+  }
+  return null;
+});
 
 const barcodeImage = ref("");
 const parking_rates = ref([]);
@@ -431,6 +480,9 @@ const loadData = async () => {
       parking_rates.value = result.tariff.parking_rates;
       discountAmount.value = 0;
       list.value = data.map((item) => {
+        if (item.out_time) {
+          currentTime.value = moment(item.out_time);
+        }
         const duration = moment.duration(currentTime.value.diff(item.in_time));
         const hours = duration.hours();
         const minutes = duration.minutes();
@@ -543,10 +595,15 @@ const confirmCheckout = async () => {
 
 const checkoutAndprint = () => {
   try {
-    console.log(totalCost.value, receivedAmount.value);
-
-    const total = totalCost.value;
-    if ((totalCost.value - discountAmount.value) === receivedAmount.value) {
+    console.log(
+      totalCost.value,
+      receivedAmount.value,
+      Math.ceil((totalCost.value - discountAmount.value)), receivedAmount.value
+    );
+    const subtotal = Math.ceil((totalCost.value - discountAmount.value))
+    const result = subtotal == receivedAmount.value
+    const total = subtotal;
+    if (result) {
       confirmCheckout();
     } else {
       if (total < receivedAmount) {
@@ -572,6 +629,27 @@ const checkoutAndprint = () => {
     if (error.errors) {
       serverErrors.value = error.errors;
     }
+  }
+};
+
+const payDue = async () => {
+  const payable_amount = parseFloat(duePayment.value.payable_amount);
+  const paid_amount = parseFloat(duePayment.value.paid_amount);
+  const remaining = payable_amount - paid_amount - discountAmount.value;
+  if (receivedAmount.value == remaining) {
+    // receivedAmountRef.value.focus();
+    const obj = {
+      paid_amount: receivedAmount.value,
+      method: paymentMethod.value,
+      discount_amount: discountAmount.value,
+    };
+    try {
+      await PaymentService.update(duePayment.value.id, obj);
+    } catch (error) {
+      serverErrors.value = error.errors;
+    }
+  } else {
+    alert("Please input amount in received amount field!");
   }
 };
 onMounted(() => {
