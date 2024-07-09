@@ -222,14 +222,74 @@
                     class="membership-item hover:bg-slate-100"
                   >
                     <span>Discount:</span>
-                    <span>{{
-                      vehicle.membership.membership_type.discount_amount ?? 0
-                    }}</span>
+                    <span
+                      >{{
+                        vehicle.membership.membership_type.discount_amount ?? 0
+                      }}৳</span
+                    >
                   </li>
                 </ul>
+                <div class="shadow-md p-2 mt-8">
+                  <ul class="flex flex-col gap-2">
+                    <li
+                      v-for="(item, index) in parking_rates"
+                      :key="item.id"
+                      class="bg-indigo-500 text-white p-1 rounded"
+                    >
+                      <span
+                        v-if="parking_rates?.length == 1"
+                        class="flex justify-between"
+                      >
+                        <span>Each half hour rate</span>
+                        <span>{{ item.rate }}৳</span>
+                      </span>
+                      <span v-else class="flex justify-between">
+                        <span>{{
+                          index == 0 ? "First half hour" : "Next half hour"
+                        }}</span>
+                        <span>{{ item.rate }}৳</span>
+                      </span>
+                    </li>
+                    <li class="flex justify-between">
+                      <span class="font-bold">Total: </span
+                      ><span class="font-bold"
+                        >{{ Number(parseFloat(totalCost)).toFixed(2) }}৳</span
+                      >
+                    </li>
+                  </ul>
+                </div>
               </div>
               <div v-else>
-                <AddMembership :vehicleId="vehicleId" />
+                <AddMembership @refetch="loadData" :vehicleId="vehicleId" />
+                <div class="shadow-md p-2">
+                  <ul class="flex flex-col gap-2">
+                    <li
+                      v-for="(item, index) in parking_rates"
+                      :key="item.id"
+                      class="bg-indigo-500 text-white p-1 rounded"
+                    >
+                      <span
+                        v-if="parking_rates?.length == 1"
+                        class="flex justify-between"
+                      >
+                        <span>Each half hour rate</span>
+                        <span>{{ item.rate }}৳</span>
+                      </span>
+                      <span v-else class="flex justify-between">
+                        <span>{{
+                          index == 0 ? "First half hour" : "Next half hour"
+                        }}</span>
+                        <span>{{ item.rate }}৳</span>
+                      </span>
+                    </li>
+                    <li class="flex justify-between">
+                      <span class="font-bold">Total: </span
+                      ><span class="font-bold"
+                        >{{ Number(parseFloat(totalCost)).toFixed(2) }}৳</span
+                      >
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -334,6 +394,7 @@ const parkingData = computed(() => {
       method: paymentMethod.value,
       paid_amount: Math.round(receivedAmount.value),
       payable_amount: Math.round(totalCost.value),
+      discount_amount: Math.round(discountAmount.value),
     },
   };
   return obj;
@@ -354,6 +415,7 @@ class CustomError extends Error {
 }
 const vehicleId = ref(null);
 const vehicle = ref(null);
+const discountAmount = ref(0);
 const loadData = async () => {
   try {
     isLoading.value = true;
@@ -366,22 +428,14 @@ const loadData = async () => {
       vehicleId.value = result?.vehicle?.id;
       vehicle.value = result?.vehicle;
 
-      // const differenceInMillis = currentTime.value.diff(result.in_time);
-
-      // // Create a duration object
-      // const duration = moment.duration(differenceInMillis);
-
-      // // Extract total time in minutes
-      // durationInMinutes.value = Math.ceil(duration.asMinutes());
-
       parking_rates.value = result.tariff.parking_rates;
-
+      discountAmount.value = 0;
       list.value = data.map((item) => {
         const duration = moment.duration(currentTime.value.diff(item.in_time));
         const hours = duration.hours();
         const minutes = duration.minutes();
         const seconds = duration.seconds();
-        const totalTime = `${hours}h ${minutes}m`;
+        const totalTime = `${hours}h ${minutes}m ${seconds}s`;
         let discount = 0;
         if (item?.vehicle?.membership?.membership_type) {
           const { discount_type, discount_amount } =
@@ -395,6 +449,7 @@ const loadData = async () => {
           } else if (discount_type == "free") {
             discount = totalCost.value;
           }
+          discountAmount.value = discount;
         }
         return {
           "Vehicle Number": item.vehicle?.number,
@@ -408,9 +463,10 @@ const loadData = async () => {
           "Check-out-Time": formatDate(currentTime.value),
           Status: item.vehicle?.status,
           Duration: totalTime,
-          "Total Amount": totalCost.value,
-          "Discount Applied": Number(discount).toFixed(2),
-          Subtotal: Number(totalCost.value - discount).toFixed(2),
+          "Total Amount": totalCost.value + "৳",
+          "Discount Applied": Number(discount).toFixed(2) + "৳",
+          Subtotal:
+            Math.round(Number(totalCost.value - discount).toFixed(2)) + "৳",
         };
       });
 
@@ -490,9 +546,7 @@ const checkoutAndprint = () => {
     console.log(totalCost.value, receivedAmount.value);
 
     const total = totalCost.value;
-    // const receivedAmount = receivedAmount.value;
-    // const rounded = total === receivedAmount;
-    if ((totalCost.value === receivedAmount.value)) {
+    if ((totalCost.value - discountAmount.value) === receivedAmount.value) {
       confirmCheckout();
     } else {
       if (total < receivedAmount) {
@@ -500,18 +554,17 @@ const checkoutAndprint = () => {
           confirmCheckout();
         }
       } else {
-        
         const text =
           "Are you sure receiving less amount than total? Payment will be due.";
         if (confirm(text)) {
-          paymentMethod.value = "due"
+          paymentMethod.value = "due";
           confirmCheckout();
           const errors = {
             paidAmount: [`Please pay ${totalCost.value} taka`],
           };
           throw new CustomError("Validation error", errors);
-        }else {
-          paymentMethod.value = "cash"
+        } else {
+          paymentMethod.value = "cash";
         }
       }
     }

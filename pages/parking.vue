@@ -1,6 +1,6 @@
 <template>
   <div class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
-    <div v-if="!isLoading && viweOn" class="md:mt-8 flow-root">
+    <div class="md:mt-8 flow-root">
       <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
           <!-- <OrderFilters
@@ -30,7 +30,7 @@
                   v-model="searchText"
                   @input="debouncedSearch"
                   type="text"
-                  placeholder="e.g. Search here"
+                  placeholder="e.g. Search by Barcode"
                 />
                 <XMarkIcon
                   v-if="searchText"
@@ -94,12 +94,12 @@
                   >
                     Payment status
                   </th>
-                  <th
+                  <!-- <th
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
                     Payment method
-                  </th>
+                  </th> -->
                   <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                     Action
                   </th>
@@ -115,12 +115,12 @@
             </table>
             <div v-else class="text-center py-10">
               <p class="text-xl text-gray-400">
-                <!-- {{ $t("you_have_no_transactions") }} -->
+                No data available
               </p>
             </div>
           </div>
           <div v-if="!loadingError && isLoading">
-            <Loading />
+            <!-- <Loading /> -->
           </div>
           <div v-if="loadingError && !isLoading">
             Loading error
@@ -198,7 +198,7 @@ const loadData = async (query = searchQuery.value) => {
 const searchText = ref("");
 const search = async () => {
   const q = searchText.value
-    ? searchQuery.value + `&barcode=${searchText.value}`
+    ? searchQuery.value + `&query=${searchText.value}`
     : searchQuery.value;
   loadData(q);
 };

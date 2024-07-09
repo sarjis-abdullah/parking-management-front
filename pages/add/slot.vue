@@ -98,7 +98,7 @@ const handlePlaceChange = () => {
 };
 onMounted(() => {
   getPlaces();
-  getCategories();
+  // getCategories();
 });
 
 const inputClass =
@@ -149,7 +149,7 @@ const inputClass =
           </select>
           <ErrorMessage :errors="validator.place.$errors" />
         </div>
-        <div class="grid gap-2">
+        <!-- <div class="grid gap-2">
           <label class="text-gray-500"
             >Category</label
           >
@@ -168,10 +168,9 @@ const inputClass =
             >
               {{ category.name }}
             </option>
-            <!-- Add more options as needed -->
           </select>
           <ErrorMessage :errors="validator.category.$errors" />
-        </div>
+        </div> -->
         <div class="grid gap-2">
           <label class="text-gray-500"
             >Floor<span class="text-red-500">*</span></label

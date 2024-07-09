@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen justify-center items-center">
+  <div :class="parentClass">
     <div
     role="status"
     class=""
@@ -25,6 +25,13 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+defineProps({
+  parentClass: {
+    type: String,
+    default: "flex h-screen justify-center items-center"
+  }
+})
+</script>
 
 <style lang="scss" scoped></style>

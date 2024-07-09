@@ -66,6 +66,12 @@
                   >
                     Vehicle No.
                   </th>
+                  <th
+                    scope="col"
+                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
+                    Total parked in count.
+                  </th>
                   <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                     Action
                   </th>
@@ -123,6 +129,11 @@
                       singleData?.vehicle?.number
                     }}</span>
                   </td>
+                  <td class="whitespace-nowrap px-3 py-5 text-sm">
+                    <span class="text-center bg-indigo-500 text-white p-2 rounded">{{
+                      singleData?.totalParkingCount
+                    }}</span>
+                  </td>
                   <td
                     class="flex justify-center gap-1 relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
                   >
@@ -154,7 +165,7 @@
             </table>
             <div v-else class="text-center py-10">
               <p class="text-xl text-gray-400">
-                <!-- {{ $t("you_have_no_transactions") }} -->
+                No data available
               </p>
             </div>
           </div>

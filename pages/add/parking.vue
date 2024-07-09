@@ -235,7 +235,6 @@ const inputClass =
 
 <template>
   <section class="">
-    <Loading v-if="loading" />
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
       <section class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div class="grid gap-2">
@@ -422,5 +421,6 @@ const inputClass =
         </div>
       </section>
     </form>
+    <Loading v-if="loading" parentClass="flex justify-center" />
   </section>
 </template>

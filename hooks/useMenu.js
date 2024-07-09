@@ -30,7 +30,7 @@ export const useMenu = () => {
   const router = useRouter();
   const state = reactive({
     menuItems: [
-      // { name: "Dashboard", href: "/dashboard", icon: HomeIcon, show: false },
+      { name: "Dashboard", href: "/dashboard", icon: HomeIcon, show: false },
       {
         name: "User",
         href: "/user",
@@ -123,12 +123,12 @@ export const useMenu = () => {
         ],
       },
       
-      {
-        name: "Reports",
-        href: "/reports",
-        icon: DocumentChartBarIcon,
-        show: false,
-      },
+      // {
+      //   name: "Reports",
+      //   href: "/reports",
+      //   icon: DocumentChartBarIcon,
+      //   show: false,
+      // },
     ],
   });
 

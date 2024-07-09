@@ -167,7 +167,7 @@
             </table>
             <div v-else class="text-center py-10">
               <p class="text-xl text-gray-400">
-                <!-- {{ $t("you_have_no_transactions") }} -->
+                No data available
               </p>
             </div>
           </div>
@@ -260,6 +260,7 @@ const deleteRecord = async (id) => {
       serverErrors.value = {};
       // handleReset();
     } catch (error) {
+      console.log(error, 1111);
       serverErrors.value = error.errors;
     } finally {
       isDeleting.value = false;
@@ -322,6 +323,9 @@ const updateRecord = async (id) => {
           item.default = record.default;
           item.editMode = false;
           return item;
+        }
+        if (record.default) {
+          item.default = false
         }
         return item;
       });

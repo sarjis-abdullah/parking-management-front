@@ -16,6 +16,8 @@ const {vehicleId} = defineProps({
         default: null
     }
 })
+
+const emit = defineEmits(['refetch'])
 const defaultData = {
   name: "",
   contactNumber: ""
@@ -54,6 +56,7 @@ const postItem = async () => {
     await MembershipService.create(tarifData.value);
     serverErrors.value = {};
     handleReset();
+    emit('refetch')
   } catch (error) {
     console.log(error, "error");
     serverErrors.value = error.errors;

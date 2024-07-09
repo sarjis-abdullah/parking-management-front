@@ -117,9 +117,32 @@
                       }}
                     </span>
                   </td>
-                  <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                    {{ singleData.default ? "Default" : "" }}
+                  <td class="whitespace-nowrap px-3 py-5 text-sm">
+                    <div
+                      v-if="singleData.editMode"
+                      class="flex items-center gap-1 mt-1 text-gray-500"
+                    >
+                      <input
+                        v-model="record.default"
+                        type="checkbox"
+                        value=""
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                      />
+                      <label class="text-gray-500">Marked as default</label>
+                      <!-- <input
+                        :class="inputClass"
+                        v-model="record.discount_amount"
+                        type="text"
+                        placeholder="e.g. Text about place"
+                      /> -->
+                    </div>
+                    <span v-else class="text-gray-900">{{
+                      singleData.default ? "Yes" : "No"
+                    }}</span>
                   </td>
+                  <!-- <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    {{ singleData.default ? "Default" : "" }}
+                  </td> -->
                   <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
                     <!-- Display payment rates -->
                     <ul>
@@ -169,9 +192,7 @@
               </tbody>
             </table>
             <div v-else class="text-center py-10">
-              <p class="text-xl text-gray-400">
-                <!-- {{ $t("you_have_no_transactions") }} -->
-              </p>
+              <p class="text-xl text-gray-400">No data available</p>
             </div>
           </div>
           <div v-if="!loadingError && isLoading">
@@ -225,7 +246,7 @@ const serverErrors = ref(null);
 
 //pagination
 const page = ref(1);
-const perPage = ref(2);
+const perPage = ref(10);
 const lastPage = ref(null);
 const total = ref(null);
 const totalPerPage = ref(null);
@@ -283,6 +304,7 @@ const record = reactive({
   name: "",
   startDate: "",
   endDate: "",
+  default: false,
 });
 const formatDateForInput = (date) => {
   if (!date) {
@@ -294,6 +316,7 @@ const formatDateForInput = (date) => {
 const editRecord = (props) => {
   record.id = props.id;
   record.name = props.name;
+  record.default = props.default;
   record.startDate = formatDateForInput(props.start_date);
   record.endDate = formatDateForInput(props.end_date);
   list.value = list.value.map((item) => {
@@ -315,6 +338,7 @@ const updateableRecord = computed(() => {
     name: record.name,
     start_date: record.startDate,
     end_date: record.endDate,
+    default: record.default,
   };
 });
 const cancelUpdatingRecord = async (id) => {
@@ -334,8 +358,12 @@ const updateRecord = async (id) => {
         item.name = record.name;
         item.start_date = record.startDate;
         item.end_date = record.endDate;
+        item.default = record.default;
         item.editMode = false;
         return item;
+      }
+      if (record.default) {
+        item.default = false;
       }
       return item;
     });

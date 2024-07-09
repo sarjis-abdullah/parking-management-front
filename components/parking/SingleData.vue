@@ -47,16 +47,10 @@
           {{ singleData?.payment?.method }}
         </div>
         <div>
-          <!-- <div class="flex justify-between gap-2">
-            <span>Method:</span>
-            <span class="font-bold text-right">{{
-              singleData?.payment?.method
-            }}</span>
-          </div> -->
           <div class="flex justify-between gap-2">
             <span>Paid:</span>
             <span class="font-bold text-right"
-              >{{ singleData?.payment?.paid_amount }}৳</span
+              >{{ Number(parseFloat(singleData?.payment?.paid_amount) +  parseFloat(singleData?.payment?.discount_amount ?? 0)).toFixed(2) }}৳</span
             >
           </div>
           <div class="flex justify-between gap-2">
@@ -67,7 +61,7 @@
           </div>
         </div>
       </div>
-      <div class="flex items-center justify-start gap-2" v-else>--</div>
+      <div class="flex items-center justify-center gap-2 bg-indigo-500 text-white text-center rounded-full py-2" v-else>Still in parking</div>
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
       <div>{{ singleData.vehicle?.driver_name }}</div>
@@ -76,12 +70,12 @@
     <td
       class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
     >
-      <div class="flex flex-col">
-        <nuxt-link :to="`/parking-checkin/${singleData.barcode}?view=1`"
+      <div class="flex flex-col gap-2">
+        <nuxt-link class="bg-orange-300 text-white rounded-md text-center py-1" :to="`/parking-checkin/${singleData.barcode}?view=1`"
           >Checkin view</nuxt-link
         >
-        <nuxt-link :to="`/parking-checkout/${singleData.barcode}`"
-          >Checkout</nuxt-link
+        <nuxt-link class="bg-orange-400 text-white rounded-md text-center py-1" :to="`/parking-checkout/${singleData.barcode}${singleData?.out_time ? '?view=1' : ''}`"
+          >Checkout {{ singleData?.out_time ? 'view' : '' }}</nuxt-link
         >
       </div>
       <!-- <select @change="handleActionChange" v-model="selectedAction" class="bg-white relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500">

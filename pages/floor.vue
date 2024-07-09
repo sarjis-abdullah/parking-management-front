@@ -115,7 +115,7 @@
             </table>
             <div v-else class="text-center py-10">
               <p class="text-xl text-gray-400">
-                <!-- {{ $t("you_have_no_transactions") }} -->
+                No data available
               </p>
             </div>
           </div>
