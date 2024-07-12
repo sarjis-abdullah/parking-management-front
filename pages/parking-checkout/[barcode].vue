@@ -195,7 +195,7 @@
                     v-if="vehicle?.status == 'checked_out'"
                     class="mt-6 w-full rounded-md border border-transparent bg-yellow-600 px-4 py-3 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                   >
-                    Vehicle is already checked-out
+                    Vehicle is checked-out
                   </div>
                   <!-- <button
                     v-else
@@ -597,8 +597,13 @@ const print = () => {
   }, 1);
 };
 const confirmCheckout = async () => {
-  await ParkingService.handleCheckout(parkingId.value, parkingData.value);
-  print();
+  try {
+    const result = await ParkingService.handleCheckout(parkingId.value + '?include=p.vehicle', parkingData.value);
+    vehicle.value = {...result?.data?.vehicle, status: 'checked_out'}
+    print();
+  } catch (error) {
+    
+  }
 };
 
 const checkoutAndprint = () => {
