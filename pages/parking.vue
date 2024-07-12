@@ -162,6 +162,7 @@ const loadingError = ref(null);
 const isLoading = ref(true);
 const serverErrors = ref(null);
 const viweOn = ref(false);
+const route = useRoute();
 
 //pagination
 const page = ref(1);
@@ -171,7 +172,11 @@ const total = ref(null);
 const totalPerPage = ref(null);
 
 const searchQuery = computed(() => {
-  return `?page=${page.value}&per_page=${perPage.value}&include=c.place,p.payment,p.vehicle`;
+  let query = ''
+  if (route?.query?.barcode) {
+    query += '&barcode=' + route?.query?.barcode
+  }
+  return `?page=${page.value}&per_page=${perPage.value}&include=c.place,p.payment,p.vehicle${query}`;
 });
 
 const loadData = async (query = searchQuery.value) => {
@@ -209,6 +214,9 @@ const onPageChanged = (p) => {
   loadData();
 };
 onMounted(() => {
+  if (route?.query?.barcode) {
+    searchText.value = route?.query?.barcode
+  }
   loadData();
 });
 </script>

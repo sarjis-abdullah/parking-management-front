@@ -162,23 +162,18 @@
                   </div>
                 </div>
                 <div class="flex justify-end flex-col gap-2">
-                  <div
-                    v-if="vehicle?.status == 'checked_out'"
-                    class="mt-6 w-full rounded-md border border-transparent bg-yellow-600 px-4 py-3 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50"
-                  >
-                    Vehicle is already checked-out
-                  </div>
-                  <div v-if="hasDuePayment">
-                    <ul>
-                      <li>
+                  
+                  <div v-if="hasDuePayment" style="border-radius: 0.5rem; background-color: rgb(243, 244, 246); padding: 0.75rem 1rem;">
+                    <ul class="flex flex-col gap-4">
+                      <li class="flex items-center justify-between gap-4">
                         <span>Payment status</span>
                         <span>{{ duePayment.method }}</span>
                       </li>
-                      <li>
+                      <li class="flex items-center justify-between gap-4">
                         <span>Paid:</span>
                         <span>{{ duePayment.paid_amount }}</span>
                       </li>
-                      <li>
+                      <li class="flex items-center justify-between gap-4">
                         <span>Payable</span>
                         <span>{{
                           Number(
@@ -191,12 +186,17 @@
                     </ul>
                     <button
                       @click="payDue()"
-                      class="rounded-md border border-transparent px-3 py-2 bg-green-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                      class="mt-6 w-full rounded-md border border-transparent px-3 py-2 bg-green-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                     >
                       Pay due
                     </button>
                   </div>
-
+                  <div
+                    v-if="vehicle?.status == 'checked_out'"
+                    class="mt-6 w-full rounded-md border border-transparent bg-yellow-600 px-4 py-3 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                  >
+                    Vehicle is already checked-out
+                  </div>
                   <!-- <button
                     v-else
                     id="mybutton"
@@ -648,24 +648,25 @@ const checkoutAndprint = () => {
   }
 };
 
+const router = useRouter()
 const payDue = async () => {
   const payable_amount = parseFloat(duePayment.value.payable_amount);
   const paid_amount = parseFloat(duePayment.value.paid_amount);
   const remaining = payable_amount - paid_amount - discountAmount.value;
   if (receivedAmount.value == remaining) {
-    // receivedAmountRef.value.focus();
     const obj = {
-      paid_amount: receivedAmount.value,
+      paid_amount: parseFloat(receivedAmount.value) + parseFloat(duePayment.value.paid_amount),
       method: paymentMethod.value,
       discount_amount: discountAmount.value,
     };
     try {
       await PaymentService.update(duePayment.value.id, obj);
+      router.push("/parking?barcode=" + barcode)
     } catch (error) {
       serverErrors.value = error.errors;
     }
   } else {
-    alert("Please input amount in received amount field!");
+    alert(`Please pay exact ${remaining} taka in received amount field!`);
   }
 };
 onMounted(() => {
