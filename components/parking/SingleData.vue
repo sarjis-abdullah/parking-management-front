@@ -50,7 +50,8 @@
           <div class="flex justify-between gap-2">
             <span>Paid:</span>
             <span class="font-bold text-right"
-              >{{ Number(parseFloat(singleData?.payment?.paid_amount) +  parseFloat(singleData?.payment?.discount_amount ?? 0)).toFixed(2) }}৳</span
+              >
+              {{ Number(parseFloat(singleData?.payment?.paid_amount) +  parseFloat(singleData?.payment?.discount_amount ?? 0)).toFixed(2) }}৳</span
             >
           </div>
           <div class="flex justify-between gap-2">

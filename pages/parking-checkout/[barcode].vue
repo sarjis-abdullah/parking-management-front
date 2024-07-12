@@ -255,8 +255,16 @@
                     <span
                       >{{
                         vehicle.membership.membership_type.discount_amount ?? 0
-                      }}৳</span
-                    >
+                      }}
+                      <span
+                        v-if="
+                          vehicle.membership?.membership_type?.discount_type ==
+                          'flat'
+                        "
+                        >৳</span
+                      >
+                      <span>%</span>
+                    </span>
                   </li>
                 </ul>
                 <div class="shadow-md p-2 mt-8">
@@ -426,7 +434,7 @@ const parkingData = computed(() => {
       method: paymentMethod.value,
       paid_amount: Math.round(receivedAmount.value),
       payable_amount: Math.round(totalCost.value),
-      discount_amount: Math.round(discountAmount.value),
+      discount_amount: Math.floor(discountAmount.value),
     },
   };
   return obj;
@@ -595,18 +603,26 @@ const confirmCheckout = async () => {
 
 const checkoutAndprint = () => {
   try {
-    console.log(
-      totalCost.value,
-      receivedAmount.value,
-      Math.ceil((totalCost.value - discountAmount.value)), receivedAmount.value
-    );
-    const subtotal = Math.ceil((totalCost.value - discountAmount.value))
-    const result = subtotal == receivedAmount.value
+    const subtotal = Math.ceil(totalCost.value - discountAmount.value);
+    const result = subtotal == receivedAmount.value;
     const total = subtotal;
+    console.log(
+      { totalCost: totalCost.value },
+      { receivedAmount: receivedAmount.value },
+      { discountAmount: discountAmount.value },
+      { subtotal: subtotal },
+      {
+        "totalCost.value - discountAmount.value": Math.ceil(
+          totalCost.value - discountAmount.value
+        ),
+      }
+    );
+
+    //return
     if (result) {
       confirmCheckout();
     } else {
-      if (total < receivedAmount) {
+      if (subtotal < receivedAmount.value) {
         if (confirm("Are you sure receiving more amount than total?")) {
           confirmCheckout();
         }
