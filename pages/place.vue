@@ -122,7 +122,7 @@
         </div>
       </div>
     </div>
-    <Error :error="serverErrors" />
+    <ServerError :error="serverErrors" />
     <Loading v-if="isLoading || isDeleting || isUpdating" />
     <Pagination
       class="mt-6"
@@ -146,7 +146,7 @@ import {
   CheckIcon,
   XMarkIcon,
 } from "@heroicons/vue/20/solid";
-import Error from "@/components/common/Error.vue";
+import ServerError from "@/components/common/Error.vue";
 
 definePageMeta({
   layout: "auth-layout",

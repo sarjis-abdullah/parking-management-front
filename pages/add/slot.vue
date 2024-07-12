@@ -9,6 +9,8 @@ import { PlaceService } from "@/services/PlaceService.js";
 import { SlotService } from "@/services/SlotService.js";
 import { CategoryService } from "~/services/CategoryService";
 import { FloorService } from "~/services/FloorService";
+import ClientErrors from "@/components/common/ClientErrors.vue";
+import ServerError from "@/components/common/Error.vue";
 
 definePageMeta({
   layout: "auth-layout",
@@ -126,7 +128,7 @@ const inputClass =
             type="text"
             placeholder="e.g. slot no 1"
           />
-          <ErrorMessage :errors="validator.name.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.name.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500"
@@ -147,7 +149,7 @@ const inputClass =
             </option>
             <!-- Add more options as needed -->
           </select>
-          <ErrorMessage :errors="validator.place.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.place.$errors" /> -->
         </div>
         <!-- <div class="grid gap-2">
           <label class="text-gray-500"
@@ -169,7 +171,7 @@ const inputClass =
               {{ category.name }}
             </option>
           </select>
-          <ErrorMessage :errors="validator.category.$errors" />
+          <ServerErrorMessage :errors="validator.category.$errors" />
         </div> -->
         <div class="grid gap-2">
           <label class="text-gray-500"
@@ -188,7 +190,7 @@ const inputClass =
             </option>
             <!-- Add more options as needed -->
           </select>
-          <ErrorMessage :errors="validator.floor.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.floor.$errors" /> -->
         </div>
         <!-- <div class="grid gap-2">
           <label class="text-gray-500">Identity</label>
@@ -198,7 +200,7 @@ const inputClass =
             type="text"
             placeholder="e.g. corrola 2012 model"
           />
-          <ErrorMessage :errors="validator.identity.$errors" />
+          <ServerErrorMessage :errors="validator.identity.$errors" />
         </div> -->
         <div class="grid gap-2">
           <label class="text-gray-500">Remarks</label>
@@ -208,9 +210,11 @@ const inputClass =
             type="text"
             placeholder="e.g. remarks"
           />
-          <ErrorMessage :errors="validator.remarks.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.remarks.$errors" /> -->
         </div>
       </section>
+      <ServerError :error="serverErrors" />
+      <ClientErrors :errors="validator.$errors" />
       <section>
         <div class="flex justify-end gap-2">
           <button

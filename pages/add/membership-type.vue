@@ -1,7 +1,7 @@
 <script setup>
 import AuthLayout from "../layouts/AuthLayout.vue";
 import ErrorMessage from "../components/common/ErrorMessage.vue";
-import Error from "@/components/common/Error.vue";
+import ServerError from "@/components/common/Error.vue";
 import ClientErrors from "@/components/common/ClientErrors.vue";
 import { ref, reactive, onMounted } from "vue";
 const formRef = ref(null);
@@ -139,7 +139,7 @@ const inputClass =
         </div>
         <small class="text-gray-500">{{notice}}</small>
       </div>
-      <Error :error="serverErrors" />
+      <ServerError :error="serverErrors" />
       <ClientErrors :errors="validator.$errors" />
       <section>
         <div class="flex justify-end gap-2">

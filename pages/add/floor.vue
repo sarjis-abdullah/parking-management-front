@@ -7,6 +7,8 @@ import { useVuelidate } from "@vuelidate/core";
 import { email, required, sameAs, helpers } from "@vuelidate/validators";
 import { PlaceService } from "@/services/PlaceService.js";
 import { FloorService } from "@/services/FloorService.js";
+import ClientErrors from "@/components/common/ClientErrors.vue";
+import ServerError from "@/components/common/Error.vue";
 
 definePageMeta({
   layout: "auth-layout",
@@ -79,13 +81,6 @@ const inputClass =
 <template>
   <section class="max-w-2xl">
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
-      <ul>
-        <li v-for="item in serverErrors" :key="item">
-          <span class="text-red-500">
-            -{{ item?.length ? item.toString() : 2 }}
-          </span>
-        </li>
-      </ul>
       <section class="grid grid-cols-1 gap-3">
         <div class="grid gap-2">
           <label class="text-gray-500">
@@ -97,7 +92,7 @@ const inputClass =
             type="text"
             placeholder="e.g. Ground/Basement floor"
           />
-          <ErrorMessage :errors="validator.name.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.name.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500">
@@ -117,7 +112,7 @@ const inputClass =
             </option>
             <!-- Add more options as needed -->
           </select>
-          <ErrorMessage :errors="validator.place.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.place.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500">Remarks</label>
@@ -127,9 +122,11 @@ const inputClass =
             type="text"
             placeholder="e.g. remarks"
           />
-          <ErrorMessage :errors="validator.remarks.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.remarks.$errors" /> -->
         </div>
       </section>
+      <ServerError :error="serverErrors" />
+      <ClientErrors :errors="validator.$errors" />
       <section>
         <div class="flex justify-end gap-2">
           <button

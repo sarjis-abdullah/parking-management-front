@@ -5,7 +5,7 @@ import { useVuelidate } from "@vuelidate/core";
 import { email, required, sameAs, helpers } from "@vuelidate/validators";
 import { UserService } from "@/services/UserService.js";
 import ClientErrors from "@/components/common/ClientErrors.vue";
-import Error from "@/components/common/Error.vue";
+import ServerError from "@/components/common/Error.vue";
 
 definePageMeta({
   layout: "auth-layout",
@@ -145,7 +145,7 @@ const inputClass =
           />
         </div>
       </section>
-      <Error :error="serverErrors" />
+      <ServerError :error="serverErrors" />
       <ClientErrors :errors="validator.$errors" />
       <section>
         <div class="flex justify-end gap-2">

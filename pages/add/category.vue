@@ -1,13 +1,14 @@
 <script setup>
 import AuthLayout from "../layouts/AuthLayout.vue";
 import ErrorMessage from "../components/common/ErrorMessage.vue";
-import Error from "@/components/common/Error.vue";
 import { ref, reactive, onMounted } from "vue";
 const formRef = ref(null);
 import { useVuelidate } from "@vuelidate/core";
 import { email, required, sameAs, helpers } from "@vuelidate/validators";
 import { CategoryService } from "@/services/CategoryService.js";
 import { PlaceService } from "@/services/PlaceService.js";
+import ClientErrors from "@/components/common/ClientErrors.vue";
+import ServerError from "@/components/common/Error.vue";
 
 definePageMeta({
   layout: "auth-layout",
@@ -73,7 +74,6 @@ const inputClass =
 <template>
   <section class="max-w-2xl">
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
-      <Error :error="serverErrors"/>
       <section class="grid grid-cols-1 gap-3">
         <div class="grid gap-2">
           <label class="text-gray-500">
@@ -85,7 +85,7 @@ const inputClass =
             type="text"
             placeholder="e.g. Car/Micro/Motor-cycle"
           />
-          <ErrorMessage :errors="validator.name.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.name.$errors" /> -->
         </div>
         
         <div class="grid gap-2">
@@ -96,9 +96,11 @@ const inputClass =
             type="text"
             placeholder="e.g. description"
           />
-          <ErrorMessage :errors="validator.description.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.description.$errors" /> -->
         </div>
       </section>
+      <ServerError :error="serverErrors" />
+      <ClientErrors :errors="validator.$errors" />
       <section>
         <div class="flex justify-end gap-2">
           <button

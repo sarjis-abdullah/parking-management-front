@@ -14,6 +14,8 @@ import { FloorService } from "~/services/FloorService";
 import { useDebounce } from "@/hooks/useDebounce";
 import { TariffService } from "~/services/TariffService";
 import { VehicleService } from "~/services/VehicleService";
+import ClientErrors from "@/components/common/ClientErrors.vue";
+import ServerError from "@/components/common/Error.vue";
 
 definePageMeta({
   layout: "auth-layout",
@@ -259,7 +261,7 @@ const inputClass =
             ></option>
           </datalist>
 
-          <ErrorMessage :errors="validator.vehicleNumber.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.vehicleNumber.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500"
@@ -279,7 +281,7 @@ const inputClass =
             </option>
             <!-- Add more options as needed -->
           </select>
-          <ErrorMessage :errors="validator.place.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.place.$errors" /> -->
         </div>
 
         <div class="grid gap-2">
@@ -304,7 +306,7 @@ const inputClass =
             </option>
             <!-- Add more options as needed -->
           </select>
-          <ErrorMessage :errors="validator.category.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.category.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500">Tariff</label>
@@ -325,7 +327,7 @@ const inputClass =
             </option>
             <!-- Add more options as needed -->
           </select>
-          <ErrorMessage :errors="validator.tariff.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.tariff.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500">Driver Name</label>
@@ -335,7 +337,7 @@ const inputClass =
             type="text"
             placeholder="e.g. John Doe"
           />
-          <ErrorMessage :errors="validator.driverName.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.driverName.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500">Driver Mobile</label>
@@ -345,9 +347,11 @@ const inputClass =
             type="text"
             placeholder="e.g. 01587616484"
           />
-          <ErrorMessage :errors="validator.driverMobile.$errors" />
+          <!-- <ServerErrorMessage :errors="validator.driverMobile.$errors" /> -->
         </div>
       </section>
+      <ServerError :error="serverErrors" />
+      <ClientErrors :errors="validator.$errors" />
       <div class="grid gap-2" v-if="floors && floors.length">
         <label class="text-gray-500"
           >Slot<span class="text-red-500">*</span></label
@@ -393,7 +397,7 @@ const inputClass =
               {{ slot.name }}
             </option>
           </select> -->
-        <ErrorMessage :errors="validator.slot.$errors" />
+        <ServerErrorMessage :errors="validator.slot.$errors" />
       </div>
       <ul>
         <li v-for="item in serverErrors" :key="item">

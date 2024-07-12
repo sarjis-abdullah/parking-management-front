@@ -139,7 +139,7 @@
         </div>
       </div>
     </div>
-    <Error :error="serverErrors" />
+    <ServerError :error="serverErrors" />
     <Loading v-if="isLoading || isDeleting || isUpdating" />
     <Pagination
       class="mt-6"
@@ -156,7 +156,7 @@ import { onMounted } from "vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { SlotService } from "@/services/SlotService.js";
-import Error from "@/components/common/Error.vue";
+import ServerError from "@/components/common/Error.vue";
 import Loading from "@/components/common/Loading.vue";
 import {
   TrashIcon,

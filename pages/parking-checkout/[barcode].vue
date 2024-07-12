@@ -334,7 +334,7 @@
             v-else-if="serverErrors && Object.keys(serverErrors)?.length"
             class="text-center py-10"
           >
-            <Errors :error="serverErrors" />
+            <ServerErrors :error="serverErrors" />
           </div>
         </div>
       </div>

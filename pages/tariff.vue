@@ -205,7 +205,7 @@
         </div>
       </div>
     </div>
-    <Error :error="serverErrors" />
+    <ServerError :error="serverErrors" />
     <Pagination
       class="mt-6"
       :perPage="perPage"
@@ -231,7 +231,7 @@ import {
 } from "@heroicons/vue/20/solid";
 import Loading from "@/components/common/Loading.vue";
 import ClientErrors from "@/components/common/ClientErrors.vue";
-import Error from "@/components/common/Error.vue";
+import ServerError from "@/components/common/Error.vue";
 
 definePageMeta({
   layout: "auth-layout",

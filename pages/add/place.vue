@@ -5,10 +5,12 @@ import { ref, reactive, onMounted } from "vue";
 const formRef = ref(null);
 import { useVuelidate } from "@vuelidate/core";
 import { email, required, sameAs, helpers } from "@vuelidate/validators";
-import {PlaceService} from "@/services/PlaceService.js";
+import { PlaceService } from "@/services/PlaceService.js";
+import ClientErrors from "@/components/common/ClientErrors.vue";
+import ServerError from "@/components/common/Error.vue";
 
 definePageMeta({
-  layout:"auth-layout",
+  layout: "auth-layout",
 });
 const defaultData = {
   name: "",
@@ -29,22 +31,22 @@ const loading = ref(false);
 const handleReset = async () => {
   await validator.value.$reset();
   for (let key in state) {
-    state[key] = '';
+    state[key] = "";
   }
   // formRef.value?.reset();
-  console.log('handleReset');
+  console.log("handleReset");
 };
 const postItem = async () => {
   try {
-    loading.value = true
-    await PlaceService.create(state)
+    loading.value = true;
+    await PlaceService.create(state);
     serverErrors.value = {};
-    handleReset()
+    handleReset();
   } catch (error) {
-    console.log(error, 'error.response');
+    console.log(error, "error.response");
     if (error.errors) {
       serverErrors.value = error.errors;
-    } 
+    }
   } finally {
     loading.value = false;
   }
@@ -63,61 +65,52 @@ const inputClass =
 </script>
 
 <template>
-    <section class="max-w-2xl">
-      <form
-        @submit.prevent="onSubmit"
-        ref="formRef"
-        class="grid gap-3"
-      >
-        <ul>
-          <li v-for="item in serverErrors" :key="item">
-            <span class="text-red-500">
-              -{{ item?.length ? item.toString() : 2 }}
-            </span>
-          </li>
-        </ul>
-        <section class="grid grid-cols-1 gap-3">
-          <div class="grid gap-2">
-            <label class="text-gray-500">
-              Name<span class="text-red-500">*</span>
-            </label>
-            <input
-              :class="inputClass"
-              v-model="state.name"
-              type="text"
-              placeholder="e.g. Khulshi town center"
-            />
-            <ErrorMessage :errors="validator.name.$errors" />
-          </div>
-          <div class="grid gap-2">
-            <label class="text-gray-500">Description</label>
-            <input
-              :class="inputClass"
-              v-model="state.description"
-              type="text"
-              placeholder="e.g. description"
-            />
-            <ErrorMessage :errors="validator.description.$errors" />
-          </div>
-        </section>
-        <section>
-          <div class="flex justify-end gap-2">
-            <button
-              type="button"
-              class="bg-gray-400 text-white px-2 py-1 rounded-md"
-              @click="handleReset"
-            >
-              Reset
-            </button>
-            <button
-              type="submit"
-              :disabled="loading"
-              class="bg-indigo-600 text-white px-2 py-1 rounded-md"
-            >
-              {{loading ? 'Processing' : 'Submit'}}
-            </button>
-          </div>
-        </section>
-      </form>
-    </section>
+  <section class="max-w-2xl">
+    <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
+      <section class="grid grid-cols-1 gap-3">
+        <div class="grid gap-2">
+          <label class="text-gray-500">
+            Name<span class="text-red-500">*</span>
+          </label>
+          <input
+            :class="inputClass"
+            v-model="state.name"
+            type="text"
+            placeholder="e.g. Khulshi town center"
+          />
+          <!-- <ServerErrorMessage :errors="validator.name.$errors" /> -->
+        </div>
+        <div class="grid gap-2">
+          <label class="text-gray-500">Description</label>
+          <input
+            :class="inputClass"
+            v-model="state.description"
+            type="text"
+            placeholder="e.g. description"
+          />
+          <!-- <ServerErrorMessage :errors="validator.description.$errors" /> -->
+        </div>
+      </section>
+      <ServerError :error="serverErrors" />
+      <ClientErrors :errors="validator.$errors" />
+      <section>
+        <div class="flex justify-end gap-2">
+          <button
+            type="button"
+            class="bg-gray-400 text-white px-2 py-1 rounded-md"
+            @click="handleReset"
+          >
+            Reset
+          </button>
+          <button
+            type="submit"
+            :disabled="loading"
+            class="bg-indigo-600 text-white px-2 py-1 rounded-md"
+          >
+            {{ loading ? "Processing" : "Submit" }}
+          </button>
+        </div>
+      </section>
+    </form>
+  </section>
 </template>
