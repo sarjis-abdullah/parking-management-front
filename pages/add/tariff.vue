@@ -138,7 +138,7 @@ const inputClass =
 </script>
 
 <template>
-  <section class="">
+  <section class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
       <section class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div class="grid gap-2">

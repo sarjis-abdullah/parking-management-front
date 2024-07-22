@@ -65,7 +65,7 @@ const inputClass =
 </script>
 
 <template>
-  <section class="max-w-2xl">
+  <section class="max-w-2xl rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
       <section class="grid grid-cols-1 gap-3">
         <div class="grid gap-2">

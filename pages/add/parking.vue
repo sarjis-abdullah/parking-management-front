@@ -57,6 +57,7 @@ const rules = computed(() => {
 const validator = useVuelidate(rules, state, { $lazy: true });
 
 const loading = ref(false);
+const initialLoading = ref(true);
 const selectedSlot = ref();
 const handleReset = async () => {
   await validator.value.$reset();
@@ -111,6 +112,7 @@ const getPlaces = async () => {
     loading.value = true;
     const { data } = await PlaceService.getAll("");
     places.value = data;
+    return Promise.resolve(data);
   } catch (error) {
   } finally {
     loading.value = false;
@@ -129,6 +131,7 @@ const getCategories = async () => {
     state.category = "";
     const { data } = await CategoryService.getAll();
     categories.value = data;
+    return Promise.resolve(data);
   } catch (error) {
   } finally {
     loading.value = false;
@@ -146,6 +149,7 @@ const getFloors = async () => {
     loading.value = true;
     const { data } = await FloorService.getAll(query);
     floors.value = data;
+    return Promise.resolve(data);
   } catch (error) {
   } finally {
     loading.value = false;
@@ -221,14 +225,22 @@ const debouncedSearch = useDebounce(search, 500);
 
 const tariffs = ref([]);
 const geTtariffs = async () => {
-  const { data } = await TariffService.getAll();
-  tariffs.value = data;
+  try {
+    const { data } = await TariffService.getAll();
+    tariffs.value = data;
+    return Promise.resolve(data);
+  } catch (error) {}
 };
-onMounted(() => {
-  getPlaces();
-  getCategories();
-  getFloors();
-  geTtariffs()
+onMounted(async () => {
+  try {
+    await getPlaces();
+    await getCategories();
+    await getFloors();
+    await geTtariffs();
+  } catch (error) {
+  } finally {
+    initialLoading.value = false;
+  }
 });
 
 const inputClass =
@@ -236,7 +248,7 @@ const inputClass =
 </script>
 
 <template>
-  <section class="">
+  <section class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
       <section class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div class="grid gap-2">
@@ -350,15 +362,16 @@ const inputClass =
           <!-- <ServerErrorMessage :errors="validator.driverMobile.$errors" /> -->
         </div>
       </section>
-      <ServerError :error="serverErrors" />
-      <ClientErrors :errors="validator.$errors" />
-      <div class="grid gap-2" v-if="floors && floors.length">
+      <div
+        class="grid gap-2 rounded-lg bg-indigo-100 shadow-lg p-6"
+        v-if="floors && floors.length"
+      >
         <label class="text-gray-500"
           >Slot<span class="text-red-500">*</span></label
         >
         <ul class="grid gap-2">
           <li v-for="(floor, index) in floors" :key="floor.id">
-            {{ floor.name }}
+            <span v-if="floor?.slots?.length">{{ floor.name }}</span>
             <ul class="grid grid-cols-3 md:grid-cols-6 gap-2">
               <li
                 v-for="(slot, i) in floor.slots"
@@ -367,7 +380,10 @@ const inputClass =
                 :class="getSlotClasses(slot)"
                 @click="handleSelectedSlot(slot)"
               >
-                <div>{{ slot.name }}</div>
+                <div class="grid gap-1">
+                  <span>{{ slot.name }}</span>
+                  <span>({{ slot.status }})</span>
+                </div>
                 <div>
                   <svg
                     class="h-6 w-6"
@@ -399,13 +415,9 @@ const inputClass =
           </select> -->
         <ServerErrorMessage :errors="validator.slot.$errors" />
       </div>
-      <ul>
-        <li v-for="item in serverErrors" :key="item">
-          <span class="text-red-500">
-            -{{ item?.length ? item.toString() : 2 }}
-          </span>
-        </li>
-      </ul>
+      <div v-else-if="!initialLoading">No floors are available</div>
+      <ServerError :error="serverErrors" />
+      <ClientErrors :errors="validator.$errors" />
       <section>
         <div class="flex justify-end gap-2">
           <button
