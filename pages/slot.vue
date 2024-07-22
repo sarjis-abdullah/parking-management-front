@@ -11,13 +11,8 @@
           @filterOrderBy="filterOrderBy"
           @downloadOrderStatement="downloadOrderStatement"
         /> -->
-          <header class="flex justify-between text-gray-900 mb-3 text-xl">
-            <h6>{{ "Slot List" }}</h6>
-            <Link to="/add/slot"> Add Slot </Link>
-          </header>
-          <!-- <pre>
-          {{ list }}
-        </pre> -->
+        <Titlebar title="slot"></Titlebar>
+
           <div v-if="!loadingError && !isLoading">
             <table
               class="min-w-full divide-y divide-gray-300"
@@ -158,6 +153,8 @@ import Pagination from "@/components/common/Pagination.vue";
 import { SlotService } from "@/services/SlotService.js";
 import ServerError from "@/components/common/Error.vue";
 import Loading from "@/components/common/Loading.vue";
+import Titlebar from "@/components/common/Titlebar.vue";
+
 import {
   TrashIcon,
   PencilIcon,

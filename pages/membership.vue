@@ -206,6 +206,7 @@ import {
 import Loading from "@/components/common/Loading.vue";
 import ServerError from "@/components/common/Error.vue";
 import { MembershipTypeService } from "~/services/MembershipTypeService";
+import Titlebar from "@/components/common/Titlebar.vue";
 
 definePageMeta({
   layout: "auth-layout",

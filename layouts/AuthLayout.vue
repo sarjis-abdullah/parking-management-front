@@ -85,9 +85,13 @@
                   />
                 </div>
                 <nav class="flex flex-1 flex-col">
+                  <!-- Mobile view -->
                   <ul role="list" class="flex flex-1 flex-col gap-y-7">
                     <li>
-                      <ul role="list" class="grid grid-cols-2 gap-2 -mx-2 space-y-1">
+                      <ul
+                        role="list"
+                        class="grid grid-cols-2 gap-2 -mx-2 space-y-1"
+                      >
                         <li
                           v-for="(item, index) in state.menuItems"
                           :key="index"
@@ -102,12 +106,19 @@
                               class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
                               :is="item.icon"
                             ></component>
-                            <nuxt-link v-if="!(item?.children?.length)" @click="sidebarOpen = false" class="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md text-sm leading-6 font-semibold" :to="item.href">{{
-                              item.name
-                            }}</nuxt-link>
-                            <span v-else class="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md text-sm leading-6 font-semibold" :to="item.href">{{
-                              item.name
-                            }}</span>
+                            <nuxt-link
+                              v-if="!item?.children?.length"
+                              @click="sidebarOpen = false"
+                              class="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md text-xs leading-6"
+                              :to="item.href"
+                              >{{ item.name }}</nuxt-link
+                            >
+                            <span
+                              v-else
+                              class="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md text-xs leading-6"
+                              :to="item.href"
+                              >{{ item.name }}</span
+                            >
                           </a>
                           <ul
                             v-if="item.show && item.children"
@@ -117,7 +128,7 @@
                               v-for="(child, idx) in item.children"
                               :key="idx"
                               @click="sidebarOpen = false"
-                              class="flex gap-2"
+                              class="flex gap-2 items-center"
                             >
                               <component
                                 v-if="child.icon"
@@ -125,7 +136,7 @@
                                 :is="child.icon"
                               ></component>
 
-                              <nuxt-link :to="child.href">{{
+                              <nuxt-link :to="child.href" class="text-xs">{{
                                 child.name
                               }}</nuxt-link>
                             </li>
@@ -159,6 +170,8 @@
         </div>
         <nav class="flex flex-1 flex-col">
           <ul role="list" class="flex flex-1 flex-col gap-y-7">
+            <!-- Desktop view -->
+
             <li
               v-for="(item, index) in state.menuItems"
               :key="index"
@@ -170,7 +183,9 @@
                   class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
                   :is="item.icon"
                 ></component>
-                <nuxt-link v-if="!(item?.children?.length)" :to="item.href">{{ item.name }}</nuxt-link>
+                <nuxt-link v-if="!item?.children?.length" :to="item.href">{{
+                  item.name
+                }}</nuxt-link>
                 <span v-else>{{ item.name }}</span>
               </a>
               <ul v-if="item.show && item.children" class="ml-8 mt-4">
@@ -197,8 +212,18 @@
     <div class="lg:pl-72">
       <div class="sticky top-0 z-40 lg:mx-auto lg:max-w-7xl lg:px-8">
         <div
-          class="flex md:hidden h-16 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-0 lg:shadow-none"
+          class="flex md:hidden h-16 items-center justify-between gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-0 lg:shadow-none"
         >
+          <div>
+            <img
+              class="h-8 w-auto"
+              src="/assets/khulshi.png"
+              alt="Your Company"
+            />
+          </div>
+          <div class="font-bold capitalize text-lg">
+            {{ getTitle }}
+          </div>
           <button
             type="button"
             class="-m-2.5 p-2.5 text-gray-700 lg:hidden"
@@ -209,8 +234,6 @@
           </button>
 
           <!-- Separator -->
-
-          
         </div>
       </div>
 
@@ -264,134 +287,48 @@ watch(
     setActiveMenu();
   }
 );
-const rawNavigation = ref([
-  { name: "Dashboard", href: "/dashboard", icon: HomeIcon, show: false },
-  {
-    name: "User",
-    href: "/user",
-    icon: UsersIcon,
-    show: false,
-    children: [
-      { name: "Add", href: "/add/user" },
-      { name: "List", href: "/user" },
-    ],
-  },
-  {
-    name: "Place",
-    href: "/place",
-    icon: CalendarIcon,
-    show: false,
-    children: [
-      { name: "Add", href: "/add/place" },
-      { name: "List", href: "/place" },
-    ],
-  },
-  {
-    name: "Category",
-    href: "/category",
-    icon: DocumentDuplicateIcon,
-    show: false,
-    children: [
-      { name: "Add", href: "/add/category" },
-      { name: "List", href: "/category" },
-    ],
-  },
-  {
-    name: "Floor",
-    href: "/floor",
-    icon: ChartPieIcon,
-    show: false,
-    children: [
-      { name: "Add", href: "/add/floor" },
-      { name: "List", href: "/floor" },
-    ],
-  },
-  {
-    name: "Tariff",
-    href: "/tariff",
-    icon: ChartPieIcon,
-    show: false,
-    children: [
-      { name: "Add", href: "/add/tariff" },
-      { name: "List", href: "/tariff" },
-    ],
-  },
-  {
-    name: "Slot setup",
-    href: "/slot",
-    icon: ChartPieIcon,
-    show: false,
-    children: [
-      { name: "Add", href: "/add/slot" },
-      { name: "List", href: "/slot" },
-    ],
-  },
-  {
-    name: "Parking",
-    href: "/parking",
-    icon: ChartPieIcon,
-    show: false,
-    children: [
-      { name: "Add", href: "/add/parking" },
-      { name: "List", href: "/parking" },
-    ],
-  },
-  {
-    name: "Reports",
-    href: "/reports",
-    icon: ChartPieIcon,
-    show: false,
-    children: [
-      { name: "parking", href: "/reports/parking" },
-      { name: "transaction", href: "reports/transaction" },
-    ],
-  },
-]);
-const navigation = computed(() => {
-  return rawNavigation.value.map((item) => {
-    // console.log(route.name, item.href);
-    const href = item.href.split("/")[1];
-    // console.log(href);
-    return {
-      ...item,
-      // show: false,
-      current: route.name.includes(href),
-      children: item?.children?.length
-        ? item.children.map((child) => {
-            const href = item.href.split("/")[1];
-            return {
-              ...child,
-              current: !!(child.href == route.path),
-            };
-          })
-        : [],
-    };
-  });
+const routeName = computed(() => useRoute().name);
+const getTitle = computed(() => {
+  switch (routeName.value) {
+    case "place":
+      return "Place list";
+    case "slot":
+      return "Slot list";
+    case "parking":
+      return "Parking list";
+    case "category":
+      return "Category list";
+    case "floor":
+      return "Floor list";
+    case "membership-type":
+      return "Membership types";
+    case "membership":
+      return "Membership list";
+    case "tariff":
+      return "Tariff list";
+    case "user":
+      return "User list";
+    case "add-user":
+      return "Add user";
+    case "add-floor":
+      return "Add floor";
+    case "add-category":
+      return "Add category";
+    case "add-membership-type":
+      return "Membership type";
+    case "add-parking":
+      return "Add parking";
+    case "add-place":
+      return "Add place";
+    case "add-slot":
+      return "Add slot";
+    case "add-tariff":
+      return "Add tariff";
+
+    default:
+      return routeName;
+  }
 });
-const teams = [
-  { id: 1, name: "Heroicons", href: "#", initial: "H", current: false },
-  { id: 2, name: "Tailwind Labs", href: "#", initial: "T", current: false },
-  { id: 3, name: "Workcation", href: "#", initial: "W", current: false },
-];
-const userNavigation = [
-  { name: "Your profile", href: "#" },
-  { name: "Sign out", href: "#" },
-];
-const showChild = (key) => {
-  rawNavigation.value = rawNavigation.value.map((item) => {
-    console.log(item.href, 7777, key);
-    if (item.href == key) {
-      return {
-        ...item,
-        show: !item.show,
-      };
-    }
-    return {
-      ...item,
-      show: false,
-    };
-  });
-};
 const barcode = ref("");
 const checkout = () => {
   // window.location.href='/parking-checkout/'

@@ -11,10 +11,7 @@
           @filterOrderBy="filterOrderBy"
           @downloadOrderStatement="downloadOrderStatement"
         /> -->
-          <header class="flex justify-between text-gray-900 mb-3 text-xl">
-            <h6>{{ "Category List" }}</h6>
-            <Link to="/add/category"> Add Vehicle Category </Link>
-          </header>
+          <Titlebar title="category"></Titlebar>
           <!-- <pre>
           {{ list }}
         </pre> -->
@@ -138,6 +135,7 @@
 import { onMounted } from "vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
+import Titlebar from "@/components/common/Titlebar.vue";
 import { CategoryService } from "@/services/CategoryService.js";
 import {
   TrashIcon,

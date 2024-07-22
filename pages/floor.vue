@@ -11,13 +11,8 @@
           @filterOrderBy="filterOrderBy"
           @downloadOrderStatement="downloadOrderStatement"
         /> -->
-          <header class="flex justify-between text-gray-900 mb-3 text-xl">
-            <h6>{{ "Floor List" }}</h6>
-            <Link to="/add/floor"> Add Floor </Link>
-          </header>
-          <!-- <pre>
-          {{ list }}
-        </pre> -->
+        <Titlebar title="floor"></Titlebar>
+
           <div v-if="!loadingError && !isLoading">
             <table
               class="min-w-full divide-y divide-gray-300"
@@ -146,6 +141,8 @@ import { onMounted } from "vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { FloorService } from "@/services/FloorService.js";
+import Titlebar from "@/components/common/Titlebar.vue";
+
 import {
   TrashIcon,
   PencilIcon,

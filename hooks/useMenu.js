@@ -93,7 +93,7 @@ export const useMenu = () => {
         ],
       },
       {
-        name: "Membership type",
+        name: "Member type",
         href: "/membership",
         icon: shallowRef(UserGroupIcon),
         show: false,

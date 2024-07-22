@@ -11,13 +11,8 @@
             @filterOrderBy="filterOrderBy"
             @downloadOrderStatement="downloadOrderStatement"
           /> -->
-          <header class="flex justify-between text-gray-900 mb-3 text-xl">
-            <h6>{{ "User List" }}</h6>
-            <Link to="/add/user"> Add User </Link>
-          </header>
-          <!-- <pre>
-            {{ users }}
-          </pre> -->
+          <Titlebar title="user"></Titlebar>
+
           <div v-if="!loadingError && !isLoading">
             <table
               class="min-w-full divide-y divide-gray-300"
@@ -123,6 +118,7 @@ import Pagination from "@/components/common/Pagination.vue";
 import Loading from "@/components/common/Loading.vue";
 import { UserService } from "@/services/UserService.js";
 import { TrashIcon } from "@heroicons/vue/20/solid";
+import Titlebar from "@/components/common/Titlebar.vue";
 
 definePageMeta({
   layout: "auth-layout",

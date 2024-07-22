@@ -11,13 +11,8 @@
           @filterOrderBy="filterOrderBy"
           @downloadOrderStatement="downloadOrderStatement"
         /> -->
-          <header class="flex justify-between text-gray-900 mb-3 text-xl">
-            <h6>{{ "Membership type list" }}</h6>
-            <Link to="/add/membership-type"> Setup membership type</Link>
-          </header>
-          <!-- <pre>
-          {{ list }}
-        </pre> -->
+        <Titlebar title="membership-type"></Titlebar>
+
           <div v-if="!loadingError && !isLoading">
             <table
               class="min-w-full divide-y divide-gray-300"
@@ -196,6 +191,7 @@
 <script setup>
 import { onMounted } from "vue";
 import Link from "@/components/common/Link.vue";
+import Titlebar from "@/components/common/Titlebar.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { MembershipTypeService } from "~/services/MembershipTypeService.js";
 import {

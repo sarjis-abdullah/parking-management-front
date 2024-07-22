@@ -11,10 +11,8 @@
             @filterOrderBy="filterOrderBy"
             @downloadOrderStatement="downloadOrderStatement"
           /> -->
-          <header class="flex justify-between text-gray-900 mb-3 text-xl">
-            <h6>{{ "Place List" }}</h6>
-            <Link to="/add/place"> Add Place </Link>
-          </header>
+          <Titlebar title="place"></Titlebar>
+
           <!-- <pre>
             {{ list }}
           </pre> -->
@@ -147,6 +145,7 @@ import {
   XMarkIcon,
 } from "@heroicons/vue/20/solid";
 import ServerError from "@/components/common/Error.vue";
+import Titlebar from "@/components/common/Titlebar.vue";
 
 definePageMeta({
   layout: "auth-layout",

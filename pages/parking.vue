@@ -150,6 +150,7 @@ import SingleData from "@/components/parking/SingleData.vue";
 import { ParkingService } from "@/services/ParkingService.js";
 import { XMarkIcon, PlusIcon } from "@heroicons/vue/24/outline";
 import { useDebounce } from "~/hooks/useDebounce";
+import Titlebar from "@/components/common/Titlebar.vue";
 
 definePageMeta({
   layout: "auth-layout",
