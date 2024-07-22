@@ -47,19 +47,9 @@
                 <tr v-for="user in users" :key="user.id">
                   <td class="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
                     <div class="flex items-center">
-                      <div class="h-10 w-10 flex-shrink-0">
-                        <img
-                          class="h-10 w-10 rounded-full"
-                          src="https://cdn-staging.inaia.cloud/icons/gold-delivery.png"
-                          alt=""
-                        />
-                      </div>
-                      <div class="ml-4">
+                      <div class="">
                         <div class="font-medium text-gray-900">
                           {{ user.name }}
-                        </div>
-                        <div class="mt-1 text-gray-500">
-                          <!-- {{ $d(getExecutionDate(order)) }} -->
                         </div>
                       </div>
                     </div>
