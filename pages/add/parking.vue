@@ -249,6 +249,9 @@ const inputClass =
 
 <template>
   <section class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
+    <header class="flex justify-between text-gray-900 pb-4 text-xl">
+      <h6 class="text-2xl font-bold">{{ "Add parking" }}</h6>
+    </header>
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
       <section class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div class="grid gap-2">
@@ -415,7 +418,7 @@ const inputClass =
           </select> -->
         <ServerErrorMessage :errors="validator.slot.$errors" />
       </div>
-      <div v-else-if="!initialLoading">No floors are available</div>
+      <div v-else-if="!initialLoading" class="text-red-500 text-center py-4">No floors are available</div>
       <ServerError :error="serverErrors" />
       <ClientErrors :errors="validator.$errors" />
       <section>
