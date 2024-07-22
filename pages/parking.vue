@@ -11,45 +11,29 @@
           @filterOrderBy="filterOrderBy"
           @downloadOrderStatement="downloadOrderStatement"
         /> -->
-          <header
-            class="flex gap-4 flex-col md:flex-row md:justify-between text-gray-900 mb-3 text-xl"
-          >
-            <h6 class="flex gap-2">
-              <span>{{ "Parking List" }}</span>
-              <Link to="/add/parking" class="md:hidden">
-                <PlusIcon
-                  class="h-5 w-5 bg-indigo-500 cursor-pointer"
-                  aria-hidden="true"
-                />
-              </Link>
-            </h6>
-            <div class="flex items-center gap-2">
-              <div class="flex items-center gap-2">
-                <input
-                  :class="inputClass"
-                  v-model="searchText"
-                  @input="debouncedSearch"
-                  type="text"
-                  placeholder="e.g. Search by Barcode"
-                />
-                <XMarkIcon
-                  v-if="searchText"
-                  @click="
-                    () => {
-                      searchText = '';
-                      loadData();
-                    }
-                  "
-                  class="h-5 w-5 text-red-500 cursor-pointer"
-                  aria-hidden="true"
-                />
-              </div>
-              <Link to="/add/parking" class="hidden md:inline-block"> Add Parking </Link>
+          
+          <Titlebar title="parking">
+            <div v-if="list && list?.length > 0" class="flex items-center gap-2">
+              <input
+                :class="inputClass"
+                v-model="searchText"
+                @input="debouncedSearch"
+                type="text"
+                placeholder="e.g. Search by Barcode"
+              />
+              <XMarkIcon
+                v-if="searchText"
+                @click="
+                  () => {
+                    searchText = '';
+                    loadData();
+                  }
+                "
+                class="h-5 w-5 text-red-500 cursor-pointer"
+                aria-hidden="true"
+              />
             </div>
-          </header>
-          <!-- <pre>
-          {{ list }}
-        </pre> -->
+          </Titlebar>
           <div v-if="!loadingError && !isLoading" class="overflow-x-auto">
             <table
               class="min-w-full divide-y divide-gray-300"
@@ -114,9 +98,7 @@
               </tbody>
             </table>
             <div v-else class="text-center py-10">
-              <p class="text-xl text-gray-400">
-                No data available
-              </p>
+              <p class="text-xl text-gray-400">No data available</p>
             </div>
           </div>
           <div v-if="!loadingError && isLoading">
@@ -173,9 +155,9 @@ const total = ref(null);
 const totalPerPage = ref(null);
 
 const searchQuery = computed(() => {
-  let query = ''
+  let query = "";
   if (route?.query?.barcode) {
-    query += '&barcode=' + route?.query?.barcode
+    query += "&barcode=" + route?.query?.barcode;
   }
   return `?page=${page.value}&per_page=${perPage.value}&include=c.place,p.payment,p.vehicle${query}`;
 });
@@ -216,7 +198,7 @@ const onPageChanged = (p) => {
 };
 onMounted(() => {
   if (route?.query?.barcode) {
-    searchText.value = route?.query?.barcode
+    searchText.value = route?.query?.barcode;
   }
   loadData();
 });

@@ -290,6 +290,8 @@ watch(
 const routeName = computed(() => useRoute().name);
 const getTitle = computed(() => {
   switch (routeName.value) {
+    case "dashboard":
+      return "Dashboard";
     case "place":
       return "Place list";
     case "slot":

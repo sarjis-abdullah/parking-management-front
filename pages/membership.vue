@@ -12,8 +12,8 @@
           @downloadOrderStatement="downloadOrderStatement"
         /> -->
           <header class="flex justify-between text-gray-900 mb-3 text-xl">
-            <h6>{{ "Membership List" }}</h6>
-            <div class="flex items-center gap-2">
+            <h6 class="hidden md:inline-block">{{ "Membership List" }}</h6>
+            <div v-if="list && list?.length > 0" class="flex items-center gap-2">
               <input
                 :class="inputClass"
                 v-model="searchText"
