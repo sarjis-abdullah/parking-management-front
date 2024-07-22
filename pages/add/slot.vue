@@ -109,6 +109,9 @@ const inputClass =
 
 <template>
   <section class="max-w-2xl rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
+    <header class="hidden md:flex justify-between text-gray-900 mb-3 text-xl">
+      <h6 class="hidden md:inline-block capitalize">{{ 'Add Slot' }}</h6>
+    </header>
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
       <ul>
         <li v-for="item in serverErrors" :key="item">

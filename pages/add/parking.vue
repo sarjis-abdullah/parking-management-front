@@ -249,6 +249,9 @@ const inputClass =
 
 <template>
   <section class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
+    <header class="hidden md:flex justify-between text-gray-900 mb-3 text-xl">
+      <h6 class="hidden md:inline-block capitalize">{{ 'Add Parking' }}</h6>
+    </header>
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
       <section class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div class="grid gap-2">
