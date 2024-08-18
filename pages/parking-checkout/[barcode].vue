@@ -162,8 +162,14 @@
                   </div>
                 </div>
                 <div class="flex justify-end flex-col gap-2">
-                  
-                  <div v-if="hasDuePayment" style="border-radius: 0.5rem; background-color: rgb(243, 244, 246); padding: 0.75rem 1rem;">
+                  <div
+                    v-if="hasDuePayment"
+                    style="
+                      border-radius: 0.5rem;
+                      background-color: rgb(243, 244, 246);
+                      padding: 0.75rem 1rem;
+                    "
+                  >
                     <ul class="flex flex-col gap-4">
                       <li class="flex items-center justify-between gap-4">
                         <span>Payment status</span>
@@ -263,7 +269,14 @@
                         "
                         >৳</span
                       >
-                      <span>%</span>
+                      <span
+                        v-else-if="
+                          vehicle.membership?.membership_type?.discount_type ==
+                          'percentage'
+                        "
+                        >%</span
+                      >
+                      <span v-else>Free</span>
                     </span>
                   </li>
                 </ul>
@@ -398,7 +411,8 @@ const durationInMinutes = computed(() => {
   if (!result) {
     return 0;
   }
-  const differenceInMillis = currentTime.value.diff(result.in_time);
+  const inTime = moment(result.in_time)
+  const differenceInMillis = currentTime.value.diff(inTime);
 
   // Create a duration object
   const duration = moment.duration(differenceInMillis);
@@ -492,9 +506,9 @@ const loadData = async () => {
           currentTime.value = moment(item.out_time);
         }
         const duration = moment.duration(currentTime.value.diff(item.in_time));
-        const hours = duration.hours();
-        const minutes = duration.minutes();
-        const seconds = duration.seconds();
+        const hours = Math.floor(duration.asHours());
+        const minutes = Math.floor(duration.minutes());
+        const seconds = Math.floor(duration.seconds());
         const totalTime = `${hours}h ${minutes}m ${seconds}s`;
         let discount = 0;
         if (item?.vehicle?.membership?.membership_type) {
@@ -598,12 +612,13 @@ const print = () => {
 };
 const confirmCheckout = async () => {
   try {
-    const result = await ParkingService.handleCheckout(parkingId.value + '?include=p.vehicle', parkingData.value);
-    vehicle.value = {...result?.data?.vehicle, status: 'checked_out'}
+    const result = await ParkingService.handleCheckout(
+      parkingId.value + "?include=p.vehicle",
+      parkingData.value
+    );
+    vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
     print();
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 };
 
 const checkoutAndprint = () => {
@@ -653,20 +668,22 @@ const checkoutAndprint = () => {
   }
 };
 
-const router = useRouter()
+const router = useRouter();
 const payDue = async () => {
   const payable_amount = parseFloat(duePayment.value.payable_amount);
   const paid_amount = parseFloat(duePayment.value.paid_amount);
   const remaining = payable_amount - paid_amount - discountAmount.value;
   if (receivedAmount.value == remaining) {
     const obj = {
-      paid_amount: parseFloat(receivedAmount.value) + parseFloat(duePayment.value.paid_amount),
+      paid_amount:
+        parseFloat(receivedAmount.value) +
+        parseFloat(duePayment.value.paid_amount),
       method: paymentMethod.value,
       discount_amount: discountAmount.value,
     };
     try {
       await PaymentService.update(duePayment.value.id, obj);
-      router.push("/parking?barcode=" + barcode)
+      router.push("/parking?barcode=" + barcode);
     } catch (error) {
       serverErrors.value = error.errors;
     }
