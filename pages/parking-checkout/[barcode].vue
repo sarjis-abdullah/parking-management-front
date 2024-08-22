@@ -18,19 +18,28 @@
                     "
                   >
                     <div style="position: relative; width: 100%">
-                      <img
-                        :src="'data:image/png;base64,' + barcodeImage"
-                        alt=""
-                        style="width: 100%"
-                      />
                       <div
+                        class="grid grid-cols-2"
                         style="
-                          position: absolute;
-                          inset: 0;
-                          border-radius: 1rem;
+                          display: flex;
+                          justify-content: center;
                           border: 1px solid rgba(0, 0, 0, 0.1);
+                          padding: 0.5rem;
+                          border-radius: 1rem;
                         "
-                      ></div>
+                      >
+                        <img src="/assets/khulshi.png" style="max-height: 3rem" alt="Your Company" />
+                        <span></span>
+                        <span></span>
+                        <!-- <img
+                          :src="'data:image/png;base64,' + barcodeImage"
+                          alt="barcode"
+                          style="width: auto; min-height: 3rem;"
+                        />
+                      </div> -->
+                      </div>
+
+                      <div style="position: absolute; inset: 0"></div>
                     </div>
 
                     <dl
@@ -119,6 +128,31 @@
                           placeholder="0.00 taka"
                           ref="receivedAmountRef"
                         />
+                      </div>
+                      <div style="position: relative; width: 100%; margin-top: 1rem">
+                        <div
+                          class=""
+                          style="
+                          display: flex;
+                          justify-content: center;
+                            border: 1px solid rgba(0, 0, 0, 0.1);
+                            padding: 0.5rem;
+                            border-radius: 1rem;
+                          "
+                        >
+                          <!-- <img
+                          src="/assets/khulshi.png"
+                          alt="Your Company"
+                        />
+                        <span></span> -->
+                          <img
+                            :src="'data:image/png;base64,' + barcodeImage"
+                            alt="barcode"
+                            style="width: auto"
+                          />
+                        </div>
+
+                        <div style="position: absolute; inset: 0"></div>
                       </div>
                       <!-- <div
                         data-v-61884e8b=""
@@ -211,7 +245,7 @@
                   >
                     Checkout
                   </button> -->
-                  <div v-if="vehicle?.status != 'checked_out'">
+                  <div v-if="vehicle?.status != 'checked_out'" class="mx-4 mt-4">
                     <button
                       @click="checkoutAndprint()"
                       class="rounded-md border w-full border-transparent px-3 py-2 bg-green-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
@@ -411,7 +445,7 @@ const durationInMinutes = computed(() => {
   if (!result) {
     return 0;
   }
-  const inTime = moment(result.in_time)
+  const inTime = moment(result.in_time);
   const differenceInMillis = currentTime.value.diff(inTime);
 
   // Create a duration object
@@ -613,7 +647,7 @@ const print = () => {
 const confirmCheckout = async () => {
   try {
     const result = await ParkingService.handleCheckout(
-      parkingId.value + "?include=p.vehicle",
+      parkingId.value + "?include=p.vehicle,v.membership",
       parkingData.value
     );
     vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };

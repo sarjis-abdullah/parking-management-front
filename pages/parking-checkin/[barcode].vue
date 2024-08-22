@@ -16,19 +16,23 @@
                     "
                   >
                     <div style="position: relative; width: 100%">
-                      <img
-                        :src="'data:image/png;base64,' + barcodeImage"
-                        alt=""
-                        style="width: 100%"
-                      />
                       <div
                         style="
-                          position: absolute;
-                          inset: 0;
-                          border-radius: 1rem;
+                          display: flex;
+                          justify-content: center;
                           border: 1px solid rgba(0, 0, 0, 0.1);
+                          padding: 0.5rem;
+                          border-radius: 1rem;
                         "
-                      ></div>
+                      >
+                        <img
+                          src="/assets/khulshi.png"
+                          style="max-height: 3rem"
+                          alt="Your Company"
+                        />
+                      </div>
+
+                      <div style="position: absolute; inset: 0"></div>
                     </div>
 
                     <dl
@@ -61,9 +65,31 @@
                         </dd>
                       </div>
                     </dl>
+                    <div
+                      style="position: relative; width: 100%; margin-top: 1rem"
+                    >
+                      <div
+                        style="
+                          border: 1px solid rgba(0, 0, 0, 0.1);
+                          padding: 0.5rem;
+                          border-radius: 1rem;
+                          display: flex;
+                          justify-content: center;
+                        "
+                      >
+                        <img
+                          :src="'data:image/png;base64,' + barcodeImage"
+                          alt="barcode"
+                          style="width: auto; min-height: 3rem"
+                        />
+                      </div>
+
+                      <div style="position: absolute; inset: 0"></div>
+                    </div>
                   </div>
                 </div>
-                <button
+                <div class="mx-4">
+                  <button
                   data-v-61884e8b=""
                   @click="print"
                   type="submit"
@@ -71,6 +97,7 @@
                 >
                   Print
                 </button>
+                </div>
               </div>
             </div>
 
@@ -150,7 +177,7 @@ const loadData = async () => {
 
       if (!routeQuery.value.view) {
         setTimeout(() => {
-          print()
+          print();
         }, 1);
       }
     } else {
