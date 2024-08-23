@@ -28,7 +28,11 @@
                           border-radius: 1rem;
                         "
                       >
-                        <img src="/assets/khulshi.png" style="max-height: 3rem" alt="Your Company" />
+                        <img
+                          src="/assets/khulshi.png"
+                          style="max-height: 3rem"
+                          alt="Your Company"
+                        />
                         <span></span>
                         <span></span>
                         <!-- <img
@@ -73,7 +77,7 @@
                       </div>
 
                       <div
-                        data-v-61884e8b=""
+                        id="paymentMethodId"
                         style="
                           display: flex;
                           align-items: center;
@@ -105,7 +109,17 @@
                         </select>
                       </div>
                       <div
-                        data-v-61884e8b=""
+                        id="111"
+                        style="
+                          display: none;
+                          align-items: center;
+                          justify-content: space-between;
+                          border-top: 1px solid rgb(229, 231, 235);
+                          padding-top: 1rem;
+                        "
+                      ></div>
+                      <div
+                        id="receivedAmountId"
                         style="
                           display: flex;
                           align-items: center;
@@ -129,22 +143,23 @@
                           ref="receivedAmountRef"
                         />
                       </div>
-                      <div style="position: relative; width: 100%; margin-top: 1rem">
+                      <div
+                        style="
+                          position: relative;
+                          width: 100%;
+                          margin-top: 1rem;
+                        "
+                      >
                         <div
                           class=""
                           style="
-                          display: flex;
-                          justify-content: center;
+                            display: flex;
+                            justify-content: center;
                             border: 1px solid rgba(0, 0, 0, 0.1);
                             padding: 0.5rem;
                             border-radius: 1rem;
                           "
                         >
-                          <!-- <img
-                          src="/assets/khulshi.png"
-                          alt="Your Company"
-                        />
-                        <span></span> -->
                           <img
                             :src="'data:image/png;base64,' + barcodeImage"
                             alt="barcode"
@@ -154,44 +169,6 @@
 
                         <div style="position: absolute; inset: 0"></div>
                       </div>
-                      <!-- <div
-                        data-v-61884e8b=""
-                        style="
-                          display: flex;
-                          align-items: center;
-                          justify-content: space-between;
-                          border-top: 1px solid rgb(229, 231, 235);
-                          padding-top: 1rem;
-                        "
-                      >
-                        <dt
-                          data-v-61884e8b=""
-                          style="font-size: 0.875rem; color: rgb(107, 114, 128)"
-                        >
-                          Return able amount
-                        </dt>
-                        {{ returnableAmount }}
-                      </div> -->
-                      <!-- <div
-                        data-v-61884e8b=""
-                        style="
-                          display: flex;
-                          align-items: center;
-                          justify-content: space-between;
-                          border-top: 1px solid rgb(229, 231, 235);
-                          padding-top: 1rem;
-                        "
-                      >
-                        <dt
-                          data-v-61884e8b=""
-                          style="font-size: 0.875rem; color: rgb(107, 114, 128)"
-                        >
-                          Payment status
-                        </dt>
-                        <div>
-                          {{ paymentStatus }}
-                        </div>
-                      </div> -->
                     </dl>
                   </div>
                 </div>
@@ -237,15 +214,18 @@
                   >
                     Vehicle is checked-out
                   </div>
-                  <!-- <button
-                    v-else
-                    id="mybutton"
-                    @click="checkoutAndprint"
-                    class=" mt-6 w-full rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                  <button
+                    data-v-61884e8b=""
+                    @click="print"
+                    type="submit"
+                    class="mt-6 w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                   >
-                    Checkout
-                  </button> -->
-                  <div v-if="vehicle?.status != 'checked_out'" class="mx-4 mt-4">
+                    Print
+                  </button>
+                  <div
+                    v-if="vehicle?.status != 'checked_out'"
+                    class="mx-4 mt-4"
+                  >
                     <button
                       @click="checkoutAndprint()"
                       class="rounded-md border w-full border-transparent px-3 py-2 bg-green-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
@@ -253,9 +233,6 @@
                       Checkout
                     </button>
                   </div>
-                  <!-- <div id="mybutton">
-                    <button class="feedback">Feedback</button>
-                  </div> -->
                 </div>
               </div>
               <div v-if="vehicle?.membership?.id">
@@ -385,12 +362,7 @@
             Loading error
             <!-- <ListLoadingError :message="'cant_load_orders_list'" /> -->
           </div>
-          <div
-            v-else-if="serverErrors && Object.keys(serverErrors)?.length"
-            class="text-center py-10"
-          >
-            <ServerErrors :error="serverErrors" />
-          </div>
+          <ServerError :error="serverErrors" />
         </div>
       </div>
       <Loading v-if="isLoading" />
@@ -403,6 +375,7 @@ import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import Loading from "@/components/common/Loading.vue";
+import ServerError from "@/components/common/Error.vue";
 import AddMembership from "@/components/membership/AddMembership.vue";
 import Errors from "@/components/common/Error.vue";
 import { ParkingService } from "~/services/ParkingService";
@@ -566,7 +539,7 @@ const loadData = async () => {
           Floor: item.floor?.name,
           Slot: item.slot?.name,
           "Driver Name": item.vehicle?.driver_name,
-          "driver Mobile": item.vehicle?.driver_mobile,
+          "Driver Mobile": item.vehicle?.driver_mobile,
           "Check-in-Time": item.in_time ? formatDate(item.in_time) : "--",
           "Check-out-Time": formatDate(currentTime.value),
           Status: item.vehicle?.status,
@@ -603,46 +576,50 @@ const loadData = async () => {
 
 const emailTemplate = ref(null);
 const print = () => {
-  const emailT = emailTemplate.value.innerHTML;
+  document.getElementById("receivedAmountId").style.display = "none";
+  document.getElementById("paymentMethodId").style.display = "none";
+  list.value[0]["Payment method"] = paymentMethod.value ?? "";
+  list.value[0]["Received amount2"] = receivedAmount.value ?? "";
 
-  const printWindow = window.open(
-    "",
-    "",
-    "left=0,top=0,right=0,width=800,height=900,toolbar=0,scrollbars=0,status=0"
-  );
-  //   printWindow.document.open();
-  printWindow.document.write(`
-        <html>
-          <head>
-            <title>Mart technologies Ltd.</title>
-            <style>
-              /* Add CSS styles for printing */
-              body {
-                font-family: Arial, sans-serif;
-                font-size: 14px;
-              }
-              h1 {
-                color: #333;
-              }
-              p {
-                margin-bottom: 10px;
-              }
-            </style>
-          </head>
-          <body>
-            <section style="max-width: 40rem; margin: auto;">
-            ${emailT}
-          </section>
-            </body>
-        </html>
-      `);
+  nextTick(() => {
+    const emailT = emailTemplate.value.outerHTML;
 
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
-  setTimeout(() => {
-    printWindow.close();
-  }, 1);
+    const printWindow = window.open(
+      "",
+      "",
+      "left=0,top=0,right=0,width=800,height=900,toolbar=0,scrollbars=0,status=0"
+    );
+    //   printWindow.document.open();
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Mart technologies Ltd.</title>
+          <style>
+            /* Add CSS styles for printing */
+            body {
+              font-family: Arial, sans-serif;
+              font-size: 14px;
+            }
+            h1 {
+              color: #333;
+            }
+            p {
+              margin-bottom: 10px;
+            }
+          </style>
+        </head>
+        <body>
+          <section style="max-width: 40rem; margin: auto;">
+          ${emailT}
+        </section>
+          </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  });
 };
 const confirmCheckout = async () => {
   try {
