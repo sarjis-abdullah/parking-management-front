@@ -57,7 +57,7 @@
                           align-items: center;
                           justify-content: space-between;
                           border-top: 1px solid #e5e7eb;
-                          padding-top: 1rem;
+                          padding: .5rem 0 .5rem 0;
                         "
                         v-for="(value, key) in item"
                         :key="key"
@@ -66,6 +66,20 @@
                           {{ key }}
                         </dt>
                         <dd
+                          v-if="key == 'Status' || key == 'Payment method'"
+                          style="
+                            font-size: 0.875rem;
+                            font-weight: 500;
+                            color: white;
+                            background-color: #89BC40;
+                            padding: .25rem;
+                            border-radius: 6px;
+                          "
+                        >
+                          {{ value }}
+                        </dd>
+                        <dd
+                          v-else
                           style="
                             font-size: 0.875rem;
                             font-weight: 500;
@@ -215,7 +229,7 @@
                     Vehicle is checked-out
                   </div>
                   <button
-                    data-v-61884e8b=""
+                    v-if="vehicle?.status == 'checked_out'"
                     @click="print"
                     type="submit"
                     class="mt-6 w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
@@ -542,7 +556,7 @@ const loadData = async () => {
           "Driver Mobile": item.vehicle?.driver_mobile,
           "Check-in-Time": item.in_time ? formatDate(item.in_time) : "--",
           "Check-out-Time": formatDate(currentTime.value),
-          Status: item.vehicle?.status,
+          Status: item.vehicle?.status == 'checked_in' ? 'Checked-in' : 'Checked-out',
           Duration: totalTime,
           "Total Amount": totalCost.value + "৳",
           "Discount Applied": Number(discount).toFixed(2) + "৳",
@@ -579,7 +593,7 @@ const print = () => {
   document.getElementById("receivedAmountId").style.display = "none";
   document.getElementById("paymentMethodId").style.display = "none";
   list.value[0]["Payment method"] = paymentMethod.value ?? "";
-  list.value[0]["Received amount2"] = receivedAmount.value ?? "";
+  list.value[0]["Received amount"] = receivedAmount.value ?? "";
 
   nextTick(() => {
     const emailT = emailTemplate.value.outerHTML;
