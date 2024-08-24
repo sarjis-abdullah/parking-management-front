@@ -677,10 +677,10 @@ const checkoutAndprint = () => {
         if (confirm(text)) {
           paymentMethod.value = "due";
           confirmCheckout();
-          const errors = {
-            paidAmount: [`Please pay ${totalCost.value} taka`],
-          };
-          throw new CustomError("Validation error", errors);
+          // const errors = {
+          //   paidAmount: [`Please pay ${totalCost.value} taka`],
+          // };
+          // throw new CustomError("Validation error", errors);
         } else {
           paymentMethod.value = "cash";
         }

@@ -46,7 +46,7 @@
                           align-items: center;
                           justify-content: space-between;
                           border-top: 1px solid #e5e7eb;
-                          padding: .5rem 0 5rem 0;
+                          padding: .5rem 0 .5rem 0;
                         "
                         v-for="(value, key) in item"
                         :key="key"

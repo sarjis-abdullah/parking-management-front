@@ -45,10 +45,10 @@
           </div>
           <div v-if="vehicleId">
             <XMarkIcon
-            @click="removeSelectedVehicleId"
-            class="h-6 w-6 shrink-0"
-            aria-hidden="true"
-          />
+              @click="removeSelectedVehicleId"
+              class="h-6 w-6 shrink-0"
+              aria-hidden="true"
+            />
           </div>
         </div>
       </div>
@@ -78,6 +78,16 @@
       >
         <thead>
           <tr>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            >
+              Vehicle
+            </th>
             <th
               style="
                 border: 1px solid #ddd;
@@ -128,11 +138,26 @@
             >
               Total Due
             </th>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            >
+              Action
+            </th>
           </tr>
         </thead>
         <tbody>
           <!-- Dummy Data for Transactions -->
           <tr v-for="(item, index) in transactions" :key="index">
+            <td
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              {{ item.vehicle?.number }}
+            </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
@@ -151,12 +176,30 @@
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              {{ item.total_paid }}
+              {{ getPaidAmount(item) }}
             </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
               {{ item.total_due }}
+            </td>
+            <td
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              <div v-if="item.method == 'due'">
+                <dd
+                  style="
+                    font-size: 0.875rem;
+                    font-weight: 500;
+                    color: white;
+                    background-color: #89bc40;
+                    padding: 0.25rem;
+                    border-radius: 6px;
+                  "
+                >
+                  Pay
+                </dd>
+              </div>
             </td>
           </tr>
           <tr v-if="transactions.length == 0">
@@ -269,9 +312,7 @@ import { formatDate } from "@/utils/index";
 import { VehicleService } from "~/services/VehicleService";
 import { useDebounce } from "~/hooks/useDebounce";
 import Loading from "@/components/common/Loading.vue";
-import {
-  XMarkIcon,
-} from "@heroicons/vue/24/outline";
+import { XMarkIcon } from "@heroicons/vue/24/outline";
 
 definePageMeta({
   layout: "auth-layout",
@@ -335,7 +376,7 @@ const getTransactions = () => {
     try {
       const q = getQueryString(route.query);
       const res = await ReportService.getTransaction(q);
-      transactions.value = res.data;
+      transactions.value = res.data.data;
     } catch (error) {
       serverErros.value = error.errors;
     } finally {
@@ -438,16 +479,19 @@ watch(
 // );
 
 const removeSelectedVehicleId = () => {
-  
   // let newQuery = {...route.query}
-  
+
   // if (newQuery.vehicle_id) {
   //   delete newQuery.vehicle_id
   //   alert(111)
   // }
-  vehicleId.value = null
-  vehicleNumber.value = ''
+  vehicleId.value = null;
+  vehicleNumber.value = "";
   // router.push({ query: newQuery });
+};
+const getPaidAmount = (item) => {
+  const amount = parseFloat(item.total_paid) + parseFloat(item.discount_amount)
+  return Number(amount).toFixed(2)
 }
 
 onMounted(() => {
