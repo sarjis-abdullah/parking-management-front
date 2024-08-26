@@ -57,14 +57,16 @@
       <button
         :disabled="isLoading"
         @click="getTransactions"
-        class="bg-indigo-600 text-white px-2 py-1 rounded-md"
+        class="text-white px-2 py-1 rounded-md"
+        :class="activeReport == 'transactions' ? 'bg-indigo-600' : 'bg-gray-600'"
       >
         Transaction report
       </button>
       <button
         :disabled="isLoading"
         @click="getVehicleEntryReports"
-        class="bg-indigo-600 text-white px-2 py-1 rounded-md"
+        class="text-white px-2 py-1 rounded-md"
+        :class="activeReport == 'vehicle-entry-reports' ? 'bg-indigo-600' : 'bg-gray-600'"
       >
         Vehicle entry report
       </button>
