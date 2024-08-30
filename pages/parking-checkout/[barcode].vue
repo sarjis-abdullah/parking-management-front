@@ -57,7 +57,7 @@
                           align-items: center;
                           justify-content: space-between;
                           border-top: 1px solid #e5e7eb;
-                          padding: .5rem 0 .5rem 0;
+                          padding: 0.5rem 0 0.5rem 0;
                         "
                         v-for="(value, key) in item"
                         :key="key"
@@ -71,8 +71,8 @@
                             font-size: 0.875rem;
                             font-weight: 500;
                             color: white;
-                            background-color: #89BC40;
-                            padding: .25rem;
+                            background-color: #89bc40;
+                            padding: 0.25rem;
                             border-radius: 6px;
                           "
                         >
@@ -241,7 +241,7 @@
                     class="mx-4 mt-4"
                   >
                     <button
-                      @click="checkoutAndprint()"
+                      @click="showConfirmModaDialog()"
                       class="rounded-md border w-full border-transparent px-3 py-2 bg-green-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                     >
                       Checkout
@@ -380,6 +380,36 @@
         </div>
       </div>
       <Loading v-if="isLoading" />
+      <ConfirmModal
+        :open="showConfirmModal"
+        @onClose="closeConfirmModal"
+        :title="'Are you sure you want to checkout?'"
+      >
+        <div
+          class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 mt-4"
+          role="alert"
+          v-if="showAlertMessage"
+        >
+          <!-- <p class="font-bold">Be Warned</p> -->
+          <p>{{showAlertMessage}}</p>
+        </div>
+        <template v-slot:footer>
+          <div class="flex justify-end gap-2 mt-4">
+            <button
+              @click="showConfirmModal = false"
+              class="px-2 py-1 border-red-300 rounded-md"
+            >
+              Cancel
+            </button>
+            <button
+              class="px-2 py-1 border-gray-300 bg-indigo-600 text-white rounded-md"
+            >
+              Checkout
+            </button>
+            <!-- <Loading v-else /> -->
+          </div>
+        </template>
+      </ConfirmModal>
     </div>
   </div>
 </template>
@@ -389,7 +419,7 @@ import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import Loading from "@/components/common/Loading.vue";
-import ServerError from "@/components/common/Error.vue";
+import ConfirmModal from "@/components/common/Modal.vue";
 import AddMembership from "@/components/membership/AddMembership.vue";
 import Errors from "@/components/common/Error.vue";
 import { ParkingService } from "~/services/ParkingService";
@@ -405,6 +435,7 @@ const inputClass =
 const list = ref([]);
 const loadingError = ref(null);
 const isLoading = ref(true);
+const showConfirmModal = ref(false);
 const serverErrors = ref(null);
 
 //pagination
@@ -556,7 +587,8 @@ const loadData = async () => {
           "Driver Mobile": item.vehicle?.driver_mobile,
           "Check-in-Time": item.in_time ? formatDate(item.in_time) : "--",
           "Check-out-Time": formatDate(currentTime.value),
-          Status: item.vehicle?.status == 'checked_in' ? 'Checked-in' : 'Checked-out',
+          Status:
+            item.vehicle?.status == "checked_in" ? "Checked-in" : "Checked-out",
           Duration: totalTime,
           "Total Amount": totalCost.value + "৳",
           "Discount Applied": Number(discount).toFixed(2) + "৳",
@@ -645,6 +677,16 @@ const confirmCheckout = async () => {
     print();
   } catch (error) {}
 };
+const showAlertMessage = computed(() => {
+  const subtotal = Math.ceil(totalCost.value - discountAmount.value);
+  const result = subtotal == receivedAmount.value;
+  if (result) {
+    return "";
+  } else if (subtotal < receivedAmount.value) {
+    return "Are you sure receiving more amount than total?";
+  }
+  return "Are you sure receiving less amount than total? Payment will be due.";
+});
 
 const checkoutAndprint = () => {
   try {
@@ -715,6 +757,16 @@ const payDue = async () => {
   } else {
     alert(`Please pay exact ${remaining} taka in received amount field!`);
   }
+};
+const title1 =
+  "Are you sure receiving less amount than total? Payment will be due.";
+const title2 = "Are you sure receiving more amount than total?";
+const confirmTitle = ref(title1);
+const closeConfirmModal = () => {
+  showConfirmModal.value = false;
+};
+const showConfirmModaDialog = () => {
+  showConfirmModal.value = true;
 };
 onMounted(() => {
   loadData();
