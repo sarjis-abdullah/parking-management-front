@@ -74,9 +74,9 @@
                   </th> -->
                   <th
                     scope="col"
-                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    class="px-3 py-3.5 text-center text-sm font-semibold text-gray-900"
                   >
-                    Payment Method
+                    Payment
                   </th>
                   <!-- <th
                     scope="col"
