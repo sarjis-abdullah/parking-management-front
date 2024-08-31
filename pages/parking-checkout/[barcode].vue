@@ -188,7 +188,7 @@
                 </div>
                 <div class="flex justify-end flex-col gap-2">
                   <div
-                    v-if="hasDuePayment"
+                  v-if="hasDuePayment && vehicle?.status == 'checked_out'"
                     style="
                       border-radius: 0.5rem;
                       background-color: rgb(243, 244, 246);
@@ -402,11 +402,13 @@
               Cancel
             </button>
             <button
+              v-if="!checkoutLoading"
+              @click="confirmCheckout"
               class="px-2 py-1 border-gray-300 bg-indigo-600 text-white rounded-md"
             >
               Checkout
             </button>
-            <!-- <Loading v-else /> -->
+            <Loading v-else />
           </div>
         </template>
       </ConfirmModal>
@@ -507,11 +509,12 @@ const parkingData = computed(() => {
 });
 const hasDuePayment = computed(() => {
   if (parkingResponse.value?.payment) {
-    const { paid_amount, payable_amount, method } =
-      parkingResponse.value.payment;
+    const payment = parkingResponse.value.payment
+    const { paid_amount, payable_amount, method } = payment;
     if (paid_amount != payable_amount && method == "due") {
       return true;
     }
+    return false
   }
 
   return false;
@@ -667,15 +670,30 @@ const print = () => {
     printWindow.print();
   });
 };
+const subtotal = computed(()=> Math.ceil(totalCost.value - discountAmount.value))
+const checkoutLoading = ref(false)
 const confirmCheckout = async () => {
+  if (subtotal.value > receivedAmount.value){
+    paymentMethod.value = "due";
+  }
+  checkoutLoading.value = true
   try {
     const result = await ParkingService.handleCheckout(
       parkingId.value + "?include=p.vehicle,v.membership",
       parkingData.value
     );
-    vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
-    print();
+    
+    // print();
+    if (result?.data?.redirect_url) {
+      window.location.href = result.data.redirect_url
+    }else {
+      vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
+    }
   } catch (error) {}
+  finally {
+    checkoutLoading.value = false
+    closeConfirmModal()
+  }
 };
 const showAlertMessage = computed(() => {
   const subtotal = Math.ceil(totalCost.value - discountAmount.value);

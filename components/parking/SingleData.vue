@@ -33,25 +33,48 @@
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
       <div
-        class="flex items-center justify-start gap-2"
+        class="flex items-center justify-end gap-2"
         v-if="singleData?.payment?.id"
       >
-        <div
+        <div class="flex gap-2 flex-col">
+          <div
           class="p-2 rounded-md text-white"
           :class="
             singleData?.payment?.method == 'due'
               ? 'bg-orange-400'
-              : 'bg-green-400'
+              : 'bg-blue-400'
           "
         >
           {{ singleData?.payment?.method }}
+        </div>
+        <div
+          class="p-2 rounded-md"
+          :class="getStatusWiseColor(singleData.payment.status)"
+          
+        >
+          {{ singleData?.payment?.status }}
+        </div>
         </div>
         <div>
           <div class="flex justify-between gap-2">
             <span>Paid:</span>
             <span class="font-bold text-right"
               >
-              {{ Number(parseFloat(singleData?.payment?.paid_amount) +  parseFloat(singleData?.payment?.discount_amount ?? 0)).toFixed(2) }}৳</span
+              {{ Number(parseFloat(singleData?.payment?.paid_amount)).toFixed(2) }}৳</span
+            >
+          </div>
+          <div class="flex justify-between gap-2 border-b">
+            <span>Discount:</span>
+            <span class="font-bold text-right"
+              >
+              {{ Number(parseFloat(singleData?.payment?.discount_amount ?? 0)).toFixed(2) }}৳</span
+            >
+          </div>
+          <div class="flex justify-between gap-2">
+            <span>Total:</span>
+            <span class="font-bold text-right"
+              >
+              {{ Number(parseFloat(singleData?.payment?.paid_amount) + parseFloat(singleData?.payment?.discount_amount ?? 0)).toFixed(2) }}৳</span
             >
           </div>
           <div class="flex justify-between gap-2">
@@ -72,6 +95,7 @@
       class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
     >
       <div class="flex flex-col gap-2">
+        <button :disabled="repayLoading" v-if="singleData?.payment?.status !== 'success'" @click="repay" class="bg-green-500 text-white rounded-md text-center py-1">Repay</button>
         <nuxt-link class="bg-orange-300 text-white rounded-md text-center py-1" :to="`/parking-checkin/${singleData.barcode}?view=1`"
           >Checkin view</nuxt-link
         >
@@ -94,6 +118,7 @@ import { formatDate } from "@/utils/index.js";
 import { computed } from "vue";
 import { EllipsisVerticalIcon } from "@heroicons/vue/24/outline";
 import moment from "moment";
+import { PaymentService } from "~/services/PaymentService";
 const { singleData } = defineProps({
   singleData: {
     type: Object,
@@ -149,6 +174,31 @@ const router = useRouter();
 const handleActionChange = () => {
   if (selectedAction.value == "View details") {
     router.push("/parking-checkin/" + singleData.barcode);
+  }
+};
+const getStatusWiseColor = (status) => {
+  if (status == 'success') {
+    return 'text-white bg-green-600 p-1'
+  }
+  else if (status == 'pending') {
+    return 'text-white bg-yellow-600 p-1'
+  }
+  return 'text-white bg-red-600 p-1'
+}
+const repayLoading = ref(false)
+const repay = async () => {
+  repayLoading.value = true
+  try {
+    const result = await PaymentService.repay(singleData.id);
+    
+    // print();
+    if (result?.data?.redirect_url) {
+      window.location.href = result.data.redirect_url
+    }else {
+      // vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
+    }
+  } catch (error) {}
+  finally {
   }
 };
 </script>
