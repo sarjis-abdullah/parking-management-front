@@ -241,7 +241,7 @@
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="!isLoading">
           <!-- Dummy Data for Transactions -->
           <tr v-for="(item, index) in transactions" :key="index">
             <td
@@ -277,25 +277,33 @@
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
               class=""
-              
             >
-              <span class="px-4 py-1 text-white rounded-md" :class="item.payment_type=='partial' ? ' bg-orange-500' : 'bg-green-400'">
+              <span
+                class="px-4 py-1 text-white rounded-md"
+                :class="
+                  item.payment_type == 'partial'
+                    ? ' bg-orange-500'
+                    : 'bg-green-400'
+                "
+              >
                 {{ item.payment_type }}
               </span>
             </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
-              
             >
-            <span class="text-white px-4 py-1 rounded-md" :class="getStatusWiseColor(item)">{{ item.status }}</span>
-              
+              <span
+                class="text-white px-4 py-1 rounded-md"
+                :class="getStatusWiseColor(item)"
+                >{{ item.status }}</span
+              >
             </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
               <div v-if="item.status != 'success'">
                 <button
-                :disabled="repayLoading"
+                  :disabled="repayLoading"
                   @click="repay(item.id)"
                   class="bg-indigo-400 text-white rounded-md text-center px-4 py-1"
                 >
@@ -304,7 +312,7 @@
               </div>
               <div v-else-if="item.payment_type == 'partial'">
                 <button
-                :disabled="repayLoading"
+                  :disabled="repayLoading"
                   @click="payDUe(item.id)"
                   class="bg-indigo-600 text-white rounded-md text-center px-4 py-1"
                 >
@@ -382,7 +390,35 @@
       </table>
     </section>
   </section>
-  <Loading v-if="isLoading" />
+  <Loading
+    v-if="isLoading"
+    parentClass="h-[50vh] flex  justify-center items-center"
+  />
+  <Pagination
+    class="mt-6"
+    :perPage="perPage"
+    :lastPage="lastPage"
+    :total="total"
+    :totalPerPage="totalPerPage"
+    @onChange="onPageChanged"
+  >
+    <div>
+      <div class="text-xs">Per page</div>
+      <select
+        v-model="perPage"
+        :class="selecboxClass"
+        @change="handlePerpageChange"
+        class="focus:outline-none rounded-md text-center"
+        style="padding: 0;"
+      >
+        <option :value="2">2</option>
+        <option :value="10">10</option>
+        <option :value="50">50</option>
+        <option :value="100">100</option>
+        <option :value="500">500</option>
+      </select>
+    </div>
+  </Pagination>
 </template>
 
 <script setup>
@@ -393,6 +429,7 @@ import { formatDate } from "@/utils/index";
 import { VehicleService } from "~/services/VehicleService";
 import { useDebounce } from "~/hooks/useDebounce";
 import Loading from "@/components/common/Loading.vue";
+import Pagination from "@/components/common/Pagination.vue";
 import { XMarkIcon } from "@heroicons/vue/24/outline";
 import { PaymentService } from "~/services/PaymentService";
 
@@ -413,6 +450,11 @@ const paymentType = ref("");
 const paymentStatus = ref("");
 const transactions = ref([]);
 const isLoading = ref(false);
+const perPage = ref(2);
+const lastPage = ref(null);
+const total = ref(null);
+const totalPerPage = ref(null);
+const page = ref(1);
 
 function getQueryString(query) {
   const filteredQuery = {};
@@ -464,9 +506,16 @@ const getTransactions = () => {
   activeReport.value = "transactions";
   setTimeout(async () => {
     try {
-      const q = getQueryString(route.query);
+      const q =
+        getQueryString(route.query) +
+        `&page=${page.value}&per_page=${perPage.value}`;
       const res = await ReportService.getTransaction(q);
       transactions.value = res.data.data;
+      const meta = res.data;
+      page.value = meta.current_page;
+      lastPage.value = meta.last_page;
+      total.value = meta.total;
+      totalPerPage.value = res.data.data.length;
     } catch (error) {
       serverErros.value = error.errors;
     } finally {
@@ -565,7 +614,6 @@ watch(
   ([newType, newStatus], [oldType, oldStatus]) => {
     if (oldType != newType) {
       paymentType.value = newType;
-      console.log("called");
       if (!newType) {
         const newQuery = { ...route.query };
         delete newQuery.payment_type;
@@ -579,7 +627,6 @@ watch(
 
     if (newStatus != oldStatus) {
       paymentStatus.value = newStatus;
-      console.log("called");
       if (!newStatus) {
         const newQuery = { ...route.query };
         delete newQuery.status;
@@ -601,7 +648,7 @@ const getPaidAmount = (item) => {
   const amount = parseFloat(item.total_paid) + parseFloat(item.discount_amount);
   return Number(amount).toFixed(2);
 };
-const repayLoading = ref(false)
+const repayLoading = ref(false);
 const payDUe = async (id) => {
   repayLoading.value = true;
   try {
@@ -641,6 +688,15 @@ const repay = async (id) => {
   } catch (error) {
   } finally {
   }
+};
+const onPageChanged = (p) => {
+  page.value = p;
+  getTransactions();
+  // loadData();
+};
+const handlePerpageChange = () => {
+  getTransactions();
+  // loadData();
 };
 
 onMounted(() => {

@@ -188,7 +188,7 @@
                 </div>
                 <div class="flex justify-end flex-col gap-2">
                   <div
-                  v-if="hasDuePayment && vehicle?.status == 'checked_out'"
+                  v-if="hasDuePayment && vehicle?.status == 'checked_out' && false"
                     style="
                       border-radius: 0.5rem;
                       background-color: rgb(243, 244, 246);

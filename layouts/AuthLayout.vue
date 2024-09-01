@@ -177,7 +177,7 @@
               :key="index"
               class="cursor-pointer"
             >
-              <a @click.prevent="toggleMenu(index)" class="flex gap-2">
+              <div @click.prevent="toggleMenu(index)" class="flex gap-2">
                 <!-- Use the icon dynamically -->
                 <component
                   class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
@@ -187,7 +187,7 @@
                   item.name
                 }}</nuxt-link>
                 <span v-else>{{ item.name }}</span>
-              </a>
+              </div>
               <ul v-if="item.show && item.children" class="ml-8 mt-4">
                 <li
                   v-for="(child, idx) in item.children"
