@@ -41,46 +41,64 @@
         v-if="singleData?.payment?.id"
       >
         <div class="flex gap-2 flex-col">
-          <div class="grid gap-2 items-center" style="grid-template-columns: max-content auto">
+          <div
+            class="grid gap-2 items-center"
+            style="grid-template-columns: max-content auto"
+          >
             <span>Method: </span>
             <span
-            class="text-white p-2 rounded-md text-center"
+              class="text-white p-1 rounded-md text-center"
               :class="
-                singleData?.payment?.method == 'due'
-                  ? 'bg-orange-400'
-                  : 'bg-blue-400'
+                singleData?.payment?.payment_type == 'partial'
+                  ? 'bg-orange-300'
+                  : 'bg-green-400'
               "
               >{{ singleData?.payment?.method }}</span
             >
           </div>
-          <div class="grid gap-2 items-center" style="grid-template-columns: max-content auto">
+          <div
+            class="grid gap-2 items-center"
+            style="grid-template-columns: max-content auto"
+          >
             <span>Status: </span>
-            <span class="p-2 rounded-md text-center"
-            :class="getStatusWiseColor(singleData.payment.status)"> {{ singleData?.payment?.status }}</span>
+            <span
+              class="rounded-md text-center text-white p-1"
+              :class="getStatusWiseColor(singleData.payment)"
+            >
+              {{ singleData?.payment?.status }}</span
+            >
+          </div>
+          <div
+            class="grid gap-2 items-center"
+            style="grid-template-columns: max-content auto"
+          >
+            <span>Type: </span>
+            <span
+              class="rounded-md text-center text-white p-1"
+              :class="isPartialPayment ? 'bg-orange-500' : 'bg-green-600'"
+            >
+              {{ singleData?.payment?.payment_type }}</span
+            >
           </div>
         </div>
         <div>
           <div class="flex justify-between gap-2">
             <span>Payable:</span>
-            <span class="font-bold text-right"
-              >{{ singleData?.payment?.payable_amount }}৳</span
-            >
+            <span class="font-bold text-right">{{ payableAmount }}৳</span>
           </div>
-          <div class="flex justify-between gap-2">
+          <div class="flex justify-between gap-2 border-t">
             <span>Paid:</span>
-            <span class="font-bold text-right">
-              {{
-                Number(parseFloat(singleData?.payment?.paid_amount)).toFixed(2)
-              }}৳</span
-            >
+            <span class="font-bold text-right"> {{ paidAmount }}৳</span>
           </div>
           <div class="flex justify-between gap-2">
             <span>Discount:</span>
+            <span class="font-bold text-right"> {{ discountAmount }}৳</span>
+          </div>
+          <div v-if="isPartialPayment" class="flex justify-between gap-2">
+            <span>Due:</span>
             <span class="font-bold text-right">
               {{
-                Number(
-                  parseFloat(singleData?.payment?.discount_amount ?? 0)
-                ).toFixed(2)
+                dueAmount
               }}৳</span
             >
           </div>
@@ -95,14 +113,13 @@
               }}৳</span
             >
           </div> -->
-          
         </div>
       </div>
       <div
-        class="flex items-center justify-center gap-2 bg-indigo-500 text-white text-center rounded-full py-2"
+        class="flex items-center justify-center gap-2 bg-yellow-500 text-white text-center rounded-full py-2"
         v-else
       >
-        Still in parking
+        Payment not completed yet
       </div>
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
@@ -115,11 +132,23 @@
       <div class="flex flex-col gap-2">
         <button
           :disabled="repayLoading"
-          v-if="singleData?.payment?.status !== 'success'"
+          v-if="
+            singleData?.payment?.status !== 'success' && singleData?.out_time
+          "
           @click="repay"
           class="bg-green-500 text-white rounded-md text-center py-1"
         >
           Repay
+        </button>
+        <button
+          :disabled="repayLoading"
+          v-if="
+            isPartialPayment
+          "
+          @click="payDUe"
+          class="bg-green-500 text-white rounded-md text-center py-1"
+        >
+          Pay due
         </button>
         <nuxt-link
           class="bg-orange-300 text-white rounded-md text-center py-1"
@@ -173,11 +202,31 @@ const actions = computed(() => {
     },
   ];
 });
+const payableAmount = computed(() => {
+  return Number(parseFloat(singleData?.payment?.payable_amount)).toFixed(2);
+});
+const paidAmount = computed(() => {
+  return Number(parseFloat(singleData?.payment?.paid_amount)).toFixed(2);
+});
+const discountAmount = computed(() => {
+  return Number(parseFloat(singleData?.payment?.discount_amount ?? 0)).toFixed(
+    2
+  );
+});
+const dueAmount = computed(() => {
+  return Number(parseFloat(singleData?.payment?.due_amount ?? 0)).toFixed(
+    2
+  );
+});
+const isPartialPayment = computed(() => {
+  return singleData?.payment?.payment_type == "partial";
+});
 const durationInHours = computed(() => {
   const result = singleData.id;
   if (!result) {
     return 0;
   }
+
   const out_time = moment(singleData.out_time);
   const in_time = moment(singleData.in_time);
   const differenceInMillis = out_time.diff(in_time);
@@ -207,19 +256,37 @@ const handleActionChange = () => {
     router.push("/parking-checkin/" + singleData.barcode);
   }
 };
-const getStatusWiseColor = (status) => {
+const getStatusWiseColor = ({ status, payment_type }) => {
   if (status == "success") {
-    return "text-white bg-green-600 p-1";
+    if (payment_type == "partial") {
+      return "bg-orange-400";
+    }
+    return "bg-green-500 ";
   } else if (status == "pending") {
-    return "text-white bg-yellow-600 p-1";
+    return "bg-yellow-600";
   }
-  return "text-white bg-red-600 p-1";
+  return "bg-red-600";
 };
 const repayLoading = ref(false);
 const repay = async () => {
   repayLoading.value = true;
   try {
     const result = await PaymentService.repay(singleData.id);
+
+    // print();
+    if (result?.data?.redirect_url) {
+      window.location.href = result.data.redirect_url;
+    } else {
+      // vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
+    }
+  } catch (error) {
+  } finally {
+  }
+};
+const payDUe = async () => {
+  repayLoading.value = true;
+  try {
+    const result = await PaymentService.payDue(singleData.id);
 
     // print();
     if (result?.data?.redirect_url) {

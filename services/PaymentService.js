@@ -17,4 +17,11 @@ export class PaymentService {
       throw err;
     }
   }
+  static async payDue(id, data) {
+    try {
+      return await HttpRequester.get('payment/pay-due/' + id);
+    } catch (err) {
+      throw err;
+    }
+  }
 }
