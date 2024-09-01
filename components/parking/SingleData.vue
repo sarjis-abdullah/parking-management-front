@@ -136,7 +136,7 @@
             singleData?.payment?.status !== 'success' && singleData?.out_time
           "
           @click="repay"
-          class="bg-green-500 text-white rounded-md text-center py-1"
+          class="bg-indigo-400 text-white rounded-md text-center py-1"
         >
           Repay
         </button>
@@ -146,7 +146,7 @@
             isPartialPayment
           "
           @click="payDUe"
-          class="bg-green-500 text-white rounded-md text-center py-1"
+          class="bg-indigo-600 text-white rounded-md text-center py-1"
         >
           Pay due
         </button>

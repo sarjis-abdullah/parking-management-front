@@ -35,11 +35,11 @@
             <!-- Add more options as needed -->
           </select>
           <XMarkIcon
-                v-if="paymentType"
-                @click="paymentType = ''"
-                class="h-5 w-5 text-red-500 cursor-pointer mr-2"
-                aria-hidden="true"
-              />
+            v-if="paymentType"
+            @click="paymentType = ''"
+            class="h-5 w-5 text-red-500 cursor-pointer mr-2"
+            aria-hidden="true"
+          />
         </div>
         <!-- <input
           :class="inputClass"
@@ -65,11 +65,11 @@
             <!-- Add more options as needed -->
           </select>
           <XMarkIcon
-                v-if="paymentStatus"
-                @click="paymentStatus = ''"
-                class="h-5 w-5 text-red-500 cursor-pointer mr-2"
-                aria-hidden="true"
-              />
+            v-if="paymentStatus"
+            @click="paymentStatus = ''"
+            class="h-5 w-5 text-red-500 cursor-pointer mr-2"
+            aria-hidden="true"
+          />
         </div>
         <!-- <input
           :class="inputClass"
@@ -82,7 +82,10 @@
         <label class="text-gray-500"
           >Vehicle Number<span class="text-red-500">*</span></label
         >
-        <div class="flex justify-between items-center gap-2" :class="selectWrapper">
+        <div
+          class="flex justify-between items-center gap-2"
+          :class="selectWrapper"
+        >
           <div class="w-full">
             <input
               :class="selecboxClass"
@@ -214,6 +217,26 @@
                 background-color: #f2f2f2;
               "
             >
+              Payment type
+            </th>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            >
+              Payment status
+            </th>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            >
               Action
             </th>
           </tr>
@@ -253,20 +276,40 @@
             </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
+              class=""
+              
             >
-              <div v-if="item.method == 'due'">
-                <dd
-                  style="
-                    font-size: 0.875rem;
-                    font-weight: 500;
-                    color: white;
-                    background-color: #89bc40;
-                    padding: 0.25rem;
-                    border-radius: 6px;
-                  "
+              <span class="px-4 py-1 text-white rounded-md" :class="item.payment_type=='partial' ? ' bg-orange-500' : 'bg-green-400'">
+                {{ item.payment_type }}
+              </span>
+            </td>
+            <td
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+              
+            >
+            <span class="text-white px-4 py-1 rounded-md" :class="getStatusWiseColor(item)">{{ item.status }}</span>
+              
+            </td>
+            <td
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              <div v-if="item.status != 'success'">
+                <button
+                :disabled="repayLoading"
+                  @click="repay(item.id)"
+                  class="bg-indigo-400 text-white rounded-md text-center px-4 py-1"
                 >
-                  Pay
-                </dd>
+                  Repay
+                </button>
+              </div>
+              <div v-else-if="item.payment_type == 'partial'">
+                <button
+                :disabled="repayLoading"
+                  @click="payDUe(item.id)"
+                  class="bg-indigo-600 text-white rounded-md text-center px-4 py-1"
+                >
+                  Pay due
+                </button>
               </div>
             </td>
           </tr>
@@ -351,6 +394,7 @@ import { VehicleService } from "~/services/VehicleService";
 import { useDebounce } from "~/hooks/useDebounce";
 import Loading from "@/components/common/Loading.vue";
 import { XMarkIcon } from "@heroicons/vue/24/outline";
+import { PaymentService } from "~/services/PaymentService";
 
 definePageMeta({
   layout: "auth-layout",
@@ -366,7 +410,7 @@ const router = useRouter();
 const startDate = ref("");
 const endDate = ref("");
 const paymentType = ref("");
-const paymentStatus = ref('');
+const paymentStatus = ref("");
 const transactions = ref([]);
 const isLoading = ref(false);
 
@@ -412,7 +456,9 @@ const checkSelection = () => {
 const debouncedSearch = useDebounce(search, 500);
 const serverErros = ref({});
 const activeReport = ref("");
-const isTransactionReport = computed(()=> activeReport.value == "transactions") 
+const isTransactionReport = computed(
+  () => activeReport.value == "transactions"
+);
 const getTransactions = () => {
   isLoading.value = true;
   activeReport.value = "transactions";
@@ -465,11 +511,11 @@ watch(
       }
       if (route.query.status) {
         newQuery.status = route.query.status;
-        paymentStatus.value = route.query.status
+        paymentStatus.value = route.query.status;
       }
       if (route.query.payment_type) {
         newQuery.payment_type = route.query.payment_type;
-        paymentType.value = route.query.payment_type
+        paymentType.value = route.query.payment_type;
       }
 
       router.push({ query: newQuery });
@@ -508,7 +554,6 @@ watch(
         delete newQuery.vehicle_id;
       }
     }
-    
 
     router.push({ query: newQuery });
   },
@@ -516,38 +561,37 @@ watch(
 );
 
 watch(
-      [paymentType, paymentStatus],
-      ([newType, newStatus], [oldType, oldStatus]) => {
-        if (oldType != newType) {
-          paymentType.value = newType
-          console.log('called');
-          if (!newType) {
-            const newQuery = {...route.query}
-            delete newQuery.payment_type
-            router.push({ query: newQuery });
-          } else {
-            const newQuery = {...route.query}
-            newQuery.payment_type = newType
-            router.push({ query: newQuery });
-          }
-        }
-
-        if (newStatus != oldStatus) {
-          paymentStatus.value = newStatus
-          console.log('called');
-          if (!newStatus) {
-            const newQuery = {...route.query}
-            delete newQuery.status
-            router.push({ query: newQuery });
-          } else {
-            const newQuery = {...route.query}
-            newQuery.status = newStatus
-            router.push({ query: newQuery });
-          }
-        }
-
+  [paymentType, paymentStatus],
+  ([newType, newStatus], [oldType, oldStatus]) => {
+    if (oldType != newType) {
+      paymentType.value = newType;
+      console.log("called");
+      if (!newType) {
+        const newQuery = { ...route.query };
+        delete newQuery.payment_type;
+        router.push({ query: newQuery });
+      } else {
+        const newQuery = { ...route.query };
+        newQuery.payment_type = newType;
+        router.push({ query: newQuery });
       }
-    );
+    }
+
+    if (newStatus != oldStatus) {
+      paymentStatus.value = newStatus;
+      console.log("called");
+      if (!newStatus) {
+        const newQuery = { ...route.query };
+        delete newQuery.status;
+        router.push({ query: newQuery });
+      } else {
+        const newQuery = { ...route.query };
+        newQuery.status = newStatus;
+        router.push({ query: newQuery });
+      }
+    }
+  }
+);
 
 const removeSelectedVehicleId = () => {
   vehicleId.value = null;
@@ -556,6 +600,47 @@ const removeSelectedVehicleId = () => {
 const getPaidAmount = (item) => {
   const amount = parseFloat(item.total_paid) + parseFloat(item.discount_amount);
   return Number(amount).toFixed(2);
+};
+const repayLoading = ref(false)
+const payDUe = async (id) => {
+  repayLoading.value = true;
+  try {
+    const result = await PaymentService.payDue(id);
+
+    if (result?.data?.redirect_url) {
+      window.location.href = result.data.redirect_url;
+    }
+  } catch (error) {
+  } finally {
+  }
+};
+
+const getStatusWiseColor = ({ status, payment_type }) => {
+  if (status == "success") {
+    if (payment_type == "partial") {
+      return "bg-orange-400";
+    }
+    return "bg-green-500 ";
+  } else if (status == "pending") {
+    return "bg-yellow-600";
+  }
+  return "bg-red-600";
+};
+
+const repay = async (id) => {
+  repayLoading.value = true;
+  try {
+    const result = await PaymentService.repay(id);
+
+    // print();
+    if (result?.data?.redirect_url) {
+      window.location.href = result.data.redirect_url;
+    } else {
+      // vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
+    }
+  } catch (error) {
+  } finally {
+  }
 };
 
 onMounted(() => {
