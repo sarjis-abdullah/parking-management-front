@@ -1,6 +1,6 @@
 <template>
   <section>
-    <section class="grid md:grid-cols-3 gap-2">
+    <section class="grid md:grid-cols-4 gap-2">
       <div class="grid gap-2">
         <label class="text-gray-500">Start date</label>
         <input
@@ -19,14 +19,74 @@
           placeholder="e.g. 20/12/2024"
         />
       </div>
+      <div class="grid gap-2" v-if="isTransactionReport">
+        <label class="text-gray-500">Payment type</label>
+        <div :class="selectWrapper" class="flex items-center">
+          <select
+            class="focus:outline-none bg-none"
+            :class="selecboxClass"
+            style="background: none"
+            name="place"
+            v-model="paymentType"
+          >
+            <option disabled :value="''">Select</option>
+            <option value="full">Full</option>
+            <option value="partial">Partial</option>
+            <!-- Add more options as needed -->
+          </select>
+          <XMarkIcon
+                v-if="paymentType"
+                @click="paymentType = ''"
+                class="h-5 w-5 text-red-500 cursor-pointer mr-2"
+                aria-hidden="true"
+              />
+        </div>
+        <!-- <input
+          :class="inputClass"
+          v-model="paymentType"
+          type="date"
+          placeholder="e.g. 20/12/2024"
+        /> -->
+      </div>
+      <div class="grid gap-2" v-if="isTransactionReport">
+        <label class="text-gray-500">Payment Status</label>
+        <div :class="selectWrapper" class="flex items-center">
+          <select
+            class="focus:outline-none bg-none"
+            :class="selecboxClass"
+            style="background: none"
+            name="place"
+            v-model="paymentStatus"
+          >
+            <option disabled :value="''">Select</option>
+            <option value="success">success</option>
+            <option value="failed">failed</option>
+            <option value="pending">pending</option>
+            <!-- Add more options as needed -->
+          </select>
+          <XMarkIcon
+                v-if="paymentStatus"
+                @click="paymentStatus = ''"
+                class="h-5 w-5 text-red-500 cursor-pointer mr-2"
+                aria-hidden="true"
+              />
+        </div>
+        <!-- <input
+          :class="inputClass"
+          v-model="paymentType"
+          type="date"
+          placeholder="e.g. 20/12/2024"
+        /> -->
+      </div>
       <div class="grid gap-2">
         <label class="text-gray-500"
           >Vehicle Number<span class="text-red-500">*</span></label
         >
-        <div class="flex justify-between items-center gap-2">
+        <div class="flex justify-between items-center gap-2" :class="selectWrapper">
           <div class="w-full">
             <input
-              :class="inputClass"
+              :class="selecboxClass"
+              class="focus:outline-none"
               v-model="vehicleNumber"
               type="text"
               @input="debouncedSearch"
@@ -46,7 +106,7 @@
           <div v-if="vehicleId">
             <XMarkIcon
               @click="removeSelectedVehicleId"
-              class="h-6 w-6 shrink-0"
+              class="h-5 w-5 text-red-500 cursor-pointer mr-2"
               aria-hidden="true"
             />
           </div>
@@ -58,7 +118,9 @@
         :disabled="isLoading"
         @click="getTransactions"
         class="text-white px-2 py-1 rounded-md"
-        :class="activeReport == 'transactions' ? 'bg-indigo-600' : 'bg-gray-600'"
+        :class="
+          activeReport == 'transactions' ? 'bg-indigo-600' : 'bg-gray-600'
+        "
       >
         Transaction report
       </button>
@@ -66,7 +128,11 @@
         :disabled="isLoading"
         @click="getVehicleEntryReports"
         class="text-white px-2 py-1 rounded-md"
-        :class="activeReport == 'vehicle-entry-reports' ? 'bg-indigo-600' : 'bg-gray-600'"
+        :class="
+          activeReport == 'vehicle-entry-reports'
+            ? 'bg-indigo-600'
+            : 'bg-gray-600'
+        "
       >
         Vehicle entry report
       </button>
@@ -234,36 +300,6 @@
             >
               Date
             </th>
-            <!-- <th
-            style="
-              border: 1px solid #ddd;
-              padding: 8px;
-              text-align: center;
-              background-color: #f2f2f2;
-            "
-          >
-            Transaction Count
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 8px;
-              text-align: center;
-              background-color: #f2f2f2;
-            "
-          >
-            Total Payable
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 8px;
-              text-align: center;
-              background-color: #f2f2f2;
-            "
-          >
-            Total Paid
-          </th> -->
             <th
               style="
                 border: 1px solid #ddd;
@@ -320,12 +356,17 @@ definePageMeta({
   layout: "auth-layout",
 });
 const inputClass =
-  "relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
-
+  "relative block w-full appearance-none rounded-md border-2 border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
+const selecboxClass =
+  "relative block w-full appearance-none px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10";
+const selectWrapper =
+  "rounded-md border-2 border-gray-300 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
 const route = useRoute();
 const router = useRouter();
 const startDate = ref("");
 const endDate = ref("");
+const paymentType = ref("");
+const paymentStatus = ref('');
 const transactions = ref([]);
 const isLoading = ref(false);
 
@@ -371,6 +412,7 @@ const checkSelection = () => {
 const debouncedSearch = useDebounce(search, 500);
 const serverErros = ref({});
 const activeReport = ref("");
+const isTransactionReport = computed(()=> activeReport.value == "transactions") 
 const getTransactions = () => {
   isLoading.value = true;
   activeReport.value = "transactions";
@@ -419,6 +461,15 @@ watch(
       }
       if (route.query.vehicle_id) {
         newQuery.vehicle_id = route.query.vehicle_id;
+        vehicleId.value = route.query.vehicle_id;
+      }
+      if (route.query.status) {
+        newQuery.status = route.query.status;
+        paymentStatus.value = route.query.status
+      }
+      if (route.query.payment_type) {
+        newQuery.payment_type = route.query.payment_type;
+        paymentType.value = route.query.payment_type
       }
 
       router.push({ query: newQuery });
@@ -457,44 +508,55 @@ watch(
         delete newQuery.vehicle_id;
       }
     }
+    
 
     router.push({ query: newQuery });
   },
   { deep: true, immediate: false }
 );
-// watch(
-//   vehicleId,
-//   (o, n) => {
-//     if (o != n) {
-//       const newQuery = {
-//         ...route.query,
-//       };
 
-//       if (vehicleId.value) {
-//         newQuery.vehicle_id = vehicleId.value;
-//       }
+watch(
+      [paymentType, paymentStatus],
+      ([newType, newStatus], [oldType, oldStatus]) => {
+        if (oldType != newType) {
+          paymentType.value = newType
+          console.log('called');
+          if (!newType) {
+            const newQuery = {...route.query}
+            delete newQuery.payment_type
+            router.push({ query: newQuery });
+          } else {
+            const newQuery = {...route.query}
+            newQuery.payment_type = newType
+            router.push({ query: newQuery });
+          }
+        }
 
-//       router.push({ query: newQuery });
-//     }
-//   },
-//   { deep: true, immediate: true }
-// );
+        if (newStatus != oldStatus) {
+          paymentStatus.value = newStatus
+          console.log('called');
+          if (!newStatus) {
+            const newQuery = {...route.query}
+            delete newQuery.status
+            router.push({ query: newQuery });
+          } else {
+            const newQuery = {...route.query}
+            newQuery.status = newStatus
+            router.push({ query: newQuery });
+          }
+        }
+
+      }
+    );
 
 const removeSelectedVehicleId = () => {
-  // let newQuery = {...route.query}
-
-  // if (newQuery.vehicle_id) {
-  //   delete newQuery.vehicle_id
-  //   alert(111)
-  // }
   vehicleId.value = null;
   vehicleNumber.value = "";
-  // router.push({ query: newQuery });
 };
 const getPaidAmount = (item) => {
-  const amount = parseFloat(item.total_paid) + parseFloat(item.discount_amount)
-  return Number(amount).toFixed(2)
-}
+  const amount = parseFloat(item.total_paid) + parseFloat(item.discount_amount);
+  return Number(amount).toFixed(2);
+};
 
 onMounted(() => {
   startDate.value = formatDate(moment().subtract(1, "month"), "YYYY-MM-DD");
@@ -506,8 +568,6 @@ onMounted(() => {
   newQuery.start_date = startDate.value;
   newQuery.end_date = endDate.value;
   router.push({ query: newQuery });
-
-  // getTransactions();
 });
 </script>
 
