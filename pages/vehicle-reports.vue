@@ -233,7 +233,9 @@ const checkSelection = () => {
 const debouncedSearch = useDebounce(search, 500);
 const serverErros = ref({});
 const activeReport = ref(false);
-const getTransactions = () => {
+
+const vehicleEntryReports = ref([]);
+const getVehicleEntryReports = () => {
   isLoading.value = true;
   activeReport.value = true;
   setTimeout(async () => {
@@ -241,29 +243,13 @@ const getTransactions = () => {
       const q =
         getQueryString(route.query) +
         `&page=${page.value}&per_page=${perPage.value}`;
-      const res = await ReportService.getTransaction(q);
-      transactions.value = res.data.data;
+      const res = await ReportService.getVehicle(q);
+      vehicleEntryReports.value = res.data.data;
       const meta = res.data;
       page.value = meta.current_page;
       lastPage.value = meta.last_page;
       total.value = meta.total;
       totalPerPage.value = res.data.data.length;
-    } catch (error) {
-      serverErros.value = error.errors;
-    } finally {
-      isLoading.value = false;
-    }
-  }, 500);
-};
-const vehicleEntryReports = ref([]);
-const getVehicleEntryReports = () => {
-  isLoading.value = true;
-  activeReport.value = true;
-  setTimeout(async () => {
-    try {
-      const q = getQueryString(route.query);
-      const res = await ReportService.getVehicle(q);
-      vehicleEntryReports.value = res.data;
     } catch (error) {
       serverErros.value = error.errors;
     } finally {
@@ -340,37 +326,6 @@ watch(
   },
   { deep: true, immediate: false }
 );
-
-// watch(
-//   [paymentType, paymentStatus],
-//   ([newType, newStatus], [oldType, oldStatus]) => {
-//     if (oldType != newType) {
-//       paymentType.value = newType;
-//       if (!newType) {
-//         const newQuery = { ...route.query };
-//         delete newQuery.payment_type;
-//         router.push({ query: newQuery });
-//       } else {
-//         const newQuery = { ...route.query };
-//         newQuery.payment_type = newType;
-//         router.push({ query: newQuery });
-//       }
-//     }
-
-//     if (newStatus != oldStatus) {
-//       paymentStatus.value = newStatus;
-//       if (!newStatus) {
-//         const newQuery = { ...route.query };
-//         delete newQuery.status;
-//         router.push({ query: newQuery });
-//       } else {
-//         const newQuery = { ...route.query };
-//         newQuery.status = newStatus;
-//         router.push({ query: newQuery });
-//       }
-//     }
-//   }
-// );
 
 const removeSelectedVehicleId = () => {
   vehicleId.value = null;
