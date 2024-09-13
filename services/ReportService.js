@@ -16,4 +16,11 @@ export class ReportService {
       throw err;
     }
   }
+  static async getSlotReport(query='') {
+    try {
+      return await HttpRequester.get(`report/slot`);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

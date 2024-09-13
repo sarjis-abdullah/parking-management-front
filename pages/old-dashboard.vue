@@ -1,0 +1,295 @@
+<template>
+  <section>
+    <section class="shadow-sm p-4">
+      1
+    </section>
+  </section>
+  <Loading
+    v-if="isLoading"
+    parentClass="h-[50vh] flex  justify-center items-center"
+  />
+  <!-- <Pagination
+    class="mt-6"
+    :perPage="perPage"
+    :lastPage="lastPage"
+    :total="total"
+    :totalPerPage="totalPerPage"
+    @onChange="onPageChanged"
+  >
+    <div>
+      <div class="text-xs">Per page</div>
+      <select
+        v-model="perPage"
+        :class="selecboxClass"
+        @change="handlePerpageChange"
+        class="focus:outline-none rounded-md text-center"
+        style="padding: 0;"
+      >
+        <option :value="2">2</option>
+        <option :value="10">10</option>
+        <option :value="50">50</option>
+        <option :value="100">100</option>
+        <option :value="500">500</option>
+      </select>
+    </div>
+  </Pagination> -->
+</template>
+
+<script setup>
+import { computed, ref, watch, onMounted } from "vue";
+import moment from "moment";
+import { ReportService } from "@/services/ReportService";
+import { formatDate } from "@/utils/index";
+import { VehicleService } from "~/services/VehicleService";
+import { useDebounce } from "~/hooks/useDebounce";
+import Loading from "@/components/common/Loading.vue";
+import Pagination from "@/components/common/Pagination.vue";
+import { XMarkIcon } from "@heroicons/vue/24/outline";
+import { PaymentService } from "~/services/PaymentService";
+
+definePageMeta({
+  layout: "auth-layout",
+});
+const inputClass =
+  "relative block w-full appearance-none rounded-md border-2 border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
+const selecboxClass =
+  "relative block w-full appearance-none px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10";
+const selectWrapper =
+  "rounded-md border-2 border-gray-300 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
+const route = useRoute();
+const router = useRouter();
+const startDate = ref("");
+const endDate = ref("");
+const paymentType = ref("");
+const paymentStatus = ref("");
+const transactions = ref([]);
+const isLoading = ref(false);
+const perPage = ref(2);
+const lastPage = ref(null);
+const total = ref(null);
+const totalPerPage = ref(null);
+const page = ref(1);
+
+function getQueryString(query) {
+  const filteredQuery = {};
+
+  // Filter out null and undefined values
+  for (const key in query) {
+    if (query[key] !== null && query[key] !== undefined) {
+      filteredQuery[key] = query[key];
+    }
+  }
+
+  const params = new URLSearchParams(filteredQuery);
+  return `?${params.toString()}`;
+}
+
+const vehicleNumber = ref("");
+const vehicleList = ref([]);
+
+const search = async () => {
+  let query = "";
+  if (vehicleNumber.value) {
+    query += `?query=${vehicleNumber.value}`;
+    const newQuery = {
+      ...route.query,
+    };
+  }
+  const result = await VehicleService.getAll(query);
+  if (result?.data?.length) {
+    vehicleList.value = result.data;
+  }
+};
+const vehicleId = ref(null);
+const checkSelection = () => {
+  const data = vehicleList.value.find(
+    (item) => item.number == vehicleNumber.value
+  );
+  if (data) {
+    vehicleId.value = data.id;
+  }
+};
+const debouncedSearch = useDebounce(search, 500);
+const serverErros = ref({});
+const activeReport = ref("");
+const vehicleEntryReports = ref([]);
+const getVehicleEntryReports = () => {
+  isLoading.value = true;
+  activeReport.value = "vehicle-entry-reports";
+  setTimeout(async () => {
+    try {
+      const q = getQueryString(route.query);
+      const res = await ReportService.getVehicle(q);
+      vehicleEntryReports.value = res.data;
+    } catch (error) {
+      serverErros.value = error.errors;
+    } finally {
+      isLoading.value = false;
+    }
+  }, 500);
+};
+
+// watch(
+//   route,
+//   (o, n) => {
+//     if (route.query) {
+//       const newQuery = {
+//         ...route.query,
+//       };
+//       console.log(route.query);
+//       if (route.query.start_date) {
+//         newQuery.start_date = route.query.start_date;
+//       }
+//       if (route.query.end_date) {
+//         newQuery.end_date = route.query.end_date;
+//       }
+//       if (route.query.vehicle_id) {
+//         newQuery.vehicle_id = route.query.vehicle_id;
+//         vehicleId.value = route.query.vehicle_id;
+//       }
+//       if (route.query.status) {
+//         newQuery.status = route.query.status;
+//         paymentStatus.value = route.query.status;
+//       }
+//       if (route.query.payment_type) {
+//         newQuery.payment_type = route.query.payment_type;
+//         paymentType.value = route.query.payment_type;
+//       }
+
+//       router.push({ query: newQuery });
+//     }
+//   },
+//   { deep: false, immediate: true }
+// );
+
+watch(
+  [startDate, endDate, vehicleId],
+  (
+    [newStartDate, newEndDate, newVehicleId],
+    [oldStartDate, oldEndDate, oldVehicleId]
+  ) => {
+    const newQuery = { ...route.query };
+
+    if (newStartDate !== oldStartDate) {
+      if (newStartDate) {
+        newQuery.start_date = newStartDate;
+      } else {
+        delete newQuery.start_date;
+      }
+    }
+
+    if (newEndDate !== oldEndDate) {
+      if (newEndDate) {
+        newQuery.end_date = newEndDate;
+      } else {
+        delete newQuery.end_date;
+      }
+    }
+    if (newVehicleId !== oldVehicleId) {
+      if (newVehicleId) {
+        newQuery.vehicle_id = newVehicleId;
+      } else {
+        delete newQuery.vehicle_id;
+      }
+    }
+
+    router.push({ query: newQuery });
+  },
+  { deep: true, immediate: false }
+);
+
+watch(
+  [paymentType, paymentStatus],
+  ([newType, newStatus], [oldType, oldStatus]) => {
+    if (oldType != newType) {
+      paymentType.value = newType;
+      if (!newType) {
+        const newQuery = { ...route.query };
+        delete newQuery.payment_type;
+        router.push({ query: newQuery });
+      } else {
+        const newQuery = { ...route.query };
+        newQuery.payment_type = newType;
+        router.push({ query: newQuery });
+      }
+    }
+
+    if (newStatus != oldStatus) {
+      paymentStatus.value = newStatus;
+      if (!newStatus) {
+        const newQuery = { ...route.query };
+        delete newQuery.status;
+        router.push({ query: newQuery });
+      } else {
+        const newQuery = { ...route.query };
+        newQuery.status = newStatus;
+        router.push({ query: newQuery });
+      }
+    }
+  }
+);
+
+const removeSelectedVehicleId = () => {
+  vehicleId.value = null;
+  vehicleNumber.value = "";
+};
+const getPaidAmount = (item) => {
+  const amount = parseFloat(item.total_paid) + parseFloat(item.discount_amount);
+  return Number(amount).toFixed(2);
+};
+const repayLoading = ref(false);
+const payDUe = async (id) => {
+  repayLoading.value = true;
+  try {
+    const result = await PaymentService.payDue(id);
+
+    if (result?.data?.redirect_url) {
+      window.location.href = result.data.redirect_url;
+    }
+  } catch (error) {
+  } finally {
+  }
+};
+
+const getStatusWiseColor = ({ status, payment_type }) => {
+  if (status == "success") {
+    if (payment_type == "partial") {
+      return "bg-orange-400";
+    }
+    return "bg-green-500 ";
+  } else if (status == "pending") {
+    return "bg-yellow-600";
+  }
+  return "bg-red-600";
+};
+
+const repay = async (id) => {
+  repayLoading.value = true;
+  try {
+    const result = await PaymentService.repay(id);
+
+    // print();
+    if (result?.data?.redirect_url) {
+      window.location.href = result.data.redirect_url;
+    } else {
+      // vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
+    }
+  } catch (error) {
+  } finally {
+  }
+};
+
+onMounted(() => {
+  // startDate.value = formatDate(moment().subtract(1, "month"), "YYYY-MM-DD");
+  // endDate.value = formatDate(moment(), "YYYY-MM-DD");
+  // const newQuery = {
+  //   ...route.query,
+  // };
+
+  // newQuery.start_date = startDate.value;
+  // newQuery.end_date = endDate.value;
+  // router.push({ query: newQuery });
+});
+</script>
+
+<style lang="scss" scoped></style>
