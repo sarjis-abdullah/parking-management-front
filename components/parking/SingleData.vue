@@ -13,7 +13,9 @@
       </div>
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm">
-      <span class="text-gray-900">{{ singleData.vehicle?.number }}</span>
+      <div v-if="singleData.vehicle?.number " class="text-gray-900">{{ singleData.vehicle?.number }}</div>
+      <div v-if="singleData.vehicle?.driver_name">Driver: {{ singleData.vehicle.driver_name }}</div>
+      <div v-if="singleData.vehicle?.driver_mobile">Contact: <a :href="`tel:${singleData.vehicle.driver_mobile}`">{{ singleData.vehicle.driver_mobile }}</a></div>
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
       <div>
@@ -96,11 +98,7 @@
           </div>
           <div v-if="isPartialPayment" class="flex justify-between gap-2">
             <span>Due:</span>
-            <span class="font-bold text-right">
-              {{
-                dueAmount
-              }}৳</span
-            >
+            <span class="font-bold text-right"> {{ dueAmount }}৳</span>
           </div>
           <!-- <div class="flex justify-between gap-2">
             <span>Total:</span>
@@ -122,17 +120,25 @@
         Payment not completed yet
       </div>
     </td>
-    <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+    <!-- <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
       <div>{{ singleData.vehicle?.driver_name }}</div>
       <div>{{ singleData.vehicle?.driver_mobile }}</div>
-    </td>
+    </td> -->
     <td
       class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
     >
       <div class="flex flex-col gap-2">
         <button
           :disabled="repayLoading"
-          v-if="
+          v-if="isPartialPayment"
+          @click="payDUe"
+          class="bg-indigo-600 text-white rounded-md text-center py-1"
+        >
+          Pay due
+        </button>
+        <button
+          :disabled="repayLoading"
+          v-else-if="
             singleData?.payment?.status !== 'success' && singleData?.out_time
           "
           @click="repay"
@@ -141,14 +147,14 @@
           Repay
         </button>
         <button
-          :disabled="repayLoading"
           v-if="
-            isPartialPayment
+            (singleData?.payment?.status !== 'success' && singleData?.out_time) || isPartialPayment
           "
-          @click="payDUe"
-          class="bg-indigo-600 text-white rounded-md text-center py-1"
+          :disabled="repayLoading"
+          @click="scanToPay('pay-due')"
+          class="bg-green-600 text-white rounded-md text-center py-1"
         >
-          Pay due
+          Scan to pay
         </button>
         <nuxt-link
           class="bg-orange-300 text-white rounded-md text-center py-1"
@@ -170,6 +176,11 @@
         </option>
     </select> -->
     </td>
+    <QrCodeModal
+      :open="showQrCode"
+      @onClose="showQrCode = false"
+      :value="qrCodeUrl"
+    />
   </tr>
 </template>
 
@@ -179,6 +190,8 @@ import { computed } from "vue";
 import { EllipsisVerticalIcon } from "@heroicons/vue/24/outline";
 import moment from "moment";
 import { PaymentService } from "~/services/PaymentService";
+import QrCodeModal from "@/components/common/QrCodeModal.vue";
+
 const { singleData } = defineProps({
   singleData: {
     type: Object,
@@ -186,6 +199,7 @@ const { singleData } = defineProps({
   },
 });
 const selectedAction = ref("");
+const showQrCode = ref(false);
 const actions = computed(() => {
   return [
     {
@@ -214,9 +228,7 @@ const discountAmount = computed(() => {
   );
 });
 const dueAmount = computed(() => {
-  return Number(parseFloat(singleData?.payment?.due_amount ?? 0)).toFixed(
-    2
-  );
+  return Number(parseFloat(singleData?.payment?.due_amount ?? 0)).toFixed(2);
 });
 const isPartialPayment = computed(() => {
   return singleData?.payment?.payment_type == "partial";
@@ -297,6 +309,17 @@ const payDUe = async () => {
   } catch (error) {
   } finally {
   }
+};
+const config = useRuntimeConfig();
+const url = config.public.BASE_URL;
+const qrCodeUrl = ref("");
+const scanToPay = (title) => {
+  const paymentId = singleData.payment.id;
+  const remaingUrl = isPartialPayment.value
+    ? `payment/scan/pay-due/${paymentId}`
+    : `payment/scan/repay/${paymentId}`;
+  showQrCode.value = true;
+  qrCodeUrl.value = url + remaingUrl;
 };
 </script>
 
