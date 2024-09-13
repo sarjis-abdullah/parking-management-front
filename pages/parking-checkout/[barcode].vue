@@ -238,7 +238,7 @@
                   </button>
                   <div
                     v-if="vehicle?.status != 'checked_out'"
-                    class="mx-4 mt-4"
+                    class="mx-4 mt-4 px-3"
                   >
                     <button
                       @click="showConfirmModaDialog()"
@@ -246,6 +246,13 @@
                     >
                       Checkout
                     </button>
+                    <button
+                      @click="toggleQrCode"
+                      class="mt-2 rounded-md border w-full border-transparent px-3 py-2 bg-indigo-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                    >
+                      Show QR code
+                    </button>
+
                   </div>
                 </div>
               </div>
@@ -335,9 +342,9 @@
                   </ul>
                 </div>
               </div>
-              <div v-else>
-                <AddMembership @refetch="loadData" :vehicleId="vehicleId" />
-                <div class="shadow-md p-2">
+              <div v-else class="">
+                <AddMembership v-if="authUser" @refetch="loadData" :vehicleId="vehicleId" />
+                <div class="shadow-md py-2 px-7">
                   <ul class="flex flex-col gap-2">
                     <li
                       v-for="(item, index) in parking_rates"
@@ -402,25 +409,31 @@
               Cancel
             </button>
             <button
-              v-if="!checkoutLoading"
+              :disabled="checkoutLoading"
               @click="confirmCheckout"
-              class="px-2 py-1 border-gray-300 bg-indigo-600 text-white rounded-md"
+              :class="checkoutLoading ? 'bg-gray-600 text-white' : 'bg-indigo-600 text-white'"
+              class="px-2 py-1 border-gray-300 rounded-md"
             >
               Checkout
             </button>
-            <Loading v-else />
           </div>
         </template>
       </ConfirmModal>
+      <QrCodeModal
+        :open="showQrCode"
+        @onClose="showQrCode= false"
+        :value="qrCodeUrl"
+      >
+      </QrCodeModal>
     </div>
   </div>
 </template>
 <script setup>
 import { onMounted, nextTick, computed, ref } from "vue";
-import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import Loading from "@/components/common/Loading.vue";
+import QrCodeModal from "@/components/common/QrCodeModal.vue";
 import ConfirmModal from "@/components/common/Modal.vue";
 import AddMembership from "@/components/membership/AddMembership.vue";
 import Errors from "@/components/common/Error.vue";
@@ -428,6 +441,8 @@ import { ParkingService } from "~/services/ParkingService";
 import { formatDate } from "@/utils/index";
 import moment from "moment";
 import { PaymentService } from "~/services/PaymentService";
+import QrcodeVue from 'qrcode.vue'
+
 definePageMeta({
   layout: "auth-layout",
 });
@@ -438,6 +453,7 @@ const list = ref([]);
 const loadingError = ref(null);
 const isLoading = ref(true);
 const showConfirmModal = ref(false);
+const showQrCode = ref(false);
 const serverErrors = ref(null);
 
 //pagination
@@ -452,7 +468,13 @@ const payableAmount = ref(0);
 const parkingId = ref(null);
 
 const route = useRoute();
+const router = useRouter();
 const barcode = route.params.barcode;
+const config = useRuntimeConfig();
+const url = config.public.APP_URL
+const routeName = computed(()=> router);
+const qrCodeUrl = computed(()=> url + route.href);
+const authUser = computed(()=> localStorage.getItem("LOGIN_ACCOUNT"));
 
 const searchQuery = computed(() => {
   return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.vehicle,v.membership,m.mt,p.tariff,t.parking_rates,p.payment`;
@@ -753,7 +775,6 @@ const checkoutAndprint = () => {
   }
 };
 
-const router = useRouter();
 const payDue = async () => {
   const payable_amount = parseFloat(duePayment.value.payable_amount);
   const paid_amount = parseFloat(duePayment.value.paid_amount);
@@ -785,6 +806,10 @@ const closeConfirmModal = () => {
 };
 const showConfirmModaDialog = () => {
   showConfirmModal.value = true;
+};
+const toggleQrCode = () => {
+  showQrCode.value = true;
+  console.log(route, router);
 };
 onMounted(() => {
   loadData();

@@ -226,6 +226,7 @@
           </div>
           <button
             type="button"
+            v-if="authUser"
             class="-m-2.5 p-2.5 text-gray-700 lg:hidden"
             @click="sidebarOpen = true"
           >
@@ -288,6 +289,7 @@ watch(
   }
 );
 const routeName = computed(() => useRoute().name);
+const authUser = computed(()=> window && window.localStorage && localStorage.getItem("LOGIN_ACCOUNT"));
 const getTitle = computed(() => {
   switch (routeName.value) {
     case "dashboard":
@@ -326,6 +328,14 @@ const getTitle = computed(() => {
       return "Add slot";
     case "add-tariff":
       return "Add tariff";
+    case "parking-checkout-barcode":
+      return "Parking Checkout";
+    case "success":
+      return "Success";
+    case "failed":
+      return "Failed";
+    case "cancel":
+      return "Canceled";
 
     default:
       return routeName;

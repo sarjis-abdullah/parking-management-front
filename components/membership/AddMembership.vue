@@ -79,7 +79,7 @@ const inputClass =
 
 <template>
   <section class="">
-    <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
+    <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3 px-7 py-4">
       <header>
         <h3 class="text-lg text-indigo-600">Add Membership</h3>
       </header>
