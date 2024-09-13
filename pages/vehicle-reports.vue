@@ -20,65 +20,6 @@
         />
       </div>
       <div class="grid gap-2">
-        <label class="text-gray-500">Payment type</label>
-        <div :class="selectWrapper" class="flex items-center">
-          <select
-            class="focus:outline-none bg-none"
-            :class="selecboxClass"
-            style="background: none"
-            name="place"
-            v-model="paymentType"
-          >
-            <option disabled :value="''">Select</option>
-            <option value="full">Full</option>
-            <option value="partial">Partial</option>
-            <!-- Add more options as needed -->
-          </select>
-          <XMarkIcon
-            v-if="paymentType"
-            @click="paymentType = ''"
-            class="h-5 w-5 text-red-500 cursor-pointer mr-2"
-            aria-hidden="true"
-          />
-        </div>
-        <!-- <input
-          :class="inputClass"
-          v-model="paymentType"
-          type="date"
-          placeholder="e.g. 20/12/2024"
-        /> -->
-      </div>
-      <div class="grid gap-2">
-        <label class="text-gray-500">Payment Status</label>
-        <div :class="selectWrapper" class="flex items-center">
-          <select
-            class="focus:outline-none bg-none"
-            :class="selecboxClass"
-            style="background: none"
-            name="place"
-            v-model="paymentStatus"
-          >
-            <option disabled :value="''">Select</option>
-            <option value="success">success</option>
-            <option value="failed">failed</option>
-            <option value="pending">pending</option>
-            <!-- Add more options as needed -->
-          </select>
-          <XMarkIcon
-            v-if="paymentStatus"
-            @click="paymentStatus = ''"
-            class="h-5 w-5 text-red-500 cursor-pointer mr-2"
-            aria-hidden="true"
-          />
-        </div>
-        <!-- <input
-          :class="inputClass"
-          v-model="paymentType"
-          type="date"
-          placeholder="e.g. 20/12/2024"
-        /> -->
-      </div>
-      <div class="grid gap-2">
         <label class="text-gray-500"
           >Vehicle Number<span class="text-red-500">*</span></label
         >
@@ -118,11 +59,9 @@
       <section class="flex items-end">
         <button
           :disabled="isLoading"
-          @click="getTransactions"
+          @click="getVehicleEntryReports"
           class="text-white px-2 py-1 rounded-md"
-          :class="
-            activeReport ? 'bg-indigo-600' : 'bg-gray-600'
-          "
+          :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
         >
           Apply
         </button>
@@ -130,23 +69,13 @@
     </section>
     <section>
       <h2 style="text-align: center; margin-top: 20px; padding: 1rem">
-        Date-wise Transactions
+        Date-wise vehicle entry reports
       </h2>
       <table
         style="width: 100%; border-collapse: collapse; margin-bottom: 20px"
       >
         <thead>
           <tr>
-            <th
-              style="
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: center;
-                background-color: #f2f2f2;
-              "
-            >
-              Vehicle
-            </th>
             <th
               style="
                 border: 1px solid #ddd;
@@ -165,153 +94,28 @@
                 background-color: #f2f2f2;
               "
             >
-              Transaction Count
-            </th>
-            <th
-              style="
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: center;
-                background-color: #f2f2f2;
-              "
-            >
-              Total Payable
-            </th>
-            <th
-              style="
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: center;
-                background-color: #f2f2f2;
-              "
-            >
-              Total Paid
-            </th>
-            <th
-              style="
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: center;
-                background-color: #f2f2f2;
-              "
-            >
-              Total Due
-            </th>
-            <th
-              style="
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: center;
-                background-color: #f2f2f2;
-              "
-            >
-              Payment type
-            </th>
-            <th
-              style="
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: center;
-                background-color: #f2f2f2;
-              "
-            >
-              Payment status
-            </th>
-            <th
-              style="
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: center;
-                background-color: #f2f2f2;
-              "
-            >
-              Action
+              Vehicle entries count
             </th>
           </tr>
         </thead>
-        <tbody v-if="!isLoading">
-          <!-- Dummy Data for Transactions -->
-          <tr v-for="(item, index) in transactions" :key="index">
+        <tbody>
+          <!-- Dummy Data for reports -->
+          <tr v-for="(item, index) in vehicleEntryReports" :key="index">
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              {{ item.vehicle?.number }}
+              {{ item.entry_date }}
             </td>
+
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              {{ item.transaction_date }}
-            </td>
-            <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center"
-            >
-              {{ item.transaction_count }}
-            </td>
-            <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center"
-            >
-              {{ item.total_payable }}
-            </td>
-            <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center"
-            >
-              {{ getPaidAmount(item) }}
-            </td>
-            <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center"
-            >
-              {{ item.total_due }}
-            </td>
-            <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center"
-              class=""
-            >
-              <span
-                class="px-4 py-1 text-white rounded-md"
-                :class="
-                  item.payment_type == 'partial'
-                    ? ' bg-orange-500'
-                    : 'bg-green-400'
-                "
-              >
-                {{ item.payment_type }}
-              </span>
-            </td>
-            <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center"
-            >
-              <span
-                class="text-white px-4 py-1 rounded-md"
-                :class="getStatusWiseColor(item)"
-                >{{ item.status }}</span
-              >
-            </td>
-            <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center"
-            >
-              <div v-if="item.status != 'success'">
-                <button
-                  :disabled="repayLoading"
-                  @click="repay(item.id)"
-                  class="bg-indigo-400 text-white rounded-md text-center px-4 py-1"
-                >
-                  Repay
-                </button>
-              </div>
-              <div v-else-if="item.payment_type == 'partial'">
-                <button
-                  :disabled="repayLoading"
-                  @click="payDUe(item.id)"
-                  class="bg-indigo-600 text-white rounded-md text-center px-4 py-1"
-                >
-                  Pay due
-                </button>
-              </div>
+              {{ item.vehicle_entries }}
             </td>
           </tr>
-          <tr v-if="transactions.length == 0">
+          <tr v-if="vehicleEntryReports.length == 0">
             <td
-              colspan="8"
+              colspan="5"
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
               No data available
@@ -429,12 +233,9 @@ const checkSelection = () => {
 const debouncedSearch = useDebounce(search, 500);
 const serverErros = ref({});
 const activeReport = ref(false);
-// const isTransactionReport = computed(
-//   () => activeReport.value == "transactions"
-// );
 const getTransactions = () => {
   isLoading.value = true;
-  activeReport.value = true
+  activeReport.value = true;
   setTimeout(async () => {
     try {
       const q =
@@ -457,7 +258,7 @@ const getTransactions = () => {
 const vehicleEntryReports = ref([]);
 const getVehicleEntryReports = () => {
   isLoading.value = true;
-  activeReport.value = "vehicle-entry-reports";
+  activeReport.value = true;
   setTimeout(async () => {
     try {
       const q = getQueryString(route.query);
@@ -498,7 +299,6 @@ watch(
         paymentType.value = route.query.payment_type;
       }
 
-      activeReport.value = false
       router.push({ query: newQuery });
     }
   },
@@ -535,43 +335,42 @@ watch(
         delete newQuery.vehicle_id;
       }
     }
-    activeReport.value = false
+    activeReport.value = false;
     router.push({ query: newQuery });
   },
   { deep: true, immediate: false }
 );
 
-watch(
-  [paymentType, paymentStatus],
-  ([newType, newStatus], [oldType, oldStatus]) => {
-    if (oldType != newType) {
-      paymentType.value = newType;
-      if (!newType) {
-        const newQuery = { ...route.query };
-        delete newQuery.payment_type;
-        router.push({ query: newQuery });
-      } else {
-        const newQuery = { ...route.query };
-        newQuery.payment_type = newType;
-        router.push({ query: newQuery });
-      }
-    }
+// watch(
+//   [paymentType, paymentStatus],
+//   ([newType, newStatus], [oldType, oldStatus]) => {
+//     if (oldType != newType) {
+//       paymentType.value = newType;
+//       if (!newType) {
+//         const newQuery = { ...route.query };
+//         delete newQuery.payment_type;
+//         router.push({ query: newQuery });
+//       } else {
+//         const newQuery = { ...route.query };
+//         newQuery.payment_type = newType;
+//         router.push({ query: newQuery });
+//       }
+//     }
 
-    if (newStatus != oldStatus) {
-      paymentStatus.value = newStatus;
-      if (!newStatus) {
-        const newQuery = { ...route.query };
-        delete newQuery.status;
-        router.push({ query: newQuery });
-      } else {
-        const newQuery = { ...route.query };
-        newQuery.status = newStatus;
-        router.push({ query: newQuery });
-      }
-    }
-    activeReport.value = false
-  }
-);
+//     if (newStatus != oldStatus) {
+//       paymentStatus.value = newStatus;
+//       if (!newStatus) {
+//         const newQuery = { ...route.query };
+//         delete newQuery.status;
+//         router.push({ query: newQuery });
+//       } else {
+//         const newQuery = { ...route.query };
+//         newQuery.status = newStatus;
+//         router.push({ query: newQuery });
+//       }
+//     }
+//   }
+// );
 
 const removeSelectedVehicleId = () => {
   vehicleId.value = null;
@@ -624,11 +423,11 @@ const repay = async (id) => {
 };
 const onPageChanged = (p) => {
   page.value = p;
-  getTransactions();
+  getVehicleEntryReports();
   // loadData();
 };
 const handlePerpageChange = () => {
-  getTransactions();
+  getVehicleEntryReports();
   // loadData();
 };
 

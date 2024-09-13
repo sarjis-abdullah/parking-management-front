@@ -122,6 +122,16 @@ export const useMenu = () => {
           { name: "List", href: "/parking", icon: TableCellsIcon },
         ],
       },
+      {
+        name: "Reporting",
+        href: "/parking",
+        icon: shallowRef(ParkingIcon),
+        show: false,
+        children: [
+          { name: "Transaction reports", href: "/transaction-reports", icon: PlusIcon },
+          { name: "Vehicle reports", href: "/vehicle-reports", icon: TableCellsIcon },
+        ],
+      },
       
       // {
       //   name: "Reports",
