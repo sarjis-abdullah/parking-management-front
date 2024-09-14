@@ -108,9 +108,10 @@
             </td>
 
             <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+              style="border: 1px solid #ddd; padding: 8px; text-align: center; display: flex; gap: 1rem;"
             >
-              {{ item.vehicle_entries }}
+              <strong class="text-3xl">{{ item.vehicle_entries }}</strong>
+              <button class="text-white px-2 py-1 rounded-md bg-indigo-400" @click="showDetails(item.entry_date)">Details</button>
             </td>
           </tr>
           <tr v-if="vehicleEntryReports.length == 0">
@@ -154,6 +155,75 @@
       </select>
     </div>
   </Pagination>
+
+  <section v-if="!isLoading && details?.length">
+    <h2 style="text-align: center; margin-top: 20px; padding: 1rem">Details ({{ entryDate }})</h2>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px">
+      <thead>
+        <tr>
+          <th
+            style="
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: center;
+              background-color: #f2f2f2;
+            "
+          >
+            In/out time
+          </th>
+          <th
+            style="
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: center;
+              background-color: #f2f2f2;
+            "
+          >
+            Vehicle Info
+          </th>
+          <th
+            style="
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: center;
+              background-color: #f2f2f2;
+            "
+          >
+            Driver Info
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Dummy Data for reports -->
+        <tr v-for="(item, index) in details" :key="index">
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: center">
+            <div>
+              <div>In: {{ item.in_time }}</div>
+              <div>Out: {{ item.out_time }}</div>
+            </div>
+          </td>
+
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: center">
+            {{ item.vehicle?.number }}
+          </td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: center">
+            <div>
+              <div>{{ item.vehicle?.driver_mobile }}</div>
+              <div>{{ item.vehicle?.driver_name }}</div>
+            </div>
+          </td>
+        </tr>
+        <tr v-if="details.length == 0">
+          <td
+            colspan="5"
+            style="border: 1px solid #ddd; padding: 8px; text-align: center"
+          >
+            No details available
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 </template>
 
 <script setup>
@@ -256,6 +326,31 @@ const getVehicleEntryReports = () => {
       isLoading.value = false;
     }
   }, 500);
+};
+const details = ref([]);
+const entryDate = ref('');
+const showDetails = async (date) => {
+  try {
+    entryDate.value = date
+    // const q =
+    //       getQueryString(route.query) +
+    //       `&page=${page.value}&per_page=${perPage.value}`;
+    const q = `?entry_date=${date}`;
+    isLoading.value = true
+    const res = await ReportService.getDetailVehicleReport(q);
+    console.log(res.data);
+    details.value = res.data.details;
+    // vehicleEntryReports.value = res.data.data;
+    // const meta = res.data;
+    // page.value = meta.current_page;
+    // lastPage.value = meta.last_page;
+    // total.value = meta.total;
+    // totalPerPage.value = res.data.data.length;
+  } catch (error) {
+    serverErros.value = error.errors;
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 watch(

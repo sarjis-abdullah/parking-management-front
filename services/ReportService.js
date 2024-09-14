@@ -23,4 +23,11 @@ export class ReportService {
       throw err;
     }
   }
+  static async getDetailVehicleReport(query='') {
+    try {
+      return await HttpRequester.get(`report/vehicle-details${query}`);
+    } catch (err) {
+      throw err;
+    }
+  }
 }
