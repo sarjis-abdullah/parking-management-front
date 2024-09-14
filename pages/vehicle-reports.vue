@@ -108,10 +108,10 @@
             </td>
 
             <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center; display: flex; gap: 1rem;"
+              style="border: 1px solid #ddd; padding: 8px; text-align: center; display: flex; gap: 1rem; justify-content: center"
             >
-              <strong class="text-3xl">{{ item.vehicle_entries }}</strong>
-              <button class="text-white px-2 py-1 rounded-md bg-indigo-400" @click="showDetails(item.entry_date)">Details</button>
+              <span class="text-3xl">{{ item.vehicle_entries }}</span>
+              <button class="text-white px-2 py-1 rounded-md bg-indigo-400" :disabled="isLoading" @click="showDetails(item.entry_date)">Details</button>
             </td>
           </tr>
           <tr v-if="vehicleEntryReports.length == 0">
