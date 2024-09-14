@@ -84,6 +84,16 @@
                 background-color: #f2f2f2;
               "
             >
+              SL No.
+            </th>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            >
               Date
             </th>
             <th
@@ -101,6 +111,11 @@
         <tbody>
           <!-- Dummy Data for reports -->
           <tr v-for="(item, index) in vehicleEntryReports" :key="index">
+            <td
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              {{ index + 1 }}
+            </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >

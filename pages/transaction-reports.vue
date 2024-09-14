@@ -145,6 +145,16 @@
                 background-color: #f2f2f2;
               "
             >
+              SL No.
+            </th>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            >
               Vehicle
             </th>
             <th
@@ -232,6 +242,11 @@
         <tbody v-if="!isLoading">
           <!-- Dummy Data for Transactions -->
           <tr v-for="(item, index) in transactions" :key="index">
+            <td
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              {{ index + 1 }}
+            </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
