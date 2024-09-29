@@ -4,7 +4,7 @@
       <div class="-mx-4 -mt-2 mb-12 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full align-middle sm:px-6 lg:px-8">
           <div v-if="!loadingError && !isLoading">
-            <div
+            <div                                                      
               v-if="list && list?.length > 0"
               class="grid md:grid-cols-3 justify-center gap-4"
             >
@@ -256,7 +256,7 @@
                   </div>
                 </div>
               </div>
-              <div v-if="vehicle?.membership?.id">
+              <div v-if="vehicle?.membership?.id && vehicle?.membership?.active">
                 <ul class="shadow-lg">
                   <li
                     v-if="vehicle.membership?.name"
@@ -292,27 +292,21 @@
                     <span>Discount:</span>
                     <span
                       >{{
-                        vehicle.membership.membership_type.discount_amount ?? 0
+                        membershipHasPercentageDiscount ? parseInt(vehicle.membership.membership_type.discount_amount) ?? 0 : vehicle.membership.membership_type.discount_amount ?? 0
                       }}
                       <span
-                        v-if="
-                          vehicle.membership?.membership_type?.discount_type ==
-                          'flat'
-                        "
+                        v-if="membershipHasFlatDiscount"
                         >৳</span
                       >
                       <span
-                        v-else-if="
-                          vehicle.membership?.membership_type?.discount_type ==
-                          'percentage'
-                        "
+                        v-else-if="membershipHasPercentageDiscount"
                         >%</span
                       >
                       <span v-else>Free</span>
                     </span>
                   </li>
                 </ul>
-                <div class="shadow-md p-2 mt-8">
+                <div v-if="false" class="shadow-md p-2 mt-8">
                   <ul class="flex flex-col gap-2">
                     <li
                       v-for="(item, index) in parking_rates"
@@ -563,6 +557,14 @@ class CustomError extends Error {
 }
 const vehicleId = ref(null);
 const vehicle = ref(null);
+const membershipHasFlatDiscount = computed(()=> {
+  const type = vehicle.value?.membership?.membership_type?.discount_type
+  return type == 'flat'
+})
+const membershipHasPercentageDiscount = computed(()=> {
+  const type = vehicle.value?.membership?.membership_type?.discount_type
+  return type == 'percentage'
+})
 const discountAmount = ref(0);
 const loadData = async () => {
   try {
@@ -705,7 +707,7 @@ const confirmCheckout = async () => {
       parkingData.value
     );
     
-    // print();
+    print();
     if (result?.data?.redirect_url) {
       window.location.href = result.data.redirect_url
     }else {

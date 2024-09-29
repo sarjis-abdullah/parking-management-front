@@ -115,16 +115,23 @@
           </div>
         </div>
       </div>
-      <section class="flex items-end">
+      <section class="flex items-end gap-2">
         <button
           :disabled="isLoading"
           @click="getTransactions"
           class="text-white px-2 py-1 rounded-md"
-          :class="
-            activeReport ? 'bg-indigo-600' : 'bg-gray-600'
-          "
+          :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
         >
           Apply
+        </button>
+        <!-- v-if="vehicleId && (transactions?.length > 0) && paymentType == 'partial'" -->
+
+        <button
+          @click="payAllDue"
+          class="text-white px-2 py-1 rounded-md"
+          :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
+        >
+          Pay all due
         </button>
       </section>
     </section>
@@ -166,16 +173,6 @@
               "
             >
               Date
-            </th>
-            <th
-              style="
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: center;
-                background-color: #f2f2f2;
-              "
-            >
-              Transaction Count
             </th>
             <th
               style="
@@ -257,11 +254,7 @@
             >
               {{ item.transaction_date }}
             </td>
-            <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center"
-            >
-              {{ item.transaction_count }}
-            </td>
+
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
@@ -304,16 +297,7 @@
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              <div v-if="item.status != 'success'">
-                <button
-                  :disabled="repayLoading"
-                  @click="repay(item.id)"
-                  class="bg-indigo-400 text-white rounded-md text-center px-4 py-1"
-                >
-                  Repay
-                </button>
-              </div>
-              <div v-else-if="item.payment_type == 'partial'">
+              <div v-if="item.payment_type == 'partial'">
                 <button
                   :disabled="repayLoading"
                   @click="payDUe(item.id)"
@@ -322,11 +306,29 @@
                   Pay due
                 </button>
               </div>
+              <div v-else-if="item.status != 'success'">
+                <button
+                  :disabled="repayLoading"
+                  @click="repay(item.id)"
+                  class="bg-indigo-400 text-white rounded-md text-center px-4 py-1"
+                >
+                  Repay
+                </button>
+              </div>
             </td>
           </tr>
+          <!-- <tr>
+            <td
+              colspan="9"
+              v-for="(total, index) in totals" :key="index"
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              {{ total }}
+            </td>
+          </tr> -->
           <tr v-if="transactions.length == 0">
             <td
-              colspan="8"
+              colspan="9"
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
               No data available
@@ -415,6 +417,26 @@ function getQueryString(query) {
   const params = new URLSearchParams(filteredQuery);
   return `?${params.toString()}`;
 }
+const totals = computed(() => {
+  if (transactions.value && transactions.value.length) {
+    return transactions.value.reduce(
+      (acc, payment) => {
+        acc.total_payable += parseFloat(payment.total_payable);
+        acc.total_paid += parseFloat(payment.total_paid);
+        acc.total_due += parseFloat(payment.total_due);
+        return acc;
+      },
+      { total_payable: 0, total_paid: 0, total_due: 0 }
+    );
+  }
+  return 0.0;
+});
+const totalTransaction = computed(() => {
+  if (transactions.value && transactions.value.length) {
+    return transactions.value;
+  }
+  return 0.0;
+});
 
 const vehicleNumber = ref("");
 const vehicleList = ref([]);
@@ -449,7 +471,7 @@ const activeReport = ref(false);
 // );
 const getTransactions = () => {
   isLoading.value = true;
-  activeReport.value = true
+  activeReport.value = true;
   setTimeout(async () => {
     try {
       const q =
@@ -513,7 +535,7 @@ watch(
         paymentType.value = route.query.payment_type;
       }
 
-      activeReport.value = false
+      activeReport.value = false;
       router.push({ query: newQuery });
     }
   },
@@ -550,7 +572,7 @@ watch(
         delete newQuery.vehicle_id;
       }
     }
-    activeReport.value = false
+    activeReport.value = false;
     router.push({ query: newQuery });
   },
   { deep: true, immediate: false }
@@ -584,7 +606,7 @@ watch(
         router.push({ query: newQuery });
       }
     }
-    activeReport.value = false
+    activeReport.value = false;
   }
 );
 
@@ -626,6 +648,25 @@ const repay = async (id) => {
   repayLoading.value = true;
   try {
     const result = await PaymentService.repay(id);
+
+    // print();
+    if (result?.data?.redirect_url) {
+      window.location.href = result.data.redirect_url;
+    } else {
+      // vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
+    }
+  } catch (error) {
+  } finally {
+  }
+};
+const payAllDue = async (id) => {
+  if (!startDate.value || !endDate.value) {
+    return;
+  }
+  repayLoading.value = true;
+  const query = `?start_date=${startDate.value}&end_date=${endDate.value}`;
+  try {
+    const result = await PaymentService.payAllDue(query);
 
     // print();
     if (result?.data?.redirect_url) {

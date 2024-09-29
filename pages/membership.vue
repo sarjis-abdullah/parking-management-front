@@ -72,6 +72,12 @@
                   >
                     Total parked in count.
                   </th>
+                  <th
+                    scope="col"
+                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
+                    Status
+                  </th>
                   <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                     Action
                   </th>
@@ -132,6 +138,29 @@
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
                     <span class="text-center bg-indigo-500 text-white p-2 rounded">{{
                       singleData?.totalParkingCount
+                    }}</span>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-5 text-sm">
+                    <div
+                      v-if="singleData.editMode"
+                      class="flex items-center gap-1 mt-1 text-gray-500"
+                    >
+                      <input
+                        v-model="record.active"
+                        type="checkbox"
+                        value=""
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                      />
+                      <label class="text-gray-500">Marked as active</label>
+                      <!-- <input
+                        :class="inputClass"
+                        v-model="record.discount_amount"
+                        type="text"
+                        placeholder="e.g. Text about place"
+                      /> -->
+                    </div>
+                    <span v-else class="text-gray-900">{{
+                      singleData.active ? "Active" : "Inactive"
                     }}</span>
                   </td>
                   <td
@@ -294,10 +323,12 @@ const record = reactive({
   id: "",
   name: "",
   membership_type_id: null,
+  active: 0,
 });
 const editRecord = (props) => {
   record.id = props.id;
   record.name = props.name;
+  record.active = props.active ? true : false;
   record.membership_type_id = props.membership_type_id;
   list.value = list.value.map((item) => {
     if (item.id == props.id) {
@@ -317,6 +348,7 @@ const updateableRecord = computed(() => {
   return {
     name: record.name,
     membership_type_id: record.membership_type_id,
+    active: record.active ? 1: 0,
   };
 });
 const cancelUpdatingRecord = async (id) => {
@@ -341,6 +373,7 @@ const updateRecord = async (id) => {
           item.membership_type_id = res.data.membership_type_id;
           item.membership_type = res.data.membership_type;
           item.editMode = false;
+          item.active = record.active;
           return item;
         }
         return item;
