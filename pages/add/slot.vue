@@ -20,6 +20,7 @@ const defaultData = {
   place: "",
   category: "",
   floor: "",
+  block: "",
   identity: "",
   remarks: "",
 };
@@ -31,6 +32,7 @@ const rules = computed(() => {
     place: { required: helpers.withMessage("Place is required", required) },
     category: {},
     floor: { required: helpers.withMessage("Floor is required", required) },
+    block: { required: helpers.withMessage("Block is required", required) },
     remarks: {},
     identity: {},
   };
@@ -55,18 +57,18 @@ const postItem = async () => {
       place_id: state.place,
       category_id: state.category,
       floor_id: state.floor,
+      block_id: state.block,
     };
     delete obj.place;
     delete obj.category;
     delete obj.floor;
+    delete obj.block;
     await SlotService.create(obj);
     serverErrors.value = {};
     handleReset();
   } catch (error) {
-    if (error.response?._data?.errors) {
-      serverErrors.value = error.response._data.errors;
-    } else if (error.response?.data?.errors) {
-      serverErrors.value = error.response?.data.errors;
+    if (error.errors) {
+      serverErrors.value = error.errors;
     }
   } finally {
     loading.value = false;
@@ -191,9 +193,24 @@ const inputClass =
             <option v-for="floor in floors" :key="floor.id" :value="floor.id">
               {{ floor.name }}
             </option>
-            <!-- Add more options as needed -->
           </select>
-          <!-- <ServerErrorMessage :errors="validator.floor.$errors" /> -->
+        </div>
+        <div class="grid gap-2">
+          <label class="text-gray-500"
+            >Block<span class="text-red-500">*</span></label
+          >
+          <select
+            class="focus:outline-none bg-none"
+            :class="inputClass"
+            style="background: none"
+            name="place"
+            v-model="state.block"
+          >
+            <option disabled :value="''">Select block name</option>
+            <option v-for="floor in floors" :key="floor.id" :value="floor.id">
+              {{ floor.name }}
+            </option>
+          </select>
         </div>
         <!-- <div class="grid gap-2">
           <label class="text-gray-500">Identity</label>
