@@ -338,7 +338,7 @@
               </div>
               <div v-else class="">
                 <AddMembership v-if="authUser" @refetch="loadData" :vehicleId="vehicleId" />
-                <div class="shadow-md py-2 px-7">
+                <div class="shadow-md py-2 px-7" v-if="false">
                   <ul class="flex flex-col gap-2">
                     <li
                       v-for="(item, index) in parking_rates"
@@ -419,6 +419,7 @@
         :value="qrCodeUrl"
       >
       </QrCodeModal>
+      <CheckoutForm/>
     </div>
   </div>
 </template>
@@ -427,6 +428,7 @@ import { onMounted, nextTick, computed, ref } from "vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import Loading from "@/components/common/Loading.vue";
+import CheckoutForm from "@/components/common/CheckoutForm.vue";
 import QrCodeModal from "@/components/common/QrCodeModal.vue";
 import ConfirmModal from "@/components/common/Modal.vue";
 import AddMembership from "@/components/membership/AddMembership.vue";
