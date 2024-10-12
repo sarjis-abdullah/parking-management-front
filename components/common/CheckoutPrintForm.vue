@@ -45,7 +45,7 @@
                           >
                             {{ title }}
                           </h2>
-                          <button tabindex="0">
+                          <button @click="onClose">
                             <span
                               ><svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -300,9 +300,9 @@
                                             color: rgb(0, 0, 0);
                                           "
                                         >
-                                          <div :style="itemClass">
-                                            <span>Checkout</span>
-                                            <span>YYYY-MM-DD HH:MM</span>
+                                          <div v-for="item in checkoutData" :key="item.key" :style="itemClass">
+                                            <span>{{ item.key }}</span>
+                                            <span>{{item.value}}</span>
                                           </div>
                                           <div :style="itemClass">
                                             <span>Vehicle No</span>
@@ -670,7 +670,7 @@
                                     </ol> -->
                                   </div>
                                 </div>
-                                
+
                                 <!-- <div
                                   style="text-align: center; margin-top: 5px"
                                 >
@@ -726,33 +726,32 @@
                           </div>
                         </section>
                         <div
-                                  class="no-print"
-                                  style="
-                                    text-align: center;
-                                    margin: 15px 0px 20px;
-                                  "
-                                >
-                                  <button
-                                    class="hover:bg-gray-200"
-                                    id="printBUtton"
-                                    style="
-                                      display: inline-flex;
-                                      align-items: center;
-                                      border: 2px solid rgb(204, 204, 204);
-                                      border-radius: 5px;
-                                      padding: 10px 20px;
-                                      text-decoration: none;
-                                      font-family: Inter;
-                                      font-size: 12px;
-                                      font-weight: 600;
-                                      line-height: 15.73px;
-                                      color: rgb(0, 0, 0);
-                                    "
-                                    @click="printReceipt"
-                                  >
-                                    Print
-                                  </button>
-                                </div>
+                          class="no-print focus-product-search"
+                          style="text-align: center; margin: 15px 0px 20px"
+                        >
+                          <button
+                            class="hover:bg-gray-200"
+                            id="printBUtton"
+                            ref="myButton"
+                            tabindex="0"
+                            style="
+                              display: inline-flex;
+                              align-items: center;
+                              border: 2px solid rgb(204, 204, 204);
+                              border-radius: 5px;
+                              padding: 10px 20px;
+                              text-decoration: none;
+                              font-family: Inter;
+                              font-size: 12px;
+                              font-weight: 600;
+                              line-height: 15.73px;
+                              color: rgb(0, 0, 0);
+                            "
+                            @click="printReceipt"
+                          >
+                            Print
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -767,7 +766,7 @@
 </template>
 
 <script setup>
-import { defineProps } from "vue";
+import { defineProps, onMounted, ref } from "vue";
 import {
   Dialog,
   DialogPanel,
@@ -776,7 +775,7 @@ import {
   TransitionRoot,
 } from "@headlessui/vue";
 import { XMarkIcon } from "@heroicons/vue/20/solid";
-defineProps({
+const props = defineProps({
   title: {
     type: String,
     default: "Payment Invoice",
@@ -793,21 +792,107 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  pdfData: {
+    type: [Array, Object],
+    default: false,
+  },
 });
 const emit = defineEmits(["onClose"]);
 const itemClass = `display: flex;justify-content: space-between; border-bottom: 1px dashed rgb(131, 131, 131); padding: 4px 0 4px 0`;
+const myButton = ref(null);
 const onClose = () => {
   emit("onClose");
 };
+const checkoutData = computed(() => {
+  if (!(props.pdfData && props.pdfData.length)) {
+    return [];
+  }
+  const payment = props.pdfData[0];
+  const parking = payment.parking;
+  // Extract relevant fields from the data
+  const outTime = new Date(parking.out_time);
+  const duration = parking.duration;
+
+  const checkoutTime= `${outTime.getFullYear()}-${(outTime.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${outTime
+      .getDate()
+      .toString()
+      .padStart(2, "0")} ${outTime
+      .getHours()
+      .toString()
+      .padStart(2, "0")}:${outTime.getMinutes().toString().padStart(2, "0")}`,
+      vehicleNo= parking.vehicle.number,
+    type= parking.category.name,
+    block= parking.place.name,
+    slot= parking.slot.name,
+    totalHours= Math.floor(duration / 60),
+    totalMinutes= duration % 60,
+    parkingFee= parseFloat(payment.paid_amount),
+    discounts= parseFloat(payment.discount_amount),
+    totalAmount = parseFloat(payment.paid_amount), // Assuming no additional calculations needed
+    paymentMethod = payment.method,
+    return [
+    {
+      key: 'Checkout Time',
+      value: checkoutTime
+    },
+    {
+      key: 'vehicleNo',
+      value: vehicleNo
+    },
+    {
+      key: 'type',
+      value: type
+    },
+    {
+      key: 'block',
+      value: block
+    },
+    {
+      key: 'Slot',
+      value: slot
+    },
+    {
+      key: 'Floor',
+      value: 'formatOuttime'
+    },
+    {
+      key: 'totalHours',
+      value: totalHours
+    },
+    {
+      key: 'totalMinutes',
+      value: totalMinutes
+    },
+    {
+      key: 'parkingFee',
+      value: parkingFee
+    },
+    {
+      key: 'discounts',
+      value: discounts
+    },
+    {
+      key: 'totalAmount',
+      value: totalAmount
+    },
+    {
+      key: 'paymentMethod',
+      value: paymentMethod
+    },
+  ];
+  
+});
 function printReceipt() {
   //window.print();
-  const content = document.getElementById('receipt').innerHTML;
+  const content = document.getElementById("receipt").innerHTML;
 
-      // Open a new window
-      const newWindow = window.open('', '', 'height=600,width=800');
+  // Open a new window
+  const newWindow = window.open("", "", "height=600,width=800");
 
-      // Write the selected content into the new window with custom print-specific styles
-      newWindow.document.write(`
+  // Write the selected content into the new window with custom print-specific styles
+  newWindow.document.write(`
         <html>
           <head>
             <title>Print</title>
@@ -848,10 +933,16 @@ function printReceipt() {
         </html>
       `);
 
-      // Close the new document stream and trigger print
-      newWindow.document.close();
-      newWindow.print();
+  // Close the new document stream and trigger print
+  newWindow.document.close();
+  newWindow.print();
+  emit("onClose");
 }
+onMounted(() => {
+  if (myButton.value) {
+    myButton.value.focus();
+  }
+});
 </script>
 
 <style>
@@ -885,7 +976,7 @@ body {
     margin: 0;
     padding: 0;
   }
-  .page:nth-child(n+2) {
+  .page:nth-child(n + 2) {
     display: none; /* Hide pages after the first one */
   }
 

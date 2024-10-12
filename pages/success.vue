@@ -7,7 +7,7 @@
       <strong class="ml-2"> Transaction successful.</strong>
     </div>
   </div>
-  <CheckoutForm :show="showInvoice" @onClose="showInvoice = false" />
+  <CheckoutForm :show="showInvoice" @onClose="showInvoice = false" :pdfData="responses" />
 </template>
 
 <script setup>
@@ -22,6 +22,8 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 const showInvoice = ref(false)
+const responses = ref(null)
+const includeQuery = computed(()=> `?include=p.parking,p.place,p.category,p.slot,p.floor,p.vehicle`)
 
 watch(
   route,
@@ -31,9 +33,11 @@ watch(
         ...route.query,
       };
       if (route.query.transaction_id) {
-        const query = `?transaction_id=${route.query.transaction_id}`;
+        const query = `${includeQuery.value}&transaction_id=${route.query.transaction_id}`;
         PaymentService.findBy(query).then((result) => {
           showInvoice.value = true
+          console.log(result.data);
+          responses.value = result.data
         }).catch((err) => {
           
         });;
