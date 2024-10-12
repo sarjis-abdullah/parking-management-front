@@ -670,39 +670,7 @@
                                     </ol> -->
                                   </div>
                                 </div>
-                                <div
-                                  class="no-print"
-                                  style="
-                                    text-align: center;
-                                    margin: 15px 0px 20px;
-                                  "
-                                >
-                                  <button
-                                    class="hover:bg-gray-200"
-                                    id="printBUtton"
-                                    style="
-                                      display: inline-flex;
-                                      align-items: center;
-                                      border: 2px solid rgb(204, 204, 204);
-                                      border-radius: 5px;
-                                      padding: 10px 20px;
-                                      text-decoration: none;
-                                      font-family: Inter;
-                                      font-size: 12px;
-                                      font-weight: 600;
-                                      line-height: 15.73px;
-                                      color: rgb(0, 0, 0);
-                                    "
-                                    @click="printReceipt"
-                                  >
-                                    <!-- <img
-                                        src="/_next/static/image/public/images/print-icon.6d893a5d0055d56426e671495f7b2059.png"
-                                        alt="icon"
-                                        style="margin-right: 8px; height: 17px"
-                                      /> -->
-                                    Print
-                                  </button>
-                                </div>
+                                
                                 <!-- <div
                                   style="text-align: center; margin-top: 5px"
                                 >
@@ -757,6 +725,34 @@
                             </table>
                           </div>
                         </section>
+                        <div
+                                  class="no-print"
+                                  style="
+                                    text-align: center;
+                                    margin: 15px 0px 20px;
+                                  "
+                                >
+                                  <button
+                                    class="hover:bg-gray-200"
+                                    id="printBUtton"
+                                    style="
+                                      display: inline-flex;
+                                      align-items: center;
+                                      border: 2px solid rgb(204, 204, 204);
+                                      border-radius: 5px;
+                                      padding: 10px 20px;
+                                      text-decoration: none;
+                                      font-family: Inter;
+                                      font-size: 12px;
+                                      font-weight: 600;
+                                      line-height: 15.73px;
+                                      color: rgb(0, 0, 0);
+                                    "
+                                    @click="printReceipt"
+                                  >
+                                    Print
+                                  </button>
+                                </div>
                       </div>
                     </div>
                   </div>
@@ -804,7 +800,57 @@ const onClose = () => {
   emit("onClose");
 };
 function printReceipt() {
-  window.print();
+  //window.print();
+  const content = document.getElementById('receipt').innerHTML;
+
+      // Open a new window
+      const newWindow = window.open('', '', 'height=600,width=800');
+
+      // Write the selected content into the new window with custom print-specific styles
+      newWindow.document.write(`
+        <html>
+          <head>
+            <title>Print</title>
+            <style>
+              /* Reset default margins and padding */
+              body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                font-size: 12px;
+              }
+
+              /* Customize printed content size */
+              #print-content {
+                width: 58mm; /* Adjust this value to control content width */
+                margin: auto;
+              }
+
+              /* Other custom styles */
+              h2 {
+                font-size: 16px;
+                margin-bottom: 10px;
+              }
+              p {
+                font-size: 12px;
+                line-height: 1.5;
+              }
+              button {
+                display: none;
+              }
+            </style>
+          </head>
+          <body>
+            <div id="print-content">
+              ${content}
+            </div>
+          </body>
+        </html>
+      `);
+
+      // Close the new document stream and trigger print
+      newWindow.document.close();
+      newWindow.print();
 }
 </script>
 
@@ -838,6 +884,9 @@ body {
   body {
     margin: 0;
     padding: 0;
+  }
+  .page:nth-child(n+2) {
+    display: none; /* Hide pages after the first one */
   }
 
   /* Ensure that the receipt fits on a single page */
