@@ -46,8 +46,8 @@
                             {{ title }}
                           </h2>
                           <button @click="onClose">
-                            <span
-                              ><svg
+                            <span>
+                              <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 class="w-6 h-6"
                                 fill="none"
@@ -59,8 +59,9 @@
                                   stroke-linejoin="round"
                                   stroke-width="1"
                                   d="M6 18L18 6M6 6l12 12"
-                                ></path></svg
-                            ></span>
+                                ></path>
+                              </svg>
+                              </span>
                           </button>
                         </div>
                         <hr class="my-2" />
@@ -82,24 +83,6 @@
                           >
                             <table style="width: 100%">
                               <tbody>
-                                <!-- <tr>
-                                  <td
-                                    style="
-                                      text-align: center;
-                                      padding-bottom: 4px;
-                                    "
-                                  >
-                                    <img
-                                        src="https://pos-stage.s3.ap-southeast-1.amazonaws.com/generic/AnILlCvKX8VATmzJLLMI__images.jpeg"
-                                        alt=""
-                                        style="
-                                          margin: auto;
-                                          max-height: 65px;
-                                          max-width: 65px;
-                                        "
-                                      />
-                                  </td>
-                                </tr> -->
                                 <tr>
                                   <td
                                     style="
@@ -115,98 +98,6 @@
                                     Khulshi Mart
                                   </td>
                                 </tr>
-                                <!-- <tr>
-                                  <td
-                                    style="
-                                      margin: 0px 0px 5px;
-                                      font-family: Inter;
-                                      font-weight: 400;
-                                      font-size: 14px;
-                                      line-height: 15.73px;
-                                      text-align: center;
-                                      color: rgb(0, 0, 0);
-                                    "
-                                  >
-                                    Branch: Banani Branch
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td
-                                    style="
-                                      margin: 0px 0px 5px;
-                                      font-family: Inter;
-                                      font-weight: 400;
-                                      font-size: 11px;
-                                      line-height: 15.73px;
-                                      text-align: center;
-                                      color: rgb(0, 0, 0);
-                                    "
-                                  >
-                                    Banani link road 550
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <p
-                                    style="
-                                      margin: 0px;
-                                      font-family: Inter;
-                                      font-weight: 400;
-                                      font-size: 11px;
-                                      line-height: 15.73px;
-                                      text-align: center;
-                                      color: rgb(0, 0, 0);
-                                    "
-                                  >
-                                    banani@gmail.com
-                                  </p>
-                                </tr>
-                                <tr>
-                                  <td
-                                    style="
-                                      margin: 0px;
-                                      font-family: Inter;
-                                      font-weight: 400;
-                                      font-size: 11px;
-                                      line-height: 15.73px;
-                                      text-align: center;
-                                      color: rgb(0, 0, 0);
-                                    "
-                                  >
-                                    0178965874
-                                  </td>
-                                </tr> -->
-                                <!-- <tr style="border-bottom: 1.5px solid black">
-                                  <td class="flex justify-between">
-                                    <li
-                                      style="
-                                        font-family: Inter;
-                                        font-size: 12px;
-                                        font-weight: 500;
-                                        line-height: 12px;
-                                        list-style-type: none;
-                                        color: rgb(0, 0, 0);
-                                      "
-                                    >
-                                      VAT Reg:<span style="font-weight: 500"
-                                        >001118382-0201</span
-                                      >
-                                    </li>
-                                    <li
-                                      style="
-                                        font-family: Inter;
-                                        font-size: 12px;
-                                        font-weight: 500;
-                                        line-height: 12px;
-                                        list-style-type: none;
-                                        color: rgb(0, 0, 0);
-                                      "
-                                    >
-                                      Mushak:<span style="font-weight: 500"
-                                        >6.3</span
-                                      >
-                                    </li>
-                                  </td>
-                                </tr> -->
                                 <tr>
                                   <td class="flex justify-between mt-1">
                                     <li
@@ -304,324 +195,12 @@
                                             <span>{{ item.key }}</span>
                                             <span>{{item.value}}</span>
                                           </div>
-                                          <div :style="itemClass">
-                                            <span>Vehicle No</span>
-                                            <span>12345</span>
-                                          </div>
-                                          <div :style="itemClass">
-                                            <span>Type</span>
-                                            <span>Car</span>
-                                          </div>
-                                          <div :style="itemClass">
-                                            <span>Block</span>
-                                            <span>A</span>
-                                          </div>
-                                          <div :style="itemClass">
-                                            <span>Slot</span>
-                                            <span>1</span>
-                                          </div>
-                                          <div :style="itemClass">
-                                            <span>Total Hours</span>
-                                            <span>2h</span>
-                                          </div>
-                                          <div :style="itemClass">
-                                            <span>Total Minutes</span>
-                                            <span>30m</span>
-                                          </div>
-                                          <div :style="itemClass">
-                                            <span>Parking Fee</span>
-                                            <span>৳ 300.00</span>
-                                          </div>
-                                          <div :style="itemClass">
-                                            <span>Discounts</span>
-                                            <span>৳ 300.00</span>
-                                          </div>
-                                          <div :style="itemClass">
-                                            <span>Total Amount</span>
-                                            <span>৳ 300.00</span>
-                                          </div>
-                                          <div :style="itemClass">
-                                            <span>Payment Method</span>
-                                            <span>Cash</span>
-                                          </div>
                                         </li>
                                       </ul>
                                       <ul
                                         style="padding-left: 0px; margin: 0px"
                                       ></ul>
                                     </div>
-                                  </td>
-                                </tr>
-                                <tr v-if="false">
-                                  <td>
-                                    <div style="margin-top: 5px">
-                                      <ul
-                                        style="padding-left: 0px; margin: 0px"
-                                      >
-                                        <li
-                                          style="
-                                            font-family: Inter;
-                                            font-size: 12px;
-                                            font-weight: 500;
-                                            line-height: 12px;
-                                            list-style-type: none;
-                                            color: rgb(0, 0, 0);
-                                            padding-bottom: 20px;
-                                            border-bottom: 1px solid
-                                              rgb(131, 131, 131);
-                                            margin-bottom: 10px;
-                                          "
-                                        >
-                                          <div>
-                                            <span
-                                              style="
-                                                font-weight: 700;
-                                                float: left;
-                                                clear: both;
-                                              "
-                                              >Total Amount</span
-                                            ><span
-                                              style="
-                                                font-weight: 700;
-                                                float: right;
-                                              "
-                                              >৳ 1200.00</span
-                                            >
-                                          </div>
-                                        </li>
-                                        <li
-                                          style="
-                                            font-family: Inter;
-                                            font-size: 12px;
-                                            font-weight: 500;
-                                            line-height: 12px;
-                                            list-style-type: none;
-                                            color: rgb(0, 0, 0);
-                                            padding-bottom: 20px;
-                                            border-bottom: 1px solid
-                                              rgb(131, 131, 131);
-                                            margin-bottom: 10px;
-                                          "
-                                        >
-                                          <div>
-                                            <span
-                                              style="
-                                                font-weight: 700;
-                                                float: left;
-                                                clear: both;
-                                              "
-                                              >Discount</span
-                                            ><span
-                                              style="
-                                                font-weight: 700;
-                                                float: right;
-                                              "
-                                              >৳ 0.00</span
-                                            >
-                                          </div>
-                                        </li>
-                                        <li
-                                          style="
-                                            font-family: Inter;
-                                            font-size: 12px;
-                                            font-weight: 500;
-                                            line-height: 12px;
-                                            list-style-type: none;
-                                            color: rgb(0, 0, 0);
-                                            padding-bottom: 20px;
-                                            border-bottom: 1px solid
-                                              rgb(131, 131, 131);
-                                            margin-bottom: 10px;
-                                          "
-                                        >
-                                          <div>
-                                            <span
-                                              style="
-                                                font-weight: 700;
-                                                float: left;
-                                                clear: both;
-                                              "
-                                              >Vat</span
-                                            ><span
-                                              style="
-                                                font-weight: 700;
-                                                float: right;
-                                              "
-                                              >৳ 120</span
-                                            >
-                                          </div>
-                                        </li>
-                                        <li
-                                          style="
-                                            font-family: Inter;
-                                            font-size: 12px;
-                                            font-weight: 500;
-                                            line-height: 12px;
-                                            list-style-type: none;
-                                            color: rgb(0, 0, 0);
-                                            padding-bottom: 20px;
-                                            border-bottom: 1px solid
-                                              rgb(131, 131, 131);
-                                            margin-bottom: 10px;
-                                          "
-                                        >
-                                          <div>
-                                            <span
-                                              style="
-                                                font-weight: 700;
-                                                float: left;
-                                                clear: both;
-                                              "
-                                              >Shipping</span
-                                            ><span
-                                              style="
-                                                font-weight: 700;
-                                                float: right;
-                                              "
-                                              >৳ 0.00</span
-                                            >
-                                          </div>
-                                        </li>
-                                        <li
-                                          style="
-                                            font-family: Inter;
-                                            font-size: 12px;
-                                            font-weight: 500;
-                                            line-height: 12px;
-                                            list-style-type: none;
-                                            color: rgb(0, 0, 0);
-                                            padding-bottom: 20px;
-                                            border-bottom: 1px solid
-                                              rgb(131, 131, 131);
-                                            margin-bottom: 10px;
-                                          "
-                                        >
-                                          <div>
-                                            <span
-                                              style="
-                                                font-weight: 700;
-                                                float: left;
-                                                clear: both;
-                                              "
-                                              >Net Amount</span
-                                            ><span
-                                              style="
-                                                font-weight: 700;
-                                                float: right;
-                                              "
-                                              >৳ 1320.00</span
-                                            >
-                                          </div>
-                                        </li>
-                                        <li
-                                          style="
-                                            font-family: Inter;
-                                            font-size: 12px;
-                                            font-weight: 500;
-                                            line-height: 12px;
-                                            list-style-type: none;
-                                            color: rgb(0, 0, 0);
-                                            padding-bottom: 20px;
-                                            border-bottom: 1px solid
-                                              rgb(131, 131, 131);
-                                            margin-bottom: 10px;
-                                          "
-                                        >
-                                          <div>
-                                            <span
-                                              style="
-                                                font-weight: 700;
-                                                float: left;
-                                                clear: both;
-                                              "
-                                              >Payment Amount</span
-                                            ><span
-                                              style="
-                                                font-weight: 700;
-                                                float: right;
-                                              "
-                                              >৳ 1320.00</span
-                                            >
-                                          </div>
-                                        </li>
-                                      </ul>
-                                    </div>
-                                  </td>
-                                </tr>
-                              </tbody>
-                            </table>
-                            <table
-                              v-if="false"
-                              style="
-                                margin-top: 5px;
-                                width: 100%;
-                                border-collapse: collapse;
-                              "
-                            >
-                              <thead>
-                                <tr>
-                                  <th
-                                    style="
-                                      font-family: Inter;
-                                      font-size: 12px;
-                                      line-height: 15.73px;
-                                      color: rgb(0, 0, 0);
-                                      text-align: center;
-                                      border: 1px solid rgb(0, 0, 0);
-                                      padding: 7px 14px;
-                                      background: rgb(236, 236, 236);
-                                      font-weight: 600;
-                                    "
-                                  >
-                                    Paid By
-                                  </th>
-                                  <th
-                                    style="
-                                      font-family: Inter;
-                                      font-size: 12px;
-                                      line-height: 15.73px;
-                                      color: rgb(0, 0, 0);
-                                      text-align: center;
-                                      border: 1px solid rgb(0, 0, 0);
-                                      padding: 7px 14px;
-                                      background: rgb(236, 236, 236);
-                                      font-weight: 600;
-                                    "
-                                  >
-                                    Paid Amount
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <tr>
-                                  <td
-                                    style="
-                                      font-family: Inter;
-                                      font-size: 12px;
-                                      line-height: 15.73px;
-                                      color: rgb(0, 0, 0);
-                                      text-align: center;
-                                      border: 1px solid rgb(0, 0, 0);
-                                      padding: 7px 14px;
-                                      text-transform: capitalize;
-                                      font-weight: 400;
-                                    "
-                                  >
-                                    cash
-                                  </td>
-                                  <td
-                                    style="
-                                      font-family: Inter;
-                                      font-size: 12px;
-                                      line-height: 15.73px;
-                                      color: rgb(0, 0, 0);
-                                      text-align: center;
-                                      border: 1px solid rgb(0, 0, 0);
-                                      padding: 7px 14px;
-                                      font-weight: 400;
-                                    "
-                                  >
-                                    1320
                                   </td>
                                 </tr>
                               </tbody>
@@ -639,88 +218,7 @@
                                   "
                                 >
                                   Thank you for choosing Khulshi Mart
-                                  <div id="" class="text-xs leading-4">
-                                    <!-- <ol
-                                      style="
-                                        list-style-type: decimal;
-                                        padding-left: 20px;
-                                      "
-                                    >
-                                      <li>
-                                        <strong
-                                          ><em
-                                            ><u
-                                              >Please check the product before
-                                              going the authority beyond the
-                                              concern</u
-                                            ></em
-                                          ></strong
-                                        >
-                                      </li>
-                                      <li>
-                                        <strong
-                                          ><em
-                                            ><u
-                                              >Thank you for shopping wits SAC
-                                              Lifestyle</u
-                                            ></em
-                                          ></strong
-                                        >
-                                      </li>
-                                    </ol> -->
-                                  </div>
                                 </div>
-
-                                <!-- <div
-                                  style="text-align: center; margin-top: 5px"
-                                >
-                                  <img
-                                      src="https://pos-stage.s3.ap-southeast-1.amazonaws.com/invoices/hW5dQwSTk6fxMRAETYtu_3861_BN003861.png"
-                                      alt="Barcode"
-                                      style="
-                                        display: inline-flex;
-                                        align-items: center;
-                                      "
-                                    />
-                                </div>
-                                <div
-                                  class="no-print"
-                                  style="
-                                    text-align: center;
-                                    margin: 15px 0px 20px;
-                                  "
-                                >
-                                  <button
-                                    class="hover:bg-gray-200"
-                                    style="
-                                      display: inline-flex;
-                                      align-items: center;
-                                      border: 2px solid rgb(204, 204, 204);
-                                      border-radius: 5px;
-                                      padding: 10px 20px;
-                                      text-decoration: none;
-                                      font-family: Inter;
-                                      font-size: 12px;
-                                      font-weight: 600;
-                                      line-height: 15.73px;
-                                      color: rgb(0, 0, 0);
-                                    "
-                                  >
-                                    <img
-                                        src="/_next/static/image/public/images/print-icon.6d893a5d0055d56426e671495f7b2059.png"
-                                        alt="icon"
-                                        style="margin-right: 8px; height: 17px"
-                                      />
-                                    Print
-                                  </button>
-                                </div>
-                                <div
-                                  style="text-align: center; margin-top: 5px"
-                                >
-                                  <div id="" class="text-xs leading-4">
-                                    dokanepos.com
-                                  </div>
-                                </div> -->
                               </tfoot>
                             </table>
                           </div>
@@ -830,15 +328,16 @@ const checkoutData = computed(() => {
     totalMinutes= duration % 60,
     parkingFee= parseFloat(payment.paid_amount),
     discounts= parseFloat(payment.discount_amount),
+    floor= parking.floor.name,
     totalAmount = parseFloat(payment.paid_amount), // Assuming no additional calculations needed
-    paymentMethod = payment.method,
+    paymentMethod = payment.method;
     return [
     {
       key: 'Checkout Time',
       value: checkoutTime
     },
     {
-      key: 'vehicleNo',
+      key: 'Vehicle No',
       value: vehicleNo
     },
     {
@@ -846,7 +345,7 @@ const checkoutData = computed(() => {
       value: type
     },
     {
-      key: 'block',
+      key: 'Block',
       value: block
     },
     {
@@ -855,30 +354,30 @@ const checkoutData = computed(() => {
     },
     {
       key: 'Floor',
-      value: 'formatOuttime'
+      value: floor
     },
     {
-      key: 'totalHours',
-      value: totalHours
+      key: 'Total Hours',
+      value: totalHours + ' hour(s)'
     },
     {
-      key: 'totalMinutes',
-      value: totalMinutes
+      key: 'Total Minutes',
+      value: totalMinutes + ' minute(s)'
     },
     {
-      key: 'parkingFee',
-      value: parkingFee
+      key: 'Parking Fee',
+      value: '৳ ' + parkingFee
     },
     {
-      key: 'discounts',
-      value: discounts
+      key: 'Discounts',
+      value: '৳ ' + discounts
     },
     {
-      key: 'totalAmount',
-      value: totalAmount
+      key: 'Total Amount',
+      value: '৳ ' + totalAmount
     },
     {
-      key: 'paymentMethod',
+      key: 'Payment Method',
       value: paymentMethod
     },
   ];

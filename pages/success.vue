@@ -6,8 +6,18 @@
     <div class="text-center">
       <strong class="ml-2"> Transaction successful.</strong>
     </div>
+    <button
+      @click="showInvoice=!showInvoice"
+      class="mt-2 rounded-md border border-transparent px-3 py-2 bg-indigo-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+    >
+      Print invoice
+    </button>
   </div>
-  <CheckoutForm :show="showInvoice" @onClose="showInvoice = false" :pdfData="responses" />
+  <CheckoutForm
+    :show="showInvoice"
+    @onClose="showInvoice = false"
+    :pdfData="responses"
+  />
 </template>
 
 <script setup>
@@ -21,9 +31,11 @@ definePageMeta({
 
 const route = useRoute();
 const router = useRouter();
-const showInvoice = ref(false)
-const responses = ref(null)
-const includeQuery = computed(()=> `?include=p.parking,p.place,p.category,p.slot,p.floor,p.vehicle`)
+const showInvoice = ref(false);
+const responses = ref(null);
+const includeQuery = computed(
+  () => `?include=p.parking,p.place,p.category,p.slot,p.floor,p.vehicle`
+);
 
 watch(
   route,
@@ -34,13 +46,13 @@ watch(
       };
       if (route.query.transaction_id) {
         const query = `${includeQuery.value}&transaction_id=${route.query.transaction_id}`;
-        PaymentService.findBy(query).then((result) => {
-          showInvoice.value = true
-          console.log(result.data);
-          responses.value = result.data
-        }).catch((err) => {
-          
-        });;
+        PaymentService.findBy(query)
+          .then((result) => {
+            showInvoice.value = true;
+            console.log(result.data);
+            responses.value = result.data;
+          })
+          .catch((err) => {});
         // newQuery.transaction_id = route.query.start_date;
       }
 
