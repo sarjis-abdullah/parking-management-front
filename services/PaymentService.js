@@ -31,4 +31,11 @@ export class PaymentService {
       throw err;
     }
   }
+  static async findBy(query) {
+    try {
+      return await HttpRequester.get('payment' + query);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

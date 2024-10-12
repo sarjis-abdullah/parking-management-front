@@ -416,7 +416,7 @@ const inputClass =
               {{ slot.name }}
             </option>
           </select> -->
-        <ServerErrorMessage :errors="validator.slot.$errors" />
+        <!-- <ServerErrorMessage :errors="validator.slot.$errors" /> -->
       </div>
       <div v-else-if="!initialLoading" class="text-red-500 text-center py-4">No floors are available</div>
       <ServerError :error="serverErrors" />

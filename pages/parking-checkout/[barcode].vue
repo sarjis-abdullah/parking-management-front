@@ -4,7 +4,7 @@
       <div class="-mx-4 -mt-2 mb-12 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full align-middle sm:px-6 lg:px-8">
           <div v-if="!loadingError && !isLoading">
-            <div                                                      
+            <div
               v-if="list && list?.length > 0"
               class="grid md:grid-cols-3 justify-center gap-4"
             >
@@ -114,7 +114,7 @@
                           v-model="paymentMethod"
                         >
                           <option
-                            v-for="category in ['cash', 'bkash', 'visa', 'due']"
+                            v-for="category in ['cash', 'online']"
                             :key="category"
                             :value="category"
                           >
@@ -123,7 +123,6 @@
                         </select>
                       </div>
                       <div
-                        id="111"
                         style="
                           display: none;
                           align-items: center;
@@ -188,7 +187,9 @@
                 </div>
                 <div class="flex justify-end flex-col gap-2">
                   <div
-                  v-if="hasDuePayment && vehicle?.status == 'checked_out' && false"
+                    v-if="
+                      hasDuePayment && vehicle?.status == 'checked_out' && false
+                    "
                     style="
                       border-radius: 0.5rem;
                       background-color: rgb(243, 244, 246);
@@ -244,19 +245,20 @@
                       @click="showConfirmModaDialog()"
                       class="rounded-md border w-full border-transparent px-3 py-2 bg-green-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                     >
-                      Checkout
+                      Payment
                     </button>
                     <button
                       @click="toggleQrCode"
                       class="mt-2 rounded-md border w-full border-transparent px-3 py-2 bg-indigo-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                     >
-                      Show QR code
+                      Payment by QR code
                     </button>
-
                   </div>
                 </div>
               </div>
-              <div v-if="vehicle?.membership?.id && vehicle?.membership?.active">
+              <div
+                v-if="vehicle?.membership?.id && vehicle?.membership?.active"
+              >
                 <ul class="shadow-lg">
                   <li
                     v-if="vehicle.membership?.name"
@@ -292,81 +294,26 @@
                     <span>Discount:</span>
                     <span
                       >{{
-                        membershipHasPercentageDiscount ? parseInt(vehicle.membership.membership_type.discount_amount) ?? 0 : vehicle.membership.membership_type.discount_amount ?? 0
+                        membershipHasPercentageDiscount
+                          ? parseInt(
+                              vehicle.membership.membership_type.discount_amount
+                            ) ?? 0
+                          : vehicle.membership.membership_type
+                              .discount_amount ?? 0
                       }}
-                      <span
-                        v-if="membershipHasFlatDiscount"
-                        >৳</span
-                      >
-                      <span
-                        v-else-if="membershipHasPercentageDiscount"
-                        >%</span
-                      >
+                      <span v-if="membershipHasFlatDiscount">৳</span>
+                      <span v-else-if="membershipHasPercentageDiscount">%</span>
                       <span v-else>Free</span>
                     </span>
                   </li>
                 </ul>
-                <div v-if="false" class="shadow-md p-2 mt-8">
-                  <ul class="flex flex-col gap-2">
-                    <li
-                      v-for="(item, index) in parking_rates"
-                      :key="item.id"
-                      class="bg-indigo-500 text-white p-1 rounded"
-                    >
-                      <span
-                        v-if="parking_rates?.length == 1"
-                        class="flex justify-between"
-                      >
-                        <span>Each half hour rate</span>
-                        <span>{{ item.rate }}৳</span>
-                      </span>
-                      <span v-else class="flex justify-between">
-                        <span>{{
-                          index == 0 ? "First half hour" : "Next half hour"
-                        }}</span>
-                        <span>{{ item.rate }}৳</span>
-                      </span>
-                    </li>
-                    <li class="flex justify-between">
-                      <span class="font-bold">Total: </span
-                      ><span class="font-bold"
-                        >{{ Number(parseFloat(totalCost)).toFixed(2) }}৳</span
-                      >
-                    </li>
-                  </ul>
-                </div>
               </div>
               <div v-else class="">
-                <AddMembership v-if="authUser" @refetch="loadData" :vehicleId="vehicleId" />
-                <div class="shadow-md py-2 px-7" v-if="false">
-                  <ul class="flex flex-col gap-2">
-                    <li
-                      v-for="(item, index) in parking_rates"
-                      :key="item.id"
-                      class="bg-indigo-500 text-white p-1 rounded"
-                    >
-                      <span
-                        v-if="parking_rates?.length == 1"
-                        class="flex justify-between"
-                      >
-                        <span>Each half hour rate</span>
-                        <span>{{ item.rate }}৳</span>
-                      </span>
-                      <span v-else class="flex justify-between">
-                        <span>{{
-                          index == 0 ? "First half hour" : "Next half hour"
-                        }}</span>
-                        <span>{{ item.rate }}৳</span>
-                      </span>
-                    </li>
-                    <li class="flex justify-between">
-                      <span class="font-bold">Total: </span
-                      ><span class="font-bold"
-                        >{{ Number(parseFloat(totalCost)).toFixed(2) }}৳</span
-                      >
-                    </li>
-                  </ul>
-                </div>
+                <AddMembership
+                  v-if="authUser"
+                  @refetch="loadData"
+                  :vehicleId="vehicleId"
+                />
               </div>
             </div>
           </div>
@@ -392,7 +339,7 @@
           v-if="showAlertMessage"
         >
           <!-- <p class="font-bold">Be Warned</p> -->
-          <p>{{showAlertMessage}}</p>
+          <p>{{ showAlertMessage }}</p>
         </div>
         <template v-slot:footer>
           <div class="flex justify-end gap-2 mt-4">
@@ -405,7 +352,11 @@
             <button
               :disabled="checkoutLoading"
               @click="confirmCheckout"
-              :class="checkoutLoading ? 'bg-gray-600 text-white' : 'bg-indigo-600 text-white'"
+              :class="
+                checkoutLoading
+                  ? 'bg-gray-600 text-white'
+                  : 'bg-indigo-600 text-white'
+              "
               class="px-2 py-1 border-gray-300 rounded-md"
             >
               Checkout
@@ -415,11 +366,11 @@
       </ConfirmModal>
       <QrCodeModal
         :open="showQrCode"
-        @onClose="showQrCode= false"
+        @onClose="showQrCode = false"
         :value="qrCodeUrl"
       >
       </QrCodeModal>
-      <CheckoutForm/>
+      <!-- <CheckoutForm :v-show="showInvoice" @onClose="showInvoice = false" /> -->
     </div>
   </div>
 </template>
@@ -427,8 +378,9 @@
 import { onMounted, nextTick, computed, ref } from "vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
+import ServerError from "@/components/common/Error.vue";
 import Loading from "@/components/common/Loading.vue";
-import CheckoutForm from "@/components/common/CheckoutForm.vue";
+// import CheckoutForm from "~/components/common/CheckoutPrintForm.vue";
 import QrCodeModal from "@/components/common/QrCodeModal.vue";
 import ConfirmModal from "@/components/common/Modal.vue";
 import AddMembership from "@/components/membership/AddMembership.vue";
@@ -437,7 +389,7 @@ import { ParkingService } from "~/services/ParkingService";
 import { formatDate } from "@/utils/index";
 import moment from "moment";
 import { PaymentService } from "~/services/PaymentService";
-import QrcodeVue from 'qrcode.vue'
+import QrcodeVue from "qrcode.vue";
 
 definePageMeta({
   layout: "auth-layout",
@@ -450,6 +402,7 @@ const loadingError = ref(null);
 const isLoading = ref(true);
 const showConfirmModal = ref(false);
 const showQrCode = ref(false);
+const showInvoice = ref(false);
 const serverErrors = ref(null);
 
 //pagination
@@ -467,10 +420,10 @@ const route = useRoute();
 const router = useRouter();
 const barcode = route.params.barcode;
 const config = useRuntimeConfig();
-const url = config.public.APP_URL
-const routeName = computed(()=> router);
-const qrCodeUrl = computed(()=> url + route.href);
-const authUser = computed(()=> localStorage.getItem("LOGIN_ACCOUNT"));
+const url = config.public.APP_URL;
+const routeName = computed(() => router);
+const qrCodeUrl = computed(() => url + route.href);
+const authUser = computed(() => localStorage.getItem("LOGIN_ACCOUNT"));
 
 const searchQuery = computed(() => {
   return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.vehicle,v.membership,m.mt,p.tariff,t.parking_rates,p.payment`;
@@ -527,12 +480,12 @@ const parkingData = computed(() => {
 });
 const hasDuePayment = computed(() => {
   if (parkingResponse.value?.payment) {
-    const payment = parkingResponse.value.payment
+    const payment = parkingResponse.value.payment;
     const { paid_amount, payable_amount, method } = payment;
     if (paid_amount != payable_amount && method == "due") {
       return true;
     }
-    return false
+    return false;
   }
 
   return false;
@@ -559,14 +512,14 @@ class CustomError extends Error {
 }
 const vehicleId = ref(null);
 const vehicle = ref(null);
-const membershipHasFlatDiscount = computed(()=> {
-  const type = vehicle.value?.membership?.membership_type?.discount_type
-  return type == 'flat'
-})
-const membershipHasPercentageDiscount = computed(()=> {
-  const type = vehicle.value?.membership?.membership_type?.discount_type
-  return type == 'percentage'
-})
+const membershipHasFlatDiscount = computed(() => {
+  const type = vehicle.value?.membership?.membership_type?.discount_type;
+  return type == "flat";
+});
+const membershipHasPercentageDiscount = computed(() => {
+  const type = vehicle.value?.membership?.membership_type?.discount_type;
+  return type == "percentage";
+});
 const discountAmount = ref(0);
 const loadData = async () => {
   try {
@@ -696,29 +649,32 @@ const print = () => {
     printWindow.print();
   });
 };
-const subtotal = computed(()=> Math.ceil(totalCost.value - discountAmount.value))
-const checkoutLoading = ref(false)
+const subtotal = computed(() =>
+  Math.ceil(totalCost.value - discountAmount.value)
+);
+const checkoutLoading = ref(false);
 const confirmCheckout = async () => {
-  if (subtotal.value > receivedAmount.value){
+  if (subtotal.value > receivedAmount.value) {
     paymentMethod.value = "due";
   }
-  checkoutLoading.value = true
+  checkoutLoading.value = true;
   try {
     const result = await ParkingService.handleCheckout(
       parkingId.value + "?include=p.vehicle,v.membership",
       parkingData.value
     );
-    
-    print();
+
+    // print();
     if (result?.data?.redirect_url) {
-      window.location.href = result.data.redirect_url
-    }else {
+      console.log(123456, result);
+      window.location.href = result.data.redirect_url;
+    } else {
       vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
     }
-  } catch (error) {}
-  finally {
-    checkoutLoading.value = false
-    closeConfirmModal()
+  } catch (error) {
+  } finally {
+    checkoutLoading.value = false;
+    closeConfirmModal();
   }
 };
 const showAlertMessage = computed(() => {

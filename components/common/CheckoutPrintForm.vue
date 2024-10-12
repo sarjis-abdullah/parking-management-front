@@ -65,6 +65,7 @@
                         </div>
                         <hr class="my-2" />
                         <section
+                          id="receipt"
                           style="
                             word-spacing: normal;
                             background-color: rgb(229, 229, 229);
@@ -550,7 +551,7 @@
                               </tbody>
                             </table>
                             <table
-                            v-if="false"
+                              v-if="false"
                               style="
                                 margin-top: 5px;
                                 width: 100%;
@@ -625,7 +626,7 @@
                                 </tr>
                               </tbody>
                             </table>
-                            <table style="display: flex; ">
+                            <table style="display: flex">
                               <tfoot style="margin: auto">
                                 <div
                                   style="
@@ -637,7 +638,7 @@
                                     line-height: 12px;
                                   "
                                 >
-                                  Thank you for choosing KhulshiMart
+                                  Thank you for choosing Khulshi Mart
                                   <div id="" class="text-xs leading-4">
                                     <!-- <ol
                                       style="
@@ -668,6 +669,39 @@
                                       </li>
                                     </ol> -->
                                   </div>
+                                </div>
+                                <div
+                                  class="no-print"
+                                  style="
+                                    text-align: center;
+                                    margin: 15px 0px 20px;
+                                  "
+                                >
+                                  <button
+                                    class="hover:bg-gray-200"
+                                    id="printBUtton"
+                                    style="
+                                      display: inline-flex;
+                                      align-items: center;
+                                      border: 2px solid rgb(204, 204, 204);
+                                      border-radius: 5px;
+                                      padding: 10px 20px;
+                                      text-decoration: none;
+                                      font-family: Inter;
+                                      font-size: 12px;
+                                      font-weight: 600;
+                                      line-height: 15.73px;
+                                      color: rgb(0, 0, 0);
+                                    "
+                                    @click="printReceipt"
+                                  >
+                                    <!-- <img
+                                        src="/_next/static/image/public/images/print-icon.6d893a5d0055d56426e671495f7b2059.png"
+                                        alt="icon"
+                                        style="margin-right: 8px; height: 17px"
+                                      /> -->
+                                    Print
+                                  </button>
                                 </div>
                                 <!-- <div
                                   style="text-align: center; margin-top: 5px"
@@ -759,14 +793,65 @@ defineProps({
     type: String,
     default: "sm:min-w-sm",
   },
+  open: {
+    type: Boolean,
+    default: false,
+  },
 });
 const emit = defineEmits(["onClose"]);
 const itemClass = `display: flex;justify-content: space-between; border-bottom: 1px dashed rgb(131, 131, 131); padding: 4px 0 4px 0`;
-const open = ref(true);
 const onClose = () => {
   emit("onClose");
-  open.value = !open.value;
 };
+function printReceipt() {
+  window.print();
+}
 </script>
 
-<style lang="scss" scoped></style>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+#receipt {
+  width: 58mm; /* Size for small printed receipts */
+  font-size: 12px; /* Reduce font size */
+}
+
+/* Print-specific CSS */
+@media print {
+  /* Hide elements that shouldn't be printed */
+  button {
+    display: none;
+  }
+
+  /* Style the receipt to fit onto a small printed page */
+  #receipt {
+    margin: 0;
+    padding: 0;
+    width: 58mm; /* Set fixed width for receipt */
+    height: auto;
+    border: none;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Ensure that the receipt fits on a single page */
+  @page {
+    margin: 0; /* Remove default margins */
+    size: 13in 13in;
+  }
+
+  /* Ensure content fits in one page */
+  html,
+  body {
+    width: 58mm;
+    height: auto;
+    overflow: hidden; /* Prevent content overflow */
+  }
+}
+</style>
