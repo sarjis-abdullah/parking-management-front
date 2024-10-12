@@ -1,121 +1,12 @@
 <template>
-  <div class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
+  <div class="rounded-lg p-6">
     <div class="md:mt-8 flow-root">
       <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
           <div v-if="!loadingError && !isLoading">
-            <div v-if="list && list?.length > 0" class="flex justify-center">
-              <div style="max-width: 40rem; margin: auto">
-                <div ref="emailTemplate" style="max-width: 40rem; margin: auto">
-                  <div
-                    style="
-                      margin-top: 1rem;
-                      border-radius: 0.5rem;
-                      background-color: #f3f4f6;
-                      padding: 0.75rem 1rem;
-                    "
-                  >
-                    <div style="position: relative; width: 100%">
-                      <div
-                        style="
-                          display: flex;
-                          justify-content: center;
-                          border: 1px solid rgba(0, 0, 0, 0.1);
-                          padding: 0.5rem;
-                          border-radius: 1rem;
-                        "
-                      >
-                        <img
-                          src="/assets/khulshi.png"
-                          style="max-height: 3rem"
-                          alt="Your Company"
-                        />
-                      </div>
+       
 
-                      <div style="position: absolute; inset: 0"></div>
-                    </div>
-
-                    <dl
-                      style="margin-top: 0.75rem"
-                      v-for="(item, index) in list"
-                      :key="index"
-                    >
-                      <div
-                        style="
-                          display: flex;
-                          align-items: center;
-                          justify-content: space-between;
-                          border-top: 1px solid #e5e7eb;
-                          padding: .5rem 0 .5rem 0;
-                        "
-                        v-for="(value, key) in item"
-                        :key="key"
-                      >
-                        <dt style="font-size: 0.875rem; color: #6b7280">
-                          {{ key }}
-                        </dt>
-                        <dd
-                          v-if="key == 'Status'"
-                          style="
-                            font-size: 0.875rem;
-                            font-weight: 500;
-                            color: white;
-                            background-color: #89BC40;
-                            padding: .25rem;
-                            border-radius: 6px;
-                          "
-                        >
-                          {{ key == "In-Time" ? formatDate(value) : value }}
-                        </dd>
-                        <dd
-                          v-else
-                          style="
-                            font-size: 0.875rem;
-                            font-weight: 500;
-                            color: #111827;
-                          "
-                        >
-                          {{ key == "In-Time" ? formatDate(value) : value }}
-                        </dd>
-                      </div>
-                    </dl>
-                    <div
-                      style="position: relative; width: 100%; margin-top: 1rem"
-                    >
-                      <div
-                        style="
-                          border: 1px solid rgba(0, 0, 0, 0.1);
-                          padding: 0.5rem;
-                          border-radius: 1rem;
-                          display: flex;
-                          justify-content: center;
-                        "
-                      >
-                        <img
-                          :src="'data:image/png;base64,' + barcodeImage"
-                          alt="barcode"
-                          style="width: auto; min-height: 3rem"
-                        />
-                      </div>
-
-                      <div style="position: absolute; inset: 0"></div>
-                    </div>
-                  </div>
-                </div>
-                <div class="mx-4">
-                  <button
-                    data-v-61884e8b=""
-                    @click="print"
-                    type="submit"
-                    class="mt-6 w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
-                  >
-                    Print
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div v-else class="text-center py-10">
+            <div v-if="serverErrors" class="text-center py-10">
               <p class="text-xl text-gray-400">
                 {{ serverErrors }}
               </p>
@@ -128,6 +19,12 @@
             Loading error
             <!-- <ListLoadingError :message="'cant_load_orders_list'" /> -->
           </div>
+          <CheckinPrintForm
+            :show="showInvoice"
+            @onClose="showInvoice = true"
+            :pdfData="list"
+            :barcodeImage="barcodeImage"
+          />
         </div>
       </div>
     </div>
@@ -139,6 +36,7 @@ import AuthLayout from "@/layouts/AuthLayout.vue";
 import Link from "@/components/common/Link.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import Loading from "@/components/common/Loading.vue";
+import CheckinPrintForm from "@/components/common/CheckinPrintForm.vue";
 import { ParkingService } from "~/services/ParkingService";
 import { formatDate } from "@/utils/index";
 
@@ -148,6 +46,7 @@ definePageMeta({
 const list = ref([]);
 const loadingError = ref(null);
 const isLoading = ref(true);
+const showInvoice = ref(false);
 const serverErrors = ref(null);
 
 //pagination
@@ -173,27 +72,29 @@ const loadData = async () => {
     isLoading.value = true;
     const { data } = await ParkingService.getAll(searchQuery.value);
     if (data?.length) {
-      list.value = data.map((item) => {
-        return {
-          "Vehicle Number": item.vehicle?.number,
-          Place: item.place?.name,
-          Category: item.category?.name,
-          Floor: item.floor?.name,
-          Slot: item.slot?.name,
-          "Driver Name": item.vehicle?.driver_name,
-          "driver Mobile": item.vehicle?.driver_mobile,
-          "In-Time": item.in_time,
-          Status:
-            item.vehicle?.status == "checked_in" ? "Checked-in" : "Checked-out",
-        };
-      });
+      list.value = data
+      showInvoice.value = true
+      // list.value = data.map((item) => {
+      //   return {
+      //     "Vehicle Number": item.vehicle?.number,
+      //     Place: item.place?.name,
+      //     Category: item.category?.name,
+      //     Floor: item.floor?.name,
+      //     Slot: item.slot?.name,
+      //     "Driver Name": item.vehicle?.driver_name,
+      //     "driver Mobile": item.vehicle?.driver_mobile,
+      //     "In-Time": formatDate(item.in_time),
+      //     // Status:
+      //     //   item.vehicle?.status == "checked_in" ? "Checked-in" : "Checked-out",
+      //   };
+      // });
       barcodeImage.value = data[0].barcode_image;
       serverErrors.value = {};
 
       if (!routeQuery.value.view) {
-        setTimeout(() => {
-          print();
-        }, 1);
+        // setTimeout(() => {
+        //   print();
+        // }, 1);
       }
     } else {
       serverErrors.value = "No data available for this barcode";
