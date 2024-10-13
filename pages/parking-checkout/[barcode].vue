@@ -61,18 +61,14 @@
                         <dt style="font-size: 0.875rem; color: #6b7280">
                           {{ item.key }}
                         </dt>
-                        <dd
-                          style="
-                            font-size: 0.875rem;
-                            font-weight: 500;
-                          "
-                        >
+                        <dd style="font-size: 0.875rem; font-weight: 500">
                           {{ item.value }}
                         </dd>
                       </div>
 
                       <div
                         id="paymentMethodId"
+                        v-if="!parkingResponse.out_time"
                         style="
                           display: flex;
                           align-items: center;
@@ -95,7 +91,7 @@
                           v-model="paymentMethod"
                         >
                           <option
-                            v-for="category in ['cash', 'online']"
+                            v-for="category in ['cash', 'online', 'due']"
                             :key="category"
                             :value="category"
                           >
@@ -104,6 +100,7 @@
                         </select>
                       </div>
                       <div
+                        v-if="!parkingResponse.out_time"
                         style="
                           display: none;
                           align-items: center;
@@ -114,6 +111,7 @@
                       ></div>
                       <div
                         id="receivedAmountId"
+                        v-if="!parkingResponse.out_time"
                         style="
                           display: flex;
                           align-items: center;
@@ -210,20 +208,20 @@
                   >
                     Vehicle is checked-out
                   </div>
-                  <button
+                  <!-- <button
                     v-if="vehicle?.status == 'checked_out'"
                     @click="print"
                     type="submit"
                     class="mt-6 w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                   >
                     Print
-                  </button>
+                  </button> -->
                   <div
                     v-if="vehicle?.status != 'checked_out'"
                     class="mx-4 mt-4 px-3"
                   >
                     <button
-                      @click="showConfirmModaDialog()"
+                      @click="showPaymentConfirmModaDialog()"
                       class="rounded-md border w-full border-transparent px-3 py-2 bg-green-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                     >
                       Payment
@@ -517,6 +515,29 @@ const membershipHasPercentageDiscount = computed(() => {
   return type == "percentage";
 });
 const discountAmount = ref(0);
+const membershipDiscount = computed(() => {
+  if (!parkingResponse.value || !totalCost.value) {
+    return 0;
+  }
+  const membership = parkingResponse.value.vehicle?.membership;
+  if (!membership?.active) {
+    return 0;
+  }
+  let discount = 0
+  if (membership?.membership_type) {
+    const { discount_type, discount_amount } = membership.membership_type;
+    if (discount_type == "percentage") {
+      if (discount_amount) {
+        discount = (totalCost.value * parseFloat(discount_amount)) / 100;
+      }
+    } else if (discount_type == "flat") {
+      discount = parseFloat(discount_amount) ?? 0;
+    } else if (discount_type == "free") {
+      discount = totalCost.value;
+    }
+  }
+  return discount
+});
 const loadData = async () => {
   try {
     isLoading.value = true;
@@ -529,9 +550,8 @@ const loadData = async () => {
       parkingId.value = result.id;
       vehicleId.value = result?.vehicle?.id;
       vehicle.value = result?.vehicle;
-      console.log(111111111111);
       parking_rates.value = result.tariff.parking_rates;
-      discountAmount.value = 0;
+      discountAmount.value = membershipDiscount.value;
       const item = data[0];
       if (item.out_time) {
         currentTime.value = moment(item.out_time);
@@ -541,26 +561,7 @@ const loadData = async () => {
       const minutes = Math.floor(duration.minutes());
       const seconds = Math.floor(duration.seconds());
       const totalTime = `${hours}h ${minutes}m ${seconds}s`;
-      let discount = 0;
-      console.log(item?.vehicle, "item?.vehicle?.membership");
-      if (
-        item?.vehicle?.membership?.active &&
-        item.vehicle?.membership?.membership_type
-      ) {
-        console.log(item?.vehicle?.membership, "item?.vehicle?.membership");
-        const { discount_type, discount_amount } =
-          item.vehicle.membership.membership_type;
-        if (discount_type == "percentage") {
-          if (discount_amount) {
-            discount = (totalCost.value * parseFloat(discount_amount)) / 100;
-          }
-        } else if (discount_type == "flat") {
-          discount = parseFloat(discount_amount) ?? 0;
-        } else if (discount_type == "free") {
-          discount = totalCost.value;
-        }
-        discountAmount.value = discount;
-      }
+      
       list.value = [
         {
           key: "Checkout Time",
@@ -596,12 +597,13 @@ const loadData = async () => {
         },
         {
           key: "Discounts",
-          value: "৳ " + Number(discount).toFixed(2),
+          value: "৳ " + Number(discountAmount.value).toFixed(2),
         },
         {
           key: "Total Amount",
           value:
-            "৳ " + Number(Math.round(Number(totalCost.value - discount))).toFixed(2),
+            "৳ " +
+            Number(Math.round(Number(totalCost.value - discountAmount.value))).toFixed(2),
         },
       ];
       /*
@@ -701,7 +703,7 @@ const subtotal = computed(() =>
 const checkoutLoading = ref(false);
 const confirmCheckout = async () => {
   if (subtotal.value > receivedAmount.value) {
-    paymentMethod.value = "due";
+    // paymentMethod.value = "due";
   }
   checkoutLoading.value = true;
   try {
@@ -739,17 +741,17 @@ const checkoutAndprint = () => {
     const subtotal = Math.ceil(totalCost.value - discountAmount.value);
     const result = subtotal == receivedAmount.value;
     const total = subtotal;
-    console.log(
-      { totalCost: totalCost.value },
-      { receivedAmount: receivedAmount.value },
-      { discountAmount: discountAmount.value },
-      { subtotal: subtotal },
-      {
-        "totalCost.value - discountAmount.value": Math.ceil(
-          totalCost.value - discountAmount.value
-        ),
-      }
-    );
+    // console.log(
+    //   { totalCost: totalCost.value },
+    //   { receivedAmount: receivedAmount.value },
+    //   { discountAmount: discountAmount.value },
+    //   { subtotal: subtotal },
+    //   {
+    //     "totalCost.value - discountAmount.value": Math.ceil(
+    //       totalCost.value - discountAmount.value
+    //     ),
+    //   }
+    // );
 
     //return
     if (result) {
@@ -810,13 +812,29 @@ const confirmTitle = ref(title1);
 const closeConfirmModal = () => {
   showConfirmModal.value = false;
 };
-const showConfirmModaDialog = () => {
+const showPaymentConfirmModaDialog = () => {
   showConfirmModal.value = true;
 };
 const toggleQrCode = () => {
   showQrCode.value = true;
   console.log(route, router);
 };
+watch(() => receivedAmount, (newValue, oldValue) => {
+  if (receivedAmount.value && receivedAmount.value > 0 && paymentMethod.value == 'due') {
+    paymentMethod.value = 'cash'
+  }
+}, {
+  deep: true,
+  immediate: false,
+})
+watch(() => paymentMethod, (newValue, oldValue) => {
+  if (receivedAmount.value && receivedAmount.value > 0 && paymentMethod.value == 'due') {
+    receivedAmount.value = 0
+  }
+}, {
+  deep: true,
+  immediate: false,
+})
 onMounted(() => {
   loadData();
 });

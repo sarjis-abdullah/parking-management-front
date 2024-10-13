@@ -13,9 +13,18 @@
       </div>
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm">
-      <div v-if="singleData.vehicle?.number " class="text-gray-900">{{ singleData.vehicle?.number }}</div>
-      <div v-if="singleData.vehicle?.driver_name">Driver: {{ singleData.vehicle.driver_name }}</div>
-      <div v-if="singleData.vehicle?.driver_mobile">Contact: <a :href="`tel:${singleData.vehicle.driver_mobile}`">{{ singleData.vehicle.driver_mobile }}</a></div>
+      <div v-if="singleData.vehicle?.number" class="text-gray-900">
+        {{ singleData.vehicle?.number }}
+      </div>
+      <div v-if="singleData.vehicle?.driver_name">
+        Driver: {{ singleData.vehicle.driver_name }}
+      </div>
+      <div v-if="singleData.vehicle?.driver_mobile">
+        Contact:
+        <a :href="`tel:${singleData.vehicle.driver_mobile}`">{{
+          singleData.vehicle.driver_mobile
+        }}</a>
+      </div>
     </td>
     <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
       <div>
@@ -148,7 +157,9 @@
         </button>
         <button
           v-if="
-            (singleData?.payment?.status !== 'success' && singleData?.out_time) || isPartialPayment
+            (singleData?.payment?.status !== 'success' &&
+              singleData?.out_time) ||
+            isPartialPayment
           "
           :disabled="repayLoading"
           @click="scanToPay('pay-due')"
@@ -167,6 +178,12 @@
             singleData?.out_time ? '?view=1' : ''
           }`"
           >Checkout {{ singleData?.out_time ? "view" : "" }}</nuxt-link
+        >
+        <nuxt-link
+          v-if="singleData?.payment?.transaction_id"
+          class="bg-orange-400 text-white rounded-md text-center py-1"
+          :to="`/success?transaction_id=${singleData.payment.transaction_id}`"
+          >Print invoice</nuxt-link
         >
       </div>
       <!-- <select @change="handleActionChange" v-model="selectedAction" class="bg-white relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500">
@@ -283,7 +300,7 @@ const repayLoading = ref(false);
 const repay = async () => {
   repayLoading.value = true;
   try {
-    const result = await PaymentService.repay(singleData.id);
+    const result = await PaymentService.repay(singleData.payment.id);
 
     // print();
     if (result?.data?.redirect_url) {
@@ -293,12 +310,13 @@ const repay = async () => {
     }
   } catch (error) {
   } finally {
+    repayLoading.value = false;
   }
 };
 const payDUe = async () => {
   repayLoading.value = true;
   try {
-    const result = await PaymentService.payDue(singleData.id);
+    const result = await PaymentService.payDue(singleData.payment.id);
 
     // print();
     if (result?.data?.redirect_url) {

@@ -102,7 +102,8 @@ const inputClass =
           <input
             :class="inputClass"
             v-model="state.contactNumber"
-            type="text"
+            type="number"
+            
             placeholder="e.g. 01521878979"
           />
         </div>

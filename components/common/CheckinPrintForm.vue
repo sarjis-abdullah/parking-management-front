@@ -38,7 +38,7 @@
                       <div
                         class="mt-3 text-center sm:mt-0 sm:ml-0 sm:text-left"
                       >
-                        <!-- <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between">
                           <h2
                             class="text-xl font-medium leading-6 text-gray-900"
                             id="headlessui-dialog-title-12"
@@ -64,7 +64,7 @@
                             </span>
                           </button>
                         </div>
-                        <hr class="my-2" /> -->
+                        <hr class="my-2" />
                         <section
                           id="receipt"
                           style="
@@ -318,7 +318,7 @@ import { XMarkIcon } from "@heroicons/vue/20/solid";
 const props = defineProps({
   title: {
     type: String,
-    default: "Payment Invoice",
+    default: "Invoice",
   },
   maxWidth: {
     type: String,
@@ -346,8 +346,10 @@ const currentDate = moment().format("DD-MM-YYYY");
 const currentTime = moment().format("hh:mm A");
 const itemClass = `display: flex;justify-content: space-between; border-bottom: 1px dashed rgb(131, 131, 131); padding: 4px 0 4px 0`;
 const myButton = ref(null);
+const router = useRouter()
 const onClose = () => {
-  emit("onClose");
+  router.go(-1)
+  // emit("onClose");
 };
 const parking = computed(()=> {
   if (!(props.pdfData && props.pdfData.length)) {
@@ -456,7 +458,7 @@ function printReceipt() {
   // Close the new document stream and trigger print
   newWindow.document.close();
   newWindow.print();
-  emit("onClose");
+  onClose()
 }
 onMounted(() => {
   if (myButton.value) {
