@@ -1,5 +1,5 @@
 <template>
-  <TransitionRoot as="template" :show="open">
+  <TransitionRoot as="template" :show="true">
     <Dialog as="div" class="relative z-50" @close="onClose">
       <TransitionChild
         as="template"
@@ -162,7 +162,7 @@
                                         >
                                           Invoice No:
                                           <span style="font-weight: 400"
-                                            >BN003861</span
+                                            >{{ parking?.barcode }}</span
                                           >
                                         </li>
                                       </span>
@@ -343,44 +343,21 @@ const props = defineProps({
 });
 const emit = defineEmits(["onClose"]);
 const currentDate = moment().format("DD-MM-YYYY");
-const currentTime = moment().format("HH:mm A");
+const currentTime = moment().format("hh:mm A");
 const itemClass = `display: flex;justify-content: space-between; border-bottom: 1px dashed rgb(131, 131, 131); padding: 4px 0 4px 0`;
 const myButton = ref(null);
 const onClose = () => {
   emit("onClose");
 };
+const parking = computed(()=> {
+  if (!(props.pdfData && props.pdfData.length)) {
+    return ''
+  }
+  return props.pdfData[0]
+})
 const checkoutData = computed(() => {
   if (!(props.pdfData && props.pdfData.length)) {
-    return [
-      {
-        key: "Vehicle No",
-        value: "12345",
-      },
-      {
-        key: "Type",
-        value: "Car",
-      },
-      {
-        key: "Block",
-        value: "block",
-      },
-      {
-        key: "Slot",
-        value: "slot",
-      },
-      {
-        key: "Floor",
-        value: "floor",
-      },
-      {
-        key: "Driver",
-        value: "Ismail",
-      },
-      {
-        key: "Driver number",
-        value: "01521487679",
-      },
-    ];
+    return []
   }
   const item = props.pdfData[0];
 

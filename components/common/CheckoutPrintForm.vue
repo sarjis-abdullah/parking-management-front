@@ -61,7 +61,7 @@
                                   d="M6 18L18 6M6 6l12 12"
                                 ></path>
                               </svg>
-                              </span>
+                            </span>
                           </button>
                         </div>
                         <hr class="my-2" />
@@ -75,7 +75,7 @@
                           <div
                             style="
                               margin: 0px auto;
-                              padding: 0px 10px;
+                              padding: 0;
                               text-size-adjust: 100%;
                               background-color: rgb(255, 255, 255);
                               max-width: 300px;
@@ -87,15 +87,20 @@
                                   <td
                                     style="
                                       margin: 0px;
-                                      font-family: Poppins;
-                                      font-weight: 500;
-                                      font-size: 20px;
-                                      line-height: 30px;
-                                      color: rgb(0, 15, 26);
                                       text-align: center;
+                                      font-family: Poppins;
                                     "
                                   >
-                                    Khulshi Mart
+                                    <div
+                                      style="
+                                        margin: 0px;
+                                        font-weight: 500;
+                                        font-size: 20px;
+                                      "
+                                    >
+                                      Khulshi Mart
+                                    </div>
+                                    <div>VEHICLE CHECK-OUT RECEIPT</div>
                                   </td>
                                 </tr>
                                 <tr>
@@ -112,9 +117,9 @@
                                       "
                                     >
                                       Date:
-                                      <span style="font-weight: 400"
-                                        >29-09-2024</span
-                                      >
+                                      <span style="font-weight: 400">{{
+                                        currentDate
+                                      }}</span>
                                     </li>
                                     <li
                                       style="
@@ -128,9 +133,9 @@
                                       "
                                     >
                                       Time:
-                                      <span style="font-weight: 400"
-                                        >11:03 AM</span
-                                      >
+                                      <span style="font-weight: 400">{{
+                                        currentTime
+                                      }}</span>
                                     </li>
                                   </td>
                                 </tr>
@@ -151,7 +156,7 @@
                                         >
                                           Invoice No:
                                           <span style="font-weight: 400"
-                                            >BN003861</span
+                                            >{{parking?.barcode}}</span
                                           >
                                         </li>
                                       </span>
@@ -167,7 +172,7 @@
                                         "
                                       >
                                         Served By:<span style="font-weight: 400"
-                                          >Super admin</span
+                                          >Admin</span
                                         >
                                       </li>
                                     </ul>
@@ -180,7 +185,7 @@
                                         style="padding-left: 0px; margin: 0px"
                                       >
                                         <li
-                                          class="border-b-0 mb-1.5"
+                                          class="border-b-0"
                                           style="
                                             font-family: Inter;
                                             font-size: 12px;
@@ -191,9 +196,13 @@
                                             color: rgb(0, 0, 0);
                                           "
                                         >
-                                          <div v-for="item in checkoutData" :key="item.key" :style="itemClass">
+                                          <div
+                                            v-for="item in checkoutData"
+                                            :key="item.key"
+                                            :style="itemClass"
+                                          >
                                             <span>{{ item.key }}</span>
-                                            <span>{{item.value}}</span>
+                                            <span>{{ item.value }}</span>
                                           </div>
                                         </li>
                                       </ul>
@@ -207,6 +216,33 @@
                             </table>
                             <table style="display: flex">
                               <tfoot style="margin: auto">
+                                <div
+                                  style="
+                                    position: relative;
+                                    width: 100%;
+                                    margin-top: 1rem;
+                                  "
+                                >
+                                  <div
+                                    class=""
+                                    style="
+                                      display: flex;
+                                      justify-content: center;
+                                    "
+                                  >
+                                    <img
+                                      :src="
+                                        'data:image/png;base64,' + parking?.barcode_image
+                                      "
+                                      alt="barcode"
+                                      style="width: auto"
+                                    />
+                                  </div>
+
+                                  <div
+                                    style="position: absolute; inset: 0"
+                                  ></div>
+                                </div>
                                 <div
                                   style="
                                     text-align: center;
@@ -273,10 +309,11 @@ import {
   TransitionRoot,
 } from "@headlessui/vue";
 import { XMarkIcon } from "@heroicons/vue/20/solid";
+import moment from "moment";
 const props = defineProps({
   title: {
     type: String,
-    default: "Payment Invoice",
+    default: "Invoice",
   },
   maxWidth: {
     type: String,
@@ -296,11 +333,20 @@ const props = defineProps({
   },
 });
 const emit = defineEmits(["onClose"]);
+const currentDate = moment().format("DD-MM-YYYY");
+const currentTime = moment().format("hh:mm A");
 const itemClass = `display: flex;justify-content: space-between; border-bottom: 1px dashed rgb(131, 131, 131); padding: 4px 0 4px 0`;
 const myButton = ref(null);
 const onClose = () => {
   emit("onClose");
 };
+const parking = computed(()=> {
+  if (!(props.pdfData && props.pdfData.length)) {
+    return '';
+  }
+  return props.pdfData[0].parking
+
+})
 const checkoutData = computed(() => {
   if (!(props.pdfData && props.pdfData.length)) {
     return [];
@@ -311,77 +357,68 @@ const checkoutData = computed(() => {
   const outTime = new Date(parking.out_time);
   const duration = parking.duration;
 
-  const checkoutTime= `${outTime.getFullYear()}-${(outTime.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${outTime
-      .getDate()
-      .toString()
-      .padStart(2, "0")} ${outTime
-      .getHours()
-      .toString()
-      .padStart(2, "0")}:${outTime.getMinutes().toString().padStart(2, "0")}`,
-      vehicleNo= parking.vehicle.number,
-    type= parking.category.name,
-    block= parking.place.name,
-    slot= parking.slot.name,
-    totalHours= Math.floor(duration / 60),
-    totalMinutes= duration % 60,
-    parkingFee= parseFloat(payment.paid_amount),
-    discounts= parseFloat(payment.discount_amount),
-    floor= parking.floor.name,
+  const checkoutTime = formatDate(outTime, 'DD-MM-YYYY') + ' ' + formatDate(outTime, 'hh:mm A'),
+    vehicleNo = parking.vehicle.number,
+    type = parking.category.name,
+    block = parking.place.name,
+    slot = parking.slot.name,
+    totalHours = Math.floor(duration / 60),
+    totalMinutes = duration % 60,
+    parkingFee = parseFloat(payment.paid_amount),
+    discounts = parseFloat(payment.discount_amount),
+    floor = parking.floor.name,
     totalAmount = parseFloat(payment.paid_amount), // Assuming no additional calculations needed
     paymentMethod = payment.method;
-    return [
+  return [
     {
-      key: 'Checkout Time',
-      value: checkoutTime
+      key: "Checkout Time",
+      value: checkoutTime,
     },
     {
-      key: 'Vehicle No',
-      value: vehicleNo
+      key: "Vehicle No",
+      value: vehicleNo,
     },
     {
-      key: 'type',
-      value: type
+      key: "type",
+      value: type,
     },
     {
-      key: 'Block',
-      value: block
+      key: "Block",
+      value: block,
     },
     {
-      key: 'Slot',
-      value: slot
+      key: "Slot",
+      value: slot,
     },
     {
-      key: 'Floor',
-      value: floor
+      key: "Floor",
+      value: floor,
     },
     {
-      key: 'Total Hours',
-      value: totalHours + ' hour(s)'
+      key: "Total Hours",
+      value: totalHours + " hour(s)",
     },
     {
-      key: 'Total Minutes',
-      value: totalMinutes + ' minute(s)'
+      key: "Total Minutes",
+      value: totalMinutes + " minute(s)",
     },
     {
-      key: 'Parking Fee',
-      value: '৳ ' + parkingFee
+      key: "Parking Fee",
+      value: "৳ " + parkingFee,
     },
     {
-      key: 'Discounts',
-      value: '৳ ' + discounts
+      key: "Discounts",
+      value: "৳ " + discounts,
     },
     {
-      key: 'Total Amount',
-      value: '৳ ' + totalAmount
+      key: "Total Amount",
+      value: "৳ " + totalAmount,
     },
     {
-      key: 'Payment Method',
-      value: paymentMethod
+      key: "Payment Method",
+      value: paymentMethod,
     },
   ];
-  
 });
 function printReceipt() {
   //window.print();
