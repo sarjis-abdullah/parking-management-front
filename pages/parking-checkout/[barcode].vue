@@ -46,12 +46,10 @@
                       <div style="position: absolute; inset: 0"></div>
                     </div>
 
-                    <dl
-                      style="margin-top: 0.75rem"
-                      v-for="(item, index) in list"
-                      :key="index"
-                    >
+                    <dl style="margin-top: 0.75rem">
                       <div
+                        v-for="(item, index) in list"
+                        :key="index"
                         style="
                           display: flex;
                           align-items: center;
@@ -59,34 +57,17 @@
                           border-top: 1px solid #e5e7eb;
                           padding: 0.5rem 0 0.5rem 0;
                         "
-                        v-for="(value, key) in item"
-                        :key="key"
                       >
                         <dt style="font-size: 0.875rem; color: #6b7280">
-                          {{ key }}
+                          {{ item.key }}
                         </dt>
                         <dd
-                          v-if="key == 'Status' || key == 'Payment method'"
                           style="
                             font-size: 0.875rem;
                             font-weight: 500;
-                            color: white;
-                            background-color: #89bc40;
-                            padding: 0.25rem;
-                            border-radius: 6px;
                           "
                         >
-                          {{ value }}
-                        </dd>
-                        <dd
-                          v-else
-                          style="
-                            font-size: 0.875rem;
-                            font-weight: 500;
-                            color: #111827;
-                          "
-                        >
-                          {{ value }}
+                          {{ item.value }}
                         </dd>
                       </div>
 
@@ -256,10 +237,25 @@
                   </div>
                 </div>
               </div>
-              <div
-                v-if="vehicle?.membership?.id && vehicle?.membership?.active"
-              >
+              <div v-if="vehicle?.membership?.id">
                 <ul class="shadow-lg">
+                  <li
+                    v-if="vehicle.membership"
+                    class="membership-item hover:bg-slate-100"
+                  >
+                    <span>Status:</span>
+                    <span
+                      class="px-4 py-2 text-white rounded-md"
+                      :class="
+                        vehicle.membership.active
+                          ? 'bg-green-500'
+                          : 'bg-yellow-500'
+                      "
+                      >{{
+                        vehicle.membership.active ? "Active" : "Not-active"
+                      }}</span
+                    >
+                  </li>
                   <li
                     v-if="vehicle.membership?.name"
                     class="membership-item hover:bg-slate-100"
@@ -527,58 +523,108 @@ const loadData = async () => {
     const { data } = await ParkingService.getAll(searchQuery.value);
     if (data?.length) {
       const result = data[0];
+      console.log(result, "result");
       parkingResponse.value = data[0];
       barcodeImage.value = result.barcode_image;
       parkingId.value = result.id;
       vehicleId.value = result?.vehicle?.id;
       vehicle.value = result?.vehicle;
-
+      console.log(111111111111);
       parking_rates.value = result.tariff.parking_rates;
       discountAmount.value = 0;
-      list.value = data.map((item) => {
-        if (item.out_time) {
-          currentTime.value = moment(item.out_time);
-        }
-        const duration = moment.duration(currentTime.value.diff(item.in_time));
-        const hours = Math.floor(duration.asHours());
-        const minutes = Math.floor(duration.minutes());
-        const seconds = Math.floor(duration.seconds());
-        const totalTime = `${hours}h ${minutes}m ${seconds}s`;
-        let discount = 0;
-        if (item?.vehicle?.membership?.membership_type) {
-          const { discount_type, discount_amount } =
-            item.vehicle.membership.membership_type;
-          if (discount_type == "percentage") {
-            if (discount_amount) {
-              discount = (totalCost.value * parseFloat(discount_amount)) / 100;
-            }
-          } else if (discount_type == "flat") {
-            discount = parseFloat(discount_amount) ?? 0;
-          } else if (discount_type == "free") {
-            discount = totalCost.value;
+      const item = data[0];
+      if (item.out_time) {
+        currentTime.value = moment(item.out_time);
+      }
+      const duration = moment.duration(currentTime.value.diff(item.in_time));
+      const hours = Math.floor(duration.asHours());
+      const minutes = Math.floor(duration.minutes());
+      const seconds = Math.floor(duration.seconds());
+      const totalTime = `${hours}h ${minutes}m ${seconds}s`;
+      let discount = 0;
+      console.log(item?.vehicle, "item?.vehicle?.membership");
+      if (
+        item?.vehicle?.membership?.active &&
+        item.vehicle?.membership?.membership_type
+      ) {
+        console.log(item?.vehicle?.membership, "item?.vehicle?.membership");
+        const { discount_type, discount_amount } =
+          item.vehicle.membership.membership_type;
+        if (discount_type == "percentage") {
+          if (discount_amount) {
+            discount = (totalCost.value * parseFloat(discount_amount)) / 100;
           }
-          discountAmount.value = discount;
+        } else if (discount_type == "flat") {
+          discount = parseFloat(discount_amount) ?? 0;
+        } else if (discount_type == "free") {
+          discount = totalCost.value;
         }
-        return {
-          "Vehicle Number": item.vehicle?.number,
-          Place: item.place?.name,
-          Category: item.category?.name,
-          Floor: item.floor?.name,
-          Slot: item.slot?.name,
-          "Driver Name": item.vehicle?.driver_name,
-          "Driver Mobile": item.vehicle?.driver_mobile,
-          "Check-in-Time": item.in_time ? formatDate(item.in_time) : "--",
-          "Check-out-Time": formatDate(currentTime.value),
-          Status:
-            item.vehicle?.status == "checked_in" ? "Checked-in" : "Checked-out",
-          Duration: totalTime,
-          "Total Amount": totalCost.value + "৳",
-          "Discount Applied": Number(discount).toFixed(2) + "৳",
-          Subtotal:
-            Math.round(Number(totalCost.value - discount).toFixed(2)) + "৳",
-        };
-      });
-
+        discountAmount.value = discount;
+      }
+      list.value = [
+        {
+          key: "Checkout Time",
+          value: formatDate(currentTime.value),
+        },
+        {
+          key: "Vehicle No",
+          value: item.vehicle?.number,
+        },
+        {
+          key: "type",
+          value: item.category?.name,
+        },
+        {
+          key: "Block",
+          value: item.place?.name,
+        },
+        {
+          key: "Slot",
+          value: item.slot?.name,
+        },
+        {
+          key: "Floor",
+          value: item.floor?.name,
+        },
+        {
+          key: "Duration",
+          value: totalTime,
+        },
+        {
+          key: "Parking fee",
+          value: "৳ " + Number(totalCost.value).toFixed(2),
+        },
+        {
+          key: "Discounts",
+          value: "৳ " + Number(discount).toFixed(2),
+        },
+        {
+          key: "Total Amount",
+          value:
+            "৳ " + Number(Math.round(Number(totalCost.value - discount))).toFixed(2),
+        },
+      ];
+      /*
+      //old calculation
+      return {
+        "Vehicle Number": item.vehicle?.number,
+        Place: item.place?.name,
+        Category: item.category?.name,
+        Floor: item.floor?.name,
+        Slot: item.slot?.name,
+        "Driver Name": item.vehicle?.driver_name,
+        "Driver Mobile": item.vehicle?.driver_mobile,
+        // "Check-in-Time": item.in_time ? formatDate(item.in_time) : "--",
+        "Check-out-Time": formatDate(currentTime.value),
+        Status:
+          item.vehicle?.status == "checked_in" ? "Checked-in" : "Checked-out",
+        Duration: totalTime,
+        "Total Amount": totalCost.value + "৳",
+        "Discount Applied": Number(discount).toFixed(2) + "৳",
+        Subtotal:
+          Math.round(Number(totalCost.value - discount).toFixed(2)) + "৳",
+      };
+      */
       serverErrors.value = {};
     } else {
       const errors = {

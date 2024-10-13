@@ -355,19 +355,28 @@ const checkoutData = computed(() => {
   const parking = payment.parking;
   // Extract relevant fields from the data
   const outTime = new Date(parking.out_time);
-  const duration = parking.duration;
+  let currentTime = 0
+  if (parking.out_time) {
+    currentTime = moment(parking.out_time);
+  }
+  const duration = moment.duration(currentTime.diff(parking.in_time));
+  const hours = Math.floor(duration.asHours());
+  const minutes = Math.floor(duration.minutes());
+  const seconds = Math.floor(duration.seconds());
 
   const checkoutTime = formatDate(outTime, 'DD-MM-YYYY') + ' ' + formatDate(outTime, 'hh:mm A'),
     vehicleNo = parking.vehicle.number,
     type = parking.category.name,
     block = parking.place.name,
     slot = parking.slot.name,
-    totalHours = Math.floor(duration / 60),
-    totalMinutes = duration % 60,
+    totalHours = hours,
+    totalMinutes = minutes,
+    totalSeconds = seconds,
     parkingFee = parseFloat(payment.paid_amount),
     discounts = parseFloat(payment.discount_amount),
     floor = parking.floor.name,
     totalAmount = parseFloat(payment.paid_amount), // Assuming no additional calculations needed
+    totalDue = parseFloat(payment.due_amount), // Assuming no additional calculations needed
     paymentMethod = payment.method;
   return [
     {
@@ -403,6 +412,10 @@ const checkoutData = computed(() => {
       value: totalMinutes + " minute(s)",
     },
     {
+      key: "Total Seconds",
+      value: totalSeconds + " second(s)",
+    },
+    {
       key: "Parking Fee",
       value: "৳ " + parkingFee,
     },
@@ -413,6 +426,10 @@ const checkoutData = computed(() => {
     {
       key: "Total Amount",
       value: "৳ " + totalAmount,
+    },
+    {
+      key: "Total Due",
+      value: "৳ " + totalDue,
     },
     {
       key: "Payment Method",

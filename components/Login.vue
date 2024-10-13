@@ -26,10 +26,10 @@
 
           <!-- Email -->
           <div class="grid gap-2" :style="style">
-            <label for="email" class="block font-bold">Password</label>
+            <label for="password" class="block font-bold">Password</label>
             <input
               type="password"
-              id="email"
+              id="password"
               v-model="formData.password"
               :class="inputClass"
             />

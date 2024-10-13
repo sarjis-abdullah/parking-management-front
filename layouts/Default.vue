@@ -215,7 +215,7 @@
 
           <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <form class="relative flex flex-1" @submit.stop="">
-              <label for="search-field" class="sr-only">Search</label>
+              <label class="sr-only">Search</label>
               <MagnifyingGlassIcon
                 class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400"
                 aria-hidden="true"
