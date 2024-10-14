@@ -19,7 +19,7 @@
                 v-model="searchText"
                 @input="debouncedSearch"
                 type="text"
-                placeholder="e.g. Search by Barcode"
+                placeholder="e.g. Barcode/Vehicle No"
               />
               <XMarkIcon
                 v-if="searchText"
@@ -159,6 +159,10 @@ const searchQuery = computed(() => {
   if (route?.query?.barcode) {
     query += "&barcode=" + route?.query?.barcode;
   }
+  if (searchText.value) {
+    query += `&query=${searchText.value}`
+  }
+  
   return `?page=${page.value}&per_page=${perPage.value}&include=c.place,p.payment,p.vehicle${query}`;
 });
 
@@ -185,10 +189,11 @@ const loadData = async (query = searchQuery.value) => {
 //search
 const searchText = ref("");
 const search = async () => {
-  const q = searchText.value
-    ? searchQuery.value + `&query=${searchText.value}`
-    : searchQuery.value;
-  loadData(q);
+  // const q = searchText.value
+  //   ? searchQuery.value + `&query=${searchText.value}`
+  //   : searchQuery.value;
+  page.value = 1
+  loadData();
 };
 const debouncedSearch = useDebounce(search, 500);
 

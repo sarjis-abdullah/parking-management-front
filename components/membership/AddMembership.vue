@@ -102,8 +102,9 @@ const inputClass =
           <input
             :class="inputClass"
             v-model="state.contactNumber"
-            type="number"
-            
+            type="tel"
+            pattern="[0-9]{11}"
+            required
             placeholder="e.g. 01521878979"
           />
         </div>

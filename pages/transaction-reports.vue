@@ -20,6 +20,30 @@
         />
       </div>
       <div class="grid gap-2">
+        <label class="text-gray-500">Payment Method</label>
+        <div :class="selectWrapper" class="flex items-center">
+          <select
+            class="focus:outline-none bg-none"
+            :class="selecboxClass"
+            style="background: none"
+            name="place"
+            v-model="paymentMethod"
+          >
+            <option disabled :value="''">Select</option>
+            <option value="cash">Cash</option>
+            <option value="ssl_commerz">SSL commerz</option>
+            <option value="due">Due</option>
+            <!-- Add more options as needed -->
+          </select>
+          <XMarkIcon
+            v-if="paymentMethod"
+            @click="paymentMethod = ''"
+            class="h-5 w-5 text-red-500 cursor-pointer mr-2"
+            aria-hidden="true"
+          />
+        </div>
+      </div>
+      <div class="grid gap-2">
         <label class="text-gray-500">Payment type</label>
         <div :class="selectWrapper" class="flex items-center">
           <select
@@ -41,12 +65,6 @@
             aria-hidden="true"
           />
         </div>
-        <!-- <input
-          :class="inputClass"
-          v-model="paymentType"
-          type="date"
-          placeholder="e.g. 20/12/2024"
-        /> -->
       </div>
       <div class="grid gap-2">
         <label class="text-gray-500">Payment Status</label>
@@ -71,12 +89,6 @@
             aria-hidden="true"
           />
         </div>
-        <!-- <input
-          :class="inputClass"
-          v-model="paymentType"
-          type="date"
-          placeholder="e.g. 20/12/2024"
-        /> -->
       </div>
       <div class="grid gap-2">
         <label class="text-gray-500"
@@ -124,7 +136,6 @@
         >
           Apply
         </button>
-        <!-- v-if="vehicleId && (transactions?.length > 0) && paymentType == 'partial'" -->
 
         <button
           @click="payAllDue"
@@ -144,6 +155,14 @@
       >
         <thead>
           <tr>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            ></th>
             <th
               style="
                 border: 1px solid #ddd;
@@ -182,7 +201,7 @@
                 background-color: #f2f2f2;
               "
             >
-              Total Payable
+              Payable
             </th>
             <th
               style="
@@ -192,7 +211,7 @@
                 background-color: #f2f2f2;
               "
             >
-              Total Paid
+              Paid
             </th>
             <th
               style="
@@ -202,7 +221,7 @@
                 background-color: #f2f2f2;
               "
             >
-              Total Due
+              Discount
             </th>
             <th
               style="
@@ -212,7 +231,7 @@
                 background-color: #f2f2f2;
               "
             >
-              Payment type
+              Due
             </th>
             <th
               style="
@@ -222,7 +241,27 @@
                 background-color: #f2f2f2;
               "
             >
-              Payment status
+              Type
+            </th>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            >
+              Status
+            </th>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            >
+              Method
             </th>
             <th
               style="
@@ -239,6 +278,12 @@
         <tbody v-if="!isLoading">
           <!-- Dummy Data for Transactions -->
           <tr v-for="(item, index) in transactions" :key="index">
+            <td
+              
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              <input v-if="item.status != 'success' || item.payment_type == 'partial'" @input="handleSelect(item)" type="checkbox" />
+            </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
@@ -258,17 +303,22 @@
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              {{ item.total_payable }}
+              {{ "৳ " + item.total_payable }}
             </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              {{ getPaidAmount(item) }}
+              {{ "৳ " + getPaidAmount(item) }}
             </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              {{ item.total_due }}
+              {{ "৳ " + item.discount_amount }}
+            </td>
+            <td
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              {{ "৳ " + item.total_due }}
             </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
@@ -297,6 +347,11 @@
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
+              <span class="px-4 py-1 rounded-md">{{ item.method }}</span>
+            </td>
+            <td
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
               <div v-if="item.payment_type == 'partial'">
                 <button
                   :disabled="repayLoading"
@@ -317,6 +372,34 @@
               </div>
             </td>
           </tr>
+          <tr v-if="transactions?.length">
+            <td
+              colspan="4"
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              Total
+            </td>
+            <td
+              v-for="(total, index) in totals"
+              :key="index"
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              {{ "৳ " + Number(total).toFixed(2) }}
+            </td>
+            <td
+              colspan="4"
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              <button
+                v-if="selected?.length"
+                :disabled="selectedPaymentLoading"
+                @click="completeSelectedPayment()"
+                class="bg-indigo-400 text-white rounded-md text-center px-4 py-1"
+              >
+              Complete selected payment
+              </button>
+            </td>
+          </tr>
           <!-- <tr>
             <td
               colspan="9"
@@ -328,7 +411,7 @@
           </tr> -->
           <tr v-if="transactions.length == 0">
             <td
-              colspan="9"
+              colspan="12"
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
               No data available
@@ -395,9 +478,11 @@ const router = useRouter();
 const startDate = ref("");
 const endDate = ref("");
 const paymentType = ref("");
+const paymentMethod = ref("");
 const paymentStatus = ref("");
 const transactions = ref([]);
 const isLoading = ref(false);
+const selectedPaymentLoading = ref(false);
 const perPage = ref(2);
 const lastPage = ref(null);
 const total = ref(null);
@@ -424,9 +509,10 @@ const totals = computed(() => {
         acc.total_payable += parseFloat(payment.total_payable);
         acc.total_paid += parseFloat(payment.total_paid);
         acc.total_due += parseFloat(payment.total_due);
+        acc.total_discount += parseFloat(payment.discount_amount);
         return acc;
       },
-      { total_payable: 0, total_paid: 0, total_due: 0 }
+      { total_payable: 0, total_paid: 0, total_due: 0, total_discount: 0 }
     );
   }
   return 0.0;
@@ -491,22 +577,6 @@ const getTransactions = () => {
     }
   }, 500);
 };
-const vehicleEntryReports = ref([]);
-const getVehicleEntryReports = () => {
-  isLoading.value = true;
-  activeReport.value = "vehicle-entry-reports";
-  setTimeout(async () => {
-    try {
-      const q = getQueryString(route.query);
-      const res = await ReportService.getVehicle(q);
-      vehicleEntryReports.value = res.data;
-    } catch (error) {
-      serverErros.value = error.errors;
-    } finally {
-      isLoading.value = false;
-    }
-  }, 500);
-};
 
 watch(
   route,
@@ -533,6 +603,10 @@ watch(
       if (route.query.payment_type) {
         newQuery.payment_type = route.query.payment_type;
         paymentType.value = route.query.payment_type;
+      }
+      if (route.query.method) {
+        newQuery.method = route.query.method;
+        paymentMethod.value = route.query.method;
       }
 
       activeReport.value = false;
@@ -596,6 +670,7 @@ watch(
 
     if (newStatus != oldStatus) {
       paymentStatus.value = newStatus;
+      console.log(newStatus, oldStatus, "status");
       if (!newStatus) {
         const newQuery = { ...route.query };
         delete newQuery.status;
@@ -610,12 +685,40 @@ watch(
   }
 );
 
+watch([paymentMethod], ([newMethod], [oldMethod]) => {
+  if (oldMethod != newMethod) {
+    console.log(oldMethod, newMethod, "method");
+    paymentMethod.value = newMethod;
+    if (!newMethod) {
+      const newQuery = { ...route.query };
+      delete newQuery.method;
+      router.push({ query: newQuery });
+    } else {
+      const newQuery = { ...route.query };
+      newQuery.method = newMethod;
+      router.push({ query: newQuery });
+    }
+  }
+  activeReport.value = false;
+});
+
+const selected = ref([]);
+const handleSelect = (item) => {
+  const index = selected.value.findIndex((i) => i.id == item.id);
+  console.log(index, "index");
+  if (index > -1) {
+    selected.value = selected.value.filter((i) => i.id != item.id);
+  } else {
+    selected.value.push(item);
+  }
+};
 const removeSelectedVehicleId = () => {
   vehicleId.value = null;
   vehicleNumber.value = "";
 };
 const getPaidAmount = (item) => {
-  const amount = parseFloat(item.total_paid) + parseFloat(item.discount_amount);
+  // const amount = parseFloat(item.total_paid) + parseFloat(item.discount_amount);
+  const amount = parseFloat(item.total_paid);
   return Number(amount).toFixed(2);
 };
 const repayLoading = ref(false);
@@ -686,6 +789,23 @@ const onPageChanged = (p) => {
 const handlePerpageChange = () => {
   getTransactions();
   // loadData();
+};
+const completeSelectedPayment = async() => {
+  const query = selected.value.map(i=> i.id).join(',');
+  console.log(query);
+  return
+  try {
+    const result = await PaymentService.payAllDue();
+
+    // print();
+    if (result?.data?.redirect_url) {
+      window.location.href = result.data.redirect_url;
+    } else {
+      // vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
+    }
+  } catch (error) {
+  } finally {
+  }
 };
 
 onMounted(() => {

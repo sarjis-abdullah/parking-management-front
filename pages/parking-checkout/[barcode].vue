@@ -241,7 +241,6 @@
                     v-if="vehicle.membership"
                     class="membership-item hover:bg-slate-100"
                   >
-                    <span>Status:</span>
                     <span
                       class="px-4 py-2 text-white rounded-md"
                       :class="
@@ -460,14 +459,15 @@ const totalCost = computed(() => {
   return Math.round(Number(total).toFixed(2));
 });
 const parkingData = computed(() => {
+  const discount =  Math.floor(discountAmount.value)
   const obj = {
     out_time: formatDate(currentTime.value, "YYYY-MM-DD HH:mm:ss"),
     duration: durationInMinutes.value,
     payment: {
       method: paymentMethod.value,
       paid_amount: Math.round(receivedAmount.value),
-      payable_amount: Math.round(totalCost.value),
-      discount_amount: Math.floor(discountAmount.value),
+      payable_amount: Math.round(totalCost.value) - discount,
+      discount_amount: discount,
     },
   };
   return obj;
