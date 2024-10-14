@@ -136,14 +136,6 @@
         >
           Apply
         </button>
-
-        <button
-          @click="payAllDue"
-          class="text-white px-2 py-1 rounded-md"
-          :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
-        >
-          Pay all due
-        </button>
       </section>
     </section>
     <section>
@@ -279,10 +271,15 @@
           <!-- Dummy Data for Transactions -->
           <tr v-for="(item, index) in transactions" :key="index">
             <td
-              
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              <input v-if="item.status != 'success' || item.payment_type == 'partial'" @input="handleSelect(item)" type="checkbox" />
+              <input
+                v-if="
+                  item.status != 'success' || item.payment_type == 'partial'
+                "
+                @input="handleSelect(item)"
+                type="checkbox"
+              />
             </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
@@ -387,7 +384,18 @@
               {{ "৳ " + Number(total).toFixed(2) }}
             </td>
             <td
-              colspan="4"
+              colspan="3"
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              <button
+                v-if="selected?.length"
+                :disabled="selectedPaymentLoading"
+                class="bg-green-400 text-white rounded-md text-center px-4 py-1"
+              >
+                Total payable {{ "৳ " + totalPayableForSelectedTransaction }}
+              </button>
+            </td>
+            <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
               <button
@@ -396,7 +404,7 @@
                 @click="completeSelectedPayment()"
                 class="bg-indigo-400 text-white rounded-md text-center px-4 py-1"
               >
-              Complete selected payment
+                Pay
               </button>
             </td>
           </tr>
@@ -558,6 +566,7 @@ const activeReport = ref(false);
 const getTransactions = () => {
   isLoading.value = true;
   activeReport.value = true;
+  selected.value = [];
   setTimeout(async () => {
     try {
       const q =
@@ -702,7 +711,31 @@ watch([paymentMethod], ([newMethod], [oldMethod]) => {
   activeReport.value = false;
 });
 
+const hasPartialOrPending = computed(()=> {
+  return transactions.value.some(payment => 
+        payment.payment_type == 'partial' || payment.status !== 'success'
+      );
+})
 const selected = ref([]);
+
+const totalPayableForSelectedTransaction = computed(() => {
+  if (!selected.value.length) {
+    return 0;
+  }
+  let sum = 0;
+  for (let index = 0; index < selected.value.length; index++) {
+    const item = selected.value[index];
+
+    if (item.status == "success" && item.payment_type == "partial") {
+      sum += parseFloat(item.total_due);
+      continue;
+    } else if (item.status != "success") {
+      sum += parseFloat(item.total_payable);
+      continue;
+    }
+  }
+  return sum;
+});
 const handleSelect = (item) => {
   const index = selected.value.findIndex((i) => i.id == item.id);
   console.log(index, "index");
@@ -762,25 +795,6 @@ const repay = async (id) => {
   } finally {
   }
 };
-const payAllDue = async (id) => {
-  if (!startDate.value || !endDate.value) {
-    return;
-  }
-  repayLoading.value = true;
-  const query = `?start_date=${startDate.value}&end_date=${endDate.value}`;
-  try {
-    const result = await PaymentService.payAllDue(query);
-
-    // print();
-    if (result?.data?.redirect_url) {
-      window.location.href = result.data.redirect_url;
-    } else {
-      // vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
-    }
-  } catch (error) {
-  } finally {
-  }
-};
 const onPageChanged = (p) => {
   page.value = p;
   getTransactions();
@@ -790,12 +804,13 @@ const handlePerpageChange = () => {
   getTransactions();
   // loadData();
 };
-const completeSelectedPayment = async() => {
-  const query = selected.value.map(i=> i.id).join(',');
-  console.log(query);
-  return
+const completeSelectedPayment = async () => {
+  const paymentIds = selected.value.map((i) => i.id);
+  const query = {
+    paymentIds
+  }
   try {
-    const result = await PaymentService.payAllDue();
+    const result = await PaymentService.payAllDue(query);
 
     // print();
     if (result?.data?.redirect_url) {

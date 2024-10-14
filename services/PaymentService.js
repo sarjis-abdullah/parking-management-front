@@ -26,7 +26,7 @@ export class PaymentService {
   }
   static async payAllDue(query) {
     try {
-      return await HttpRequester.get('payment/pay-all-due' + query);
+      return await HttpRequester.post('payment/pay-all-due', query);
     } catch (err) {
       throw err;
     }
