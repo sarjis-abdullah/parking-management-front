@@ -100,7 +100,7 @@
                                     >
                                       Khulshi Mart
                                     </div>
-                                    <div>VEHICLE CHECK-OUT RECEIPT</div>
+                                    <div style="font-weight: 500; font-size: 12px">VEHICLE CHECK-OUT RECEIPT</div>
                                   </td>
                                 </tr>
                                 <tr>
@@ -156,7 +156,7 @@
                                         >
                                           Invoice No:
                                           <span style="font-weight: 400"
-                                            >{{parking?.barcode}}</span
+                                            >{{transactionId}}</span
                                           >
                                         </li>
                                       </span>
@@ -217,6 +217,7 @@
                             <table style="display: flex">
                               <tfoot style="margin: auto">
                                 <div
+                                  v-if="parking.paid_now < 1"
                                   style="
                                     position: relative;
                                     width: 100%;
@@ -352,6 +353,19 @@ const checkoutData = computed(() => {
     return [];
   }
   const payment = props.pdfData[0];
+  const bool = route.query?.transaction_id && route.query?.batch_payment && payment.paid_amount > 0
+  if (bool) {
+    return [
+      {
+        key: "Total amount paid",
+        value: "৳ " + payment.paid_now,
+      },
+      {
+        key: "Payment method",
+        value: payment.method,
+      },
+    ]
+  }
   const parking = payment.parking;
   // Extract relevant fields from the data
   const outTime = new Date(parking.out_time);
@@ -380,15 +394,15 @@ const checkoutData = computed(() => {
     paymentMethod = payment.method;
   return [
     {
-      key: "Checkout Time",
+      key: "Checkout time",
       value: checkoutTime,
     },
     {
-      key: "Vehicle No",
+      key: "Vehicle no",
       value: vehicleNo,
     },
     {
-      key: "type",
+      key: "Type",
       value: type,
     },
     {
@@ -404,19 +418,19 @@ const checkoutData = computed(() => {
       value: floor,
     },
     {
-      key: "Total Hours",
+      key: "Total hours",
       value: totalHours + " hour(s)",
     },
     {
-      key: "Total Minutes",
+      key: "Total minutes",
       value: totalMinutes + " minute(s)",
     },
     {
-      key: "Total Seconds",
+      key: "Total seconds",
       value: totalSeconds + " second(s)",
     },
     {
-      key: "Parking Fee",
+      key: "Parking fee",
       value: "৳ " + parkingFee,
     },
     {
@@ -424,15 +438,15 @@ const checkoutData = computed(() => {
       value: "৳ " + discounts,
     },
     {
-      key: "Total Amount",
+      key: "Total amount",
       value: "৳ " + totalAmount,
     },
     {
-      key: "Total Due",
+      key: "Total due",
       value: "৳ " + totalDue,
     },
     {
-      key: "Payment Method",
+      key: "Payment method",
       value: paymentMethod,
     },
   ];
@@ -491,6 +505,8 @@ function printReceipt() {
   newWindow.print();
   emit("onClose");
 }
+const route = useRoute()
+const transactionId = computed(()=> route.query?.transaction_id ?? parking.value?.barcode)
 onMounted(() => {
   if (myButton.value) {
     myButton.value.focus();

@@ -387,13 +387,12 @@
               colspan="3"
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              <button
+              <p
                 v-if="selected?.length"
-                :disabled="selectedPaymentLoading"
                 class="bg-green-400 text-white rounded-md text-center px-4 py-1"
               >
                 Total payable {{ "৳ " + totalPayableForSelectedTransaction }}
-              </button>
+              </p>
             </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
@@ -458,6 +457,59 @@
       </select>
     </div>
   </Pagination>
+  <ConfirmModal
+    :open="showConfirmModal"
+    @onClose="showConfirmModal = false"
+    :title="'Are you sure you want to pay?'"
+  >
+    
+    <div>
+      <select
+        class="focus:outline-none bg-none"
+        :class="inputClass"
+        style="background: none"
+        name="place"
+        v-model="selectedPaymentMethod"
+      >
+        <option
+          v-for="category in ['cash', 'online']"
+          :key="category"
+          :value="category"
+        >
+          {{ category }}
+        </option>
+      </select>
+    </div>
+    <div class="mt-6">
+      <p
+        class="bg-indigo-600 text-white rounded-md px-4 py-1"
+      >
+        Total payable <strong>{{ "৳ " + totalPayableForSelectedTransaction }}</strong>
+      </p>
+    </div>
+    <template v-slot:footer>
+      <div class="flex justify-end gap-2 mt-4">
+        <button
+          @click="showConfirmModal = false"
+          class="px-2 py-1 border-red-300 rounded-md"
+        >
+          Cancel
+        </button>
+        <button
+          :disabled="checkoutLoading"
+          @click="confirmPay"
+          :class="
+            checkoutLoading
+              ? 'bg-gray-600 text-white'
+              : 'bg-indigo-600 text-white'
+          "
+          class="px-2 py-1 border-gray-300 rounded-md"
+        >
+          Confirm pay
+        </button>
+      </div>
+    </template>
+  </ConfirmModal>
 </template>
 
 <script setup>
@@ -471,6 +523,7 @@ import Loading from "@/components/common/Loading.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { XMarkIcon } from "@heroicons/vue/24/outline";
 import { PaymentService } from "~/services/PaymentService";
+import ConfirmModal from "@/components/common/Modal.vue";
 
 definePageMeta({
   layout: "auth-layout",
@@ -487,6 +540,7 @@ const startDate = ref("");
 const endDate = ref("");
 const paymentType = ref("");
 const paymentMethod = ref("");
+const selectedPaymentMethod = ref("cash");
 const paymentStatus = ref("");
 const transactions = ref([]);
 const isLoading = ref(false);
@@ -496,6 +550,8 @@ const lastPage = ref(null);
 const total = ref(null);
 const totalPerPage = ref(null);
 const page = ref(1);
+const showConfirmModal = ref(false);
+const checkoutLoading = ref(false);
 
 function getQueryString(query) {
   const filteredQuery = {};
@@ -512,6 +568,17 @@ function getQueryString(query) {
 }
 const totals = computed(() => {
   if (transactions.value && transactions.value.length) {
+    const acc = { payable: 0, paid: 0, discount: 0, due: 0 };
+    for (let index = 0; index < transactions.value.length; index++) {
+      const payment = transactions.value[index];
+
+      acc.payable += parseFloat(payment.total_payable);
+      acc.paid += parseFloat(payment.total_paid);
+      acc.due += parseFloat(payment.total_due);
+      acc.discount += parseFloat(payment.discount_amount);
+    }
+
+    return acc;
     return transactions.value.reduce(
       (acc, payment) => {
         acc.total_payable += parseFloat(payment.total_payable);
@@ -711,11 +778,12 @@ watch([paymentMethod], ([newMethod], [oldMethod]) => {
   activeReport.value = false;
 });
 
-const hasPartialOrPending = computed(()=> {
-  return transactions.value.some(payment => 
-        payment.payment_type == 'partial' || payment.status !== 'success'
-      );
-})
+const hasPartialOrPending = computed(() => {
+  return transactions.value.some(
+    (payment) =>
+      payment.payment_type == "partial" || payment.status !== "success"
+  );
+});
 const selected = ref([]);
 
 const totalPayableForSelectedTransaction = computed(() => {
@@ -804,12 +872,14 @@ const handlePerpageChange = () => {
   getTransactions();
   // loadData();
 };
-const completeSelectedPayment = async () => {
+const confirmPay = async () => {
   const paymentIds = selected.value.map((i) => i.id);
   const query = {
-    paymentIds
-  }
+    paymentIds,
+    paymentMethod: selectedPaymentMethod.value,
+  };
   try {
+    checkoutLoading.value = true;
     const result = await PaymentService.payAllDue(query);
 
     // print();
@@ -820,7 +890,11 @@ const completeSelectedPayment = async () => {
     }
   } catch (error) {
   } finally {
+    checkoutLoading.value = false;
   }
+};
+const completeSelectedPayment = async () => {
+  showConfirmModal.value = true;
 };
 
 onMounted(() => {

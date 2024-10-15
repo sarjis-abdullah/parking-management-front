@@ -44,12 +44,11 @@ watch(
       const newQuery = {
         ...route.query,
       };
-      if (route.query.transaction_id) {
+      if (route.query?.transaction_id) {
         const query = `${includeQuery.value}&transaction_id=${route.query.transaction_id}`;
         PaymentService.findBy(query)
           .then((result) => {
             showInvoice.value = true;
-            console.log(result.data);
             responses.value = result.data;
           })
           .catch((err) => {});
