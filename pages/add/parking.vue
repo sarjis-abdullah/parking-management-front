@@ -16,6 +16,7 @@ import { TariffService } from "~/services/TariffService";
 import { VehicleService } from "~/services/VehicleService";
 import ClientErrors from "@/components/common/ClientErrors.vue";
 import ServerError from "@/components/common/Error.vue";
+import { BlockService } from "~/services/BlockService";
 
 definePageMeta({
   layout: "auth-layout",
@@ -118,12 +119,21 @@ const getPlaces = async () => {
     loading.value = false;
   }
 };
+const selectedFloor = ref('');
+const blocks = ref([]);
+const getBlocks = async () => {
+  const { data } = await BlockService.getAll(`?floor_id=${selectedFloor.value}`);
+  blocks.value = data;
+};
+
 const slots = ref([]);
+const selectedBlock = ref('');
 
 const getSlots = async () => {
-  // const { data } = await SlotService.getAll(`?include=s.floor&category_id=${state.category}`);
-  // slots.value = data;
+  const { data } = await SlotService.getAll(`?block_id=${selectedBlock.value}`);
+  slots.value = data;
 };
+
 const categories = ref([]);
 const getCategories = async () => {
   loading.value = true;
@@ -309,11 +319,58 @@ const inputClass =
             style="background: none"
             name="place"
             v-model="state.category"
-            @change="getSlots"
           >
             <option disabled :value="''">Select vehicle category</option>
             <option
               v-for="category in categories"
+              :key="category.id"
+              :value="category.id"
+            >
+              {{ category.name }}
+            </option>
+            <!-- Add more options as needed -->
+          </select>
+          <!-- <ServerErrorMessage :errors="validator.category.$errors" /> -->
+        </div>
+        <div class="grid gap-2">
+          <label class="text-gray-500"
+            >Floor<span class="text-red-500">*</span></label
+          >
+          <select
+            class="focus:outline-none bg-none"
+            :class="inputClass"
+            style="background: none"
+            name="place"
+            v-model="selectedFloor"
+            @change="getBlocks"
+          >
+            <option disabled :value="''">Select floor</option>
+            <option
+              v-for="category in floors"
+              :key="category.id"
+              :value="category.id"
+            >
+              {{ category.name }}
+            </option>
+            <!-- Add more options as needed -->
+          </select>
+          <!-- <ServerErrorMessage :errors="validator.category.$errors" /> -->
+        </div>
+        <div class="grid gap-2">
+          <label class="text-gray-500"
+            >Block<span class="text-red-500">*</span></label
+          >
+          <select
+            class="focus:outline-none bg-none"
+            :class="inputClass"
+            style="background: none"
+            name="place"
+            v-model="selectedBlock"
+            @change="getSlots"
+          >
+            <option disabled :value="''">Select block</option>
+            <option
+              v-for="category in blocks"
               :key="category.id"
               :value="category.id"
             >
@@ -373,12 +430,10 @@ const inputClass =
           >Slot<span class="text-red-500">*</span></label
         >
         <ul class="grid gap-2">
-          <li v-for="(floor, index) in floors" :key="floor.id">
-            <span v-if="floor?.slots?.length">{{ floor.name }}</span>
+          <li v-for="(slot, index) in slots" :key="slot.id">
+            <!-- <span v-if="slots?.length">{{ floor.name }}</span> -->
             <ul class="grid grid-cols-3 md:grid-cols-6 gap-2">
               <li
-                v-for="(slot, i) in floor.slots"
-                :key="slot.id"
                 class="flex flex-col gap-1 items-center p-4 border text-white rounded-md"
                 :class="getSlotClasses(slot)"
                 @click="handleSelectedSlot(slot)"
