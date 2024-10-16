@@ -116,6 +116,8 @@ const onSubmit = async () => {
 const places = ref([]);
 const getPlaces = async () => {
   try {
+    selectedFloor.value = null
+    floors.value = []
     loading.value = true;
     const { data } = await PlaceService.getAll("");
     places.value = data;
@@ -180,6 +182,8 @@ const floorLoading = ref(false);
 
 const getFloors = async () => {
   selectedSlot.value = null;
+  selectedBlock.value = null;
+  blocks.value = [];
   floorLoading.value = true;
   let query = `?include=f.blocks`;
   if (state.place) {
