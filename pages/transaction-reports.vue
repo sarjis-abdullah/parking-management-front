@@ -1,4 +1,3 @@
-
 <script setup>
 import { computed, ref, watch, onMounted } from "vue";
 import moment from "moment";
@@ -11,6 +10,7 @@ import Pagination from "@/components/common/Pagination.vue";
 import { XMarkIcon } from "@heroicons/vue/24/outline";
 import { PaymentService } from "~/services/PaymentService";
 import ConfirmModal from "@/components/common/Modal.vue";
+import AutoComplete from "@/components/common/AutoComplete.vue";
 
 definePageMeta({
   layout: "auth-layout",
@@ -141,6 +141,10 @@ const getTransactions = () => {
   }, 500);
 };
 
+const client = ref("aadfg");
+const handleChosen = (qq) => {
+  console.log(qq, 12345);
+};
 watch(
   route,
   (o, n) => {
@@ -492,7 +496,22 @@ onMounted(() => {
         <label class="text-gray-500"
           >Vehicle Number<span class="text-red-500">*</span></label
         >
-        <div
+        <AutoComplete
+          :data="[
+            {
+              id: 'abcd',
+              name: 'abcd',
+            },
+            {
+              name: 'qwer',
+              id: 'qwer',
+            }
+          ]"
+          v-model="client"
+          @chosen="handleChosen"
+          placeholder="Search for state..."
+        ></AutoComplete>
+        <!-- <div
           class="flex justify-between items-center gap-2"
           :class="selectWrapper"
         >
@@ -507,7 +526,6 @@ onMounted(() => {
               placeholder="e.g. Ka-12345"
               list="cityname"
             />
-            <!-- <input type="text" name="city" list="cityname" /> -->
             <datalist id="cityname">
               <option
                 v-for="item in vehicleList"
@@ -523,7 +541,7 @@ onMounted(() => {
               aria-hidden="true"
             />
           </div>
-        </div>
+        </div> -->
       </div>
       <section class="flex items-end gap-2">
         <button
@@ -860,7 +878,6 @@ onMounted(() => {
     @onClose="showConfirmModal = false"
     :title="'Are you sure you want to pay?'"
   >
-    
     <div>
       <select
         class="focus:outline-none bg-none"
@@ -879,10 +896,9 @@ onMounted(() => {
       </select>
     </div>
     <div class="mt-6">
-      <p
-        class="bg-indigo-600 text-white rounded-md px-4 py-1"
-      >
-        Total payable <strong>{{ "৳ " + totalPayableForSelectedTransaction }}</strong>
+      <p class="bg-indigo-600 text-white rounded-md px-4 py-1">
+        Total payable
+        <strong>{{ "৳ " + totalPayableForSelectedTransaction }}</strong>
       </p>
     </div>
     <template v-slot:footer>
