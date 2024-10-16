@@ -1,3 +1,89 @@
+<script setup>
+import { onMounted } from "vue";
+import AuthLayout from "@/layouts/AuthLayout.vue";
+import Link from "@/components/common/Link.vue";
+import Pagination from "@/components/common/Pagination.vue";
+import Loading from "@/components/common/Loading.vue";
+import SingleData from "@/components/parking/SingleData.vue";
+import { ParkingService } from "@/services/ParkingService.js";
+import { XMarkIcon, PlusIcon } from "@heroicons/vue/24/outline";
+import { useDebounce } from "~/hooks/useDebounce";
+import Titlebar from "@/components/common/Titlebar.vue";
+
+definePageMeta({
+  layout: "auth-layout",
+});
+const inputClass =
+  "relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
+
+const list = ref([]);
+const loadingError = ref(null);
+const isLoading = ref(true);
+const serverErrors = ref(null);
+const viweOn = ref(false);
+const route = useRoute();
+
+//pagination
+const page = ref(1);
+const perPage = ref(10);
+const lastPage = ref(null);
+const total = ref(null);
+const totalPerPage = ref(null);
+
+const searchQuery = computed(() => {
+  let query = "";
+  if (route?.query?.barcode) {
+    query += "&barcode=" + route?.query?.barcode;
+  }
+  if (searchText.value) {
+    query += `&query=${searchText.value}`
+  }
+  
+  return `?page=${page.value}&per_page=${perPage.value}&include=c.place,p.payment,p.vehicle${query}`;
+});
+
+const loadData = async (query = searchQuery.value) => {
+  try {
+    isLoading.value = true;
+    const { meta, data } = await ParkingService.getAll(query);
+    list.value = data;
+
+    page.value = meta.current_page;
+    lastPage.value = meta.last_page;
+    total.value = meta.total;
+    totalPerPage.value = data.length;
+
+    serverErrors.value = {};
+    // handleReset();
+  } catch (error) {
+    serverErrors.value = error.errors;
+  } finally {
+    isLoading.value = false;
+    viweOn.value = true;
+  }
+};
+//search
+const searchText = ref("");
+const search = async () => {
+  // const q = searchText.value
+  //   ? searchQuery.value + `&query=${searchText.value}`
+  //   : searchQuery.value;
+  page.value = 1
+  loadData();
+};
+const debouncedSearch = useDebounce(search, 500);
+
+const onPageChanged = (p) => {
+  page.value = p;
+  loadData();
+};
+onMounted(() => {
+  if (route?.query?.barcode) {
+    searchText.value = route?.query?.barcode;
+  }
+  loadData();
+});
+</script>
 <template>
   <div class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
     <div class="md:mt-8 flow-root">
@@ -122,89 +208,4 @@
     />
   </div>
 </template>
-<script setup>
-import { onMounted } from "vue";
-import AuthLayout from "@/layouts/AuthLayout.vue";
-import Link from "@/components/common/Link.vue";
-import Pagination from "@/components/common/Pagination.vue";
-import Loading from "@/components/common/Loading.vue";
-import SingleData from "@/components/parking/SingleData.vue";
-import { ParkingService } from "@/services/ParkingService.js";
-import { XMarkIcon, PlusIcon } from "@heroicons/vue/24/outline";
-import { useDebounce } from "~/hooks/useDebounce";
-import Titlebar from "@/components/common/Titlebar.vue";
 
-definePageMeta({
-  layout: "auth-layout",
-});
-const inputClass =
-  "relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
-
-const list = ref([]);
-const loadingError = ref(null);
-const isLoading = ref(true);
-const serverErrors = ref(null);
-const viweOn = ref(false);
-const route = useRoute();
-
-//pagination
-const page = ref(1);
-const perPage = ref(10);
-const lastPage = ref(null);
-const total = ref(null);
-const totalPerPage = ref(null);
-
-const searchQuery = computed(() => {
-  let query = "";
-  if (route?.query?.barcode) {
-    query += "&barcode=" + route?.query?.barcode;
-  }
-  if (searchText.value) {
-    query += `&query=${searchText.value}`
-  }
-  
-  return `?page=${page.value}&per_page=${perPage.value}&include=c.place,p.payment,p.vehicle${query}`;
-});
-
-const loadData = async (query = searchQuery.value) => {
-  try {
-    isLoading.value = true;
-    const { meta, data } = await ParkingService.getAll(query);
-    list.value = data;
-
-    page.value = meta.current_page;
-    lastPage.value = meta.last_page;
-    total.value = meta.total;
-    totalPerPage.value = data.length;
-
-    serverErrors.value = {};
-    // handleReset();
-  } catch (error) {
-    serverErrors.value = error.errors;
-  } finally {
-    isLoading.value = false;
-    viweOn.value = true;
-  }
-};
-//search
-const searchText = ref("");
-const search = async () => {
-  // const q = searchText.value
-  //   ? searchQuery.value + `&query=${searchText.value}`
-  //   : searchQuery.value;
-  page.value = 1
-  loadData();
-};
-const debouncedSearch = useDebounce(search, 500);
-
-const onPageChanged = (p) => {
-  page.value = p;
-  loadData();
-};
-onMounted(() => {
-  if (route?.query?.barcode) {
-    searchText.value = route?.query?.barcode;
-  }
-  loadData();
-});
-</script>

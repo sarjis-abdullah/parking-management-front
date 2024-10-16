@@ -1,28 +1,3 @@
-<template>
-  <section class="grid md:grid-cols-3 gap-4">
-    <section
-      
-      v-for="(item, index) in reports"
-      :key="index"
-    >
-      <section class="shadow-md py-4 px-6 border rounded-md border-indigo-400">
-        <article class="grid gap-4">
-          <header>
-            <h1 class="text-3xl text-indigo-600">
-              <strong>{{ index }}</strong>
-            </h1>
-          </header>
-          <p class="text-4xl text-indigo-800">{{ item }}</p>
-        </article>
-      </section>
-    </section>
-  </section>
-  <Loading
-    v-if="isLoading"
-    parentClass="h-[50vh] flex  justify-center items-center"
-  />
-</template>
-
 <script setup>
 import { ref, onMounted } from "vue";
 import { ReportService } from "@/services/ReportService";
@@ -67,5 +42,31 @@ onMounted(() => {
   getSlotReports();
 });
 </script>
+<template>
+  <section class="grid md:grid-cols-3 gap-4">
+    <section
+      
+      v-for="(item, index) in reports"
+      :key="index"
+    >
+      <section class="shadow-md py-4 px-6 border rounded-md border-indigo-400">
+        <article class="grid gap-4">
+          <header>
+            <h1 class="text-3xl text-indigo-600">
+              <strong>{{ index }}</strong>
+            </h1>
+          </header>
+          <p class="text-4xl text-indigo-800">{{ item }}</p>
+        </article>
+      </section>
+    </section>
+  </section>
+  <Loading
+    v-if="isLoading"
+    parentClass="h-[50vh] flex  justify-center items-center"
+  />
+</template>
+
+
 
 <style lang="scss" scoped></style>

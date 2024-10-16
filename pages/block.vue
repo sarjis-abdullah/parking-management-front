@@ -1,125 +1,3 @@
-<template>
-  <div class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
-    <div class="md:mt-8 flow-root">
-      <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-          <!-- <OrderFilters
-          v-if="showFilterButton"
-          :title="title"
-          :showFilterButton="showFilterButton"
-          :pdfLoading="pdfLoading"
-          @filterOrderBy="filterOrderBy"
-          @downloadOrderStatement="downloadOrderStatement"
-        /> -->
-        <Titlebar title="block"></Titlebar>
-
-          <div v-if="!loadingError && !isLoading">
-            <table
-              class="min-w-full divide-y divide-gray-300"
-              v-if="list && list?.length > 0"
-            >
-              <thead>
-                <tr>
-                  <th
-                    scope="col"
-                    class="py-3.5 pl-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
-                  >
-                    Name
-                  </th>
-                  <th
-                    scope="col"
-                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Floor
-                  </th>
-                  <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200 bg-white">
-                <tr v-for="singleData in list" :key="singleData.id">
-                  <td class="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
-                    <div class="flex items-center">
-                      <div class="">
-                        <div
-                          v-if="singleData.editMode"
-                          class="mt-1 text-gray-500"
-                        >
-                          <input
-                            :class="inputClass"
-                            v-model="record.name"
-                            type="text"
-                            placeholder="e.g. Place name"
-                          />
-                        </div>
-                        <div v-else class="font-medium text-gray-900">
-                          {{ singleData.name }}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                    {{ singleData?.floor?.name }}
-                  </td>
-                  
-                  <td
-                    class="flex justify-center gap-1 relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
-                  >
-                    <TrashIcon
-                      @click="deleteRecord(singleData.id)"
-                      class="h-5 w-5"
-                      aria-hidden="true"
-                    />
-                    <PencilIcon
-                      @click="editRecord(singleData)"
-                      class="h-5 w-5"
-                      aria-hidden="true"
-                    />
-                    <CheckIcon
-                      v-if="singleData?.editMode"
-                      @click="updateRecord(singleData.id)"
-                      class="h-5 w-5 text-blue-500"
-                      aria-hidden="true"
-                    />
-                    <XMarkIcon
-                      v-if="singleData?.editMode"
-                      @click="cancelUpdatingRecord(singleData.id)"
-                      class="h-5 w-5 text-red-500"
-                      aria-hidden="true"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <div v-else class="text-center py-10">
-              <p class="text-xl text-gray-400">
-                No data available
-              </p>
-            </div>
-          </div>
-          <div v-if="!loadingError && isLoading">
-            <Loading />
-          </div>
-          <div v-if="loadingError && !isLoading">
-            Loading error
-            <!-- <ListLoadingError :message="'cant_load_orders_list'" /> -->
-          </div>
-        </div>
-      </div>
-    </div>
-    <ServerError :error="serverErrors" />
-    <Loading v-if="isLoading || isDeleting || isUpdating" />
-    <Pagination
-      class="mt-6"
-      :perPage="perPage"
-      :lastPage="lastPage"
-      :total="total"
-      :totalPerPage="totalPerPage"
-      @onChange="onPageChanged"
-    />
-  </div>
-</template>
 <script setup>
 import { onMounted } from "vue";
 import Link from "@/components/common/Link.vue";
@@ -257,3 +135,125 @@ onMounted(() => {
   loadData();
 });
 </script>
+<template>
+  <div class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
+    <div class="md:mt-8 flow-root">
+      <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+          <!-- <OrderFilters
+          v-if="showFilterButton"
+          :title="title"
+          :showFilterButton="showFilterButton"
+          :pdfLoading="pdfLoading"
+          @filterOrderBy="filterOrderBy"
+          @downloadOrderStatement="downloadOrderStatement"
+        /> -->
+        <Titlebar title="block"></Titlebar>
+
+          <div v-if="!loadingError && !isLoading">
+            <table
+              class="min-w-full divide-y divide-gray-300"
+              v-if="list && list?.length > 0"
+            >
+              <thead>
+                <tr>
+                  <th
+                    scope="col"
+                    class="py-3.5 pl-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
+                  >
+                    Name
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
+                    Floor
+                  </th>
+                  <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 bg-white">
+                <tr v-for="singleData in list" :key="singleData.id">
+                  <td class="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
+                    <div class="flex items-center">
+                      <div class="">
+                        <div
+                          v-if="singleData.editMode"
+                          class="mt-1 text-gray-500"
+                        >
+                          <input
+                            :class="inputClass"
+                            v-model="record.name"
+                            type="text"
+                            placeholder="e.g. Place name"
+                          />
+                        </div>
+                        <div v-else class="font-medium text-gray-900">
+                          {{ singleData.name }}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    {{ singleData?.floor?.name }}
+                  </td>
+                  
+                  <td
+                    class="flex justify-center gap-1 relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
+                  >
+                    <TrashIcon
+                      @click="deleteRecord(singleData.id)"
+                      class="h-5 w-5"
+                      aria-hidden="true"
+                    />
+                    <PencilIcon
+                      @click="editRecord(singleData)"
+                      class="h-5 w-5"
+                      aria-hidden="true"
+                    />
+                    <CheckIcon
+                      v-if="singleData?.editMode"
+                      @click="updateRecord(singleData.id)"
+                      class="h-5 w-5 text-blue-500"
+                      aria-hidden="true"
+                    />
+                    <XMarkIcon
+                      v-if="singleData?.editMode"
+                      @click="cancelUpdatingRecord(singleData.id)"
+                      class="h-5 w-5 text-red-500"
+                      aria-hidden="true"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-else class="text-center py-10">
+              <p class="text-xl text-gray-400">
+                No data available
+              </p>
+            </div>
+          </div>
+          <div v-if="!loadingError && isLoading">
+            <Loading />
+          </div>
+          <div v-if="loadingError && !isLoading">
+            Loading error
+            <!-- <ListLoadingError :message="'cant_load_orders_list'" /> -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <ServerError :error="serverErrors" />
+    <Loading v-if="isLoading || isDeleting || isUpdating" />
+    <Pagination
+      class="mt-6"
+      :perPage="perPage"
+      :lastPage="lastPage"
+      :total="total"
+      :totalPerPage="totalPerPage"
+      @onChange="onPageChanged"
+    />
+  </div>
+</template>

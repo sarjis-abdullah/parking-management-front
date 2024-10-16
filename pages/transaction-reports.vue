@@ -1,3 +1,401 @@
+
+<script setup>
+import { computed, ref, watch, onMounted } from "vue";
+import moment from "moment";
+import { ReportService } from "@/services/ReportService";
+import { formatDate } from "@/utils/index";
+import { VehicleService } from "~/services/VehicleService";
+import { useDebounce } from "~/hooks/useDebounce";
+import Loading from "@/components/common/Loading.vue";
+import Pagination from "@/components/common/Pagination.vue";
+import { XMarkIcon } from "@heroicons/vue/24/outline";
+import { PaymentService } from "~/services/PaymentService";
+import ConfirmModal from "@/components/common/Modal.vue";
+
+definePageMeta({
+  layout: "auth-layout",
+});
+const inputClass =
+  "relative block w-full appearance-none rounded-md border-2 border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
+const selecboxClass =
+  "relative block w-full appearance-none px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10";
+const selectWrapper =
+  "rounded-md border-2 border-gray-300 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
+const route = useRoute();
+const router = useRouter();
+const startDate = ref("");
+const endDate = ref("");
+const paymentType = ref("");
+const paymentMethod = ref("");
+const selectedPaymentMethod = ref("cash");
+const paymentStatus = ref("");
+const transactions = ref([]);
+const isLoading = ref(false);
+const selectedPaymentLoading = ref(false);
+const perPage = ref(2);
+const lastPage = ref(null);
+const total = ref(null);
+const totalPerPage = ref(null);
+const page = ref(1);
+const showConfirmModal = ref(false);
+const checkoutLoading = ref(false);
+
+function getQueryString(query) {
+  const filteredQuery = {};
+
+  // Filter out null and undefined values
+  for (const key in query) {
+    if (query[key] !== null && query[key] !== undefined) {
+      filteredQuery[key] = query[key];
+    }
+  }
+
+  const params = new URLSearchParams(filteredQuery);
+  return `?${params.toString()}`;
+}
+const totals = computed(() => {
+  if (transactions.value && transactions.value.length) {
+    const acc = { payable: 0, paid: 0, discount: 0, due: 0 };
+    for (let index = 0; index < transactions.value.length; index++) {
+      const payment = transactions.value[index];
+
+      acc.payable += parseFloat(payment.total_payable);
+      acc.paid += parseFloat(payment.total_paid);
+      acc.due += parseFloat(payment.total_due);
+      acc.discount += parseFloat(payment.discount_amount);
+    }
+
+    return acc;
+    return transactions.value.reduce(
+      (acc, payment) => {
+        acc.total_payable += parseFloat(payment.total_payable);
+        acc.total_paid += parseFloat(payment.total_paid);
+        acc.total_due += parseFloat(payment.total_due);
+        acc.total_discount += parseFloat(payment.discount_amount);
+        return acc;
+      },
+      { total_payable: 0, total_paid: 0, total_due: 0, total_discount: 0 }
+    );
+  }
+  return 0.0;
+});
+const totalTransaction = computed(() => {
+  if (transactions.value && transactions.value.length) {
+    return transactions.value;
+  }
+  return 0.0;
+});
+
+const vehicleNumber = ref("");
+const vehicleList = ref([]);
+
+const search = async () => {
+  let query = "";
+  if (vehicleNumber.value) {
+    query += `?query=${vehicleNumber.value}`;
+    const newQuery = {
+      ...route.query,
+    };
+  }
+  const result = await VehicleService.getAll(query);
+  if (result?.data?.length) {
+    vehicleList.value = result.data;
+  }
+};
+const vehicleId = ref(null);
+const checkSelection = () => {
+  const data = vehicleList.value.find(
+    (item) => item.number == vehicleNumber.value
+  );
+  if (data) {
+    vehicleId.value = data.id;
+  }
+};
+const debouncedSearch = useDebounce(search, 500);
+const serverErros = ref({});
+const activeReport = ref(false);
+// const isTransactionReport = computed(
+//   () => activeReport.value == "transactions"
+// );
+const getTransactions = () => {
+  isLoading.value = true;
+  activeReport.value = true;
+  selected.value = [];
+  setTimeout(async () => {
+    try {
+      const q =
+        getQueryString(route.query) +
+        `&page=${page.value}&per_page=${perPage.value}`;
+      const res = await ReportService.getTransaction(q);
+      transactions.value = res.data.data;
+      const meta = res.data;
+      page.value = meta.current_page;
+      lastPage.value = meta.last_page;
+      total.value = meta.total;
+      totalPerPage.value = res.data.data.length;
+    } catch (error) {
+      serverErros.value = error.errors;
+    } finally {
+      isLoading.value = false;
+    }
+  }, 500);
+};
+
+watch(
+  route,
+  (o, n) => {
+    if (route.query) {
+      const newQuery = {
+        ...route.query,
+      };
+      console.log(route.query);
+      if (route.query.start_date) {
+        newQuery.start_date = route.query.start_date;
+      }
+      if (route.query.end_date) {
+        newQuery.end_date = route.query.end_date;
+      }
+      if (route.query.vehicle_id) {
+        newQuery.vehicle_id = route.query.vehicle_id;
+        vehicleId.value = route.query.vehicle_id;
+      }
+      if (route.query.status) {
+        newQuery.status = route.query.status;
+        paymentStatus.value = route.query.status;
+      }
+      if (route.query.payment_type) {
+        newQuery.payment_type = route.query.payment_type;
+        paymentType.value = route.query.payment_type;
+      }
+      if (route.query.method) {
+        newQuery.method = route.query.method;
+        paymentMethod.value = route.query.method;
+      }
+
+      activeReport.value = false;
+      router.push({ query: newQuery });
+    }
+  },
+  { deep: false, immediate: true }
+);
+
+watch(
+  [startDate, endDate, vehicleId],
+  (
+    [newStartDate, newEndDate, newVehicleId],
+    [oldStartDate, oldEndDate, oldVehicleId]
+  ) => {
+    const newQuery = { ...route.query };
+
+    if (newStartDate !== oldStartDate) {
+      if (newStartDate) {
+        newQuery.start_date = newStartDate;
+      } else {
+        delete newQuery.start_date;
+      }
+    }
+
+    if (newEndDate !== oldEndDate) {
+      if (newEndDate) {
+        newQuery.end_date = newEndDate;
+      } else {
+        delete newQuery.end_date;
+      }
+    }
+    if (newVehicleId !== oldVehicleId) {
+      if (newVehicleId) {
+        newQuery.vehicle_id = newVehicleId;
+      } else {
+        delete newQuery.vehicle_id;
+      }
+    }
+    activeReport.value = false;
+    router.push({ query: newQuery });
+  },
+  { deep: true, immediate: false }
+);
+
+watch(
+  [paymentType, paymentStatus],
+  ([newType, newStatus], [oldType, oldStatus]) => {
+    if (oldType != newType) {
+      paymentType.value = newType;
+      if (!newType) {
+        const newQuery = { ...route.query };
+        delete newQuery.payment_type;
+        router.push({ query: newQuery });
+      } else {
+        const newQuery = { ...route.query };
+        newQuery.payment_type = newType;
+        router.push({ query: newQuery });
+      }
+    }
+
+    if (newStatus != oldStatus) {
+      paymentStatus.value = newStatus;
+      console.log(newStatus, oldStatus, "status");
+      if (!newStatus) {
+        const newQuery = { ...route.query };
+        delete newQuery.status;
+        router.push({ query: newQuery });
+      } else {
+        const newQuery = { ...route.query };
+        newQuery.status = newStatus;
+        router.push({ query: newQuery });
+      }
+    }
+    activeReport.value = false;
+  }
+);
+
+watch([paymentMethod], ([newMethod], [oldMethod]) => {
+  if (oldMethod != newMethod) {
+    console.log(oldMethod, newMethod, "method");
+    paymentMethod.value = newMethod;
+    if (!newMethod) {
+      const newQuery = { ...route.query };
+      delete newQuery.method;
+      router.push({ query: newQuery });
+    } else {
+      const newQuery = { ...route.query };
+      newQuery.method = newMethod;
+      router.push({ query: newQuery });
+    }
+  }
+  activeReport.value = false;
+});
+
+const hasPartialOrPending = computed(() => {
+  return transactions.value.some(
+    (payment) =>
+      payment.payment_type == "partial" || payment.status !== "success"
+  );
+});
+const selected = ref([]);
+
+const totalPayableForSelectedTransaction = computed(() => {
+  if (!selected.value.length) {
+    return 0;
+  }
+  let sum = 0;
+  for (let index = 0; index < selected.value.length; index++) {
+    const item = selected.value[index];
+
+    if (item.status == "success" && item.payment_type == "partial") {
+      sum += parseFloat(item.total_due);
+      continue;
+    } else if (item.status != "success") {
+      sum += parseFloat(item.total_payable);
+      continue;
+    }
+  }
+  return sum;
+});
+const handleSelect = (item) => {
+  const index = selected.value.findIndex((i) => i.id == item.id);
+  console.log(index, "index");
+  if (index > -1) {
+    selected.value = selected.value.filter((i) => i.id != item.id);
+  } else {
+    selected.value.push(item);
+  }
+};
+const removeSelectedVehicleId = () => {
+  vehicleId.value = null;
+  vehicleNumber.value = "";
+};
+const getPaidAmount = (item) => {
+  // const amount = parseFloat(item.total_paid) + parseFloat(item.discount_amount);
+  const amount = parseFloat(item.total_paid);
+  return Number(amount).toFixed(2);
+};
+const repayLoading = ref(false);
+const payDUe = async (id) => {
+  repayLoading.value = true;
+  try {
+    const result = await PaymentService.payDue(id);
+
+    if (result?.data?.redirect_url) {
+      window.location.href = result.data.redirect_url;
+    }
+  } catch (error) {
+  } finally {
+  }
+};
+
+const getStatusWiseColor = ({ status, payment_type }) => {
+  if (status == "success") {
+    if (payment_type == "partial") {
+      return "bg-orange-400";
+    }
+    return "bg-green-500 ";
+  } else if (status == "pending") {
+    return "bg-yellow-600";
+  }
+  return "bg-red-600";
+};
+
+const repay = async (id) => {
+  repayLoading.value = true;
+  try {
+    const result = await PaymentService.repay(id);
+
+    // print();
+    if (result?.data?.redirect_url) {
+      window.location.href = result.data.redirect_url;
+    } else {
+      // vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
+    }
+  } catch (error) {
+  } finally {
+  }
+};
+const onPageChanged = (p) => {
+  page.value = p;
+  getTransactions();
+  // loadData();
+};
+const handlePerpageChange = () => {
+  getTransactions();
+  // loadData();
+};
+const confirmPay = async () => {
+  const paymentIds = selected.value.map((i) => i.id);
+  const query = {
+    paymentIds,
+    paymentMethod: selectedPaymentMethod.value,
+  };
+  try {
+    checkoutLoading.value = true;
+    const result = await PaymentService.payAllDue(query);
+
+    // print();
+    if (result?.data?.redirect_url) {
+      window.location.href = result.data.redirect_url;
+    } else {
+      // vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
+    }
+  } catch (error) {
+  } finally {
+    checkoutLoading.value = false;
+  }
+};
+const completeSelectedPayment = async () => {
+  showConfirmModal.value = true;
+};
+
+onMounted(() => {
+  startDate.value = formatDate(moment().subtract(1, "month"), "YYYY-MM-DD");
+  endDate.value = formatDate(moment(), "YYYY-MM-DD");
+  const newQuery = {
+    ...route.query,
+  };
+
+  newQuery.start_date = startDate.value;
+  newQuery.end_date = endDate.value;
+  router.push({ query: newQuery });
+});
+</script>
 <template>
   <section>
     <section class="grid md:grid-cols-4 gap-2">
@@ -511,403 +909,5 @@
     </template>
   </ConfirmModal>
 </template>
-
-<script setup>
-import { computed, ref, watch, onMounted } from "vue";
-import moment from "moment";
-import { ReportService } from "@/services/ReportService";
-import { formatDate } from "@/utils/index";
-import { VehicleService } from "~/services/VehicleService";
-import { useDebounce } from "~/hooks/useDebounce";
-import Loading from "@/components/common/Loading.vue";
-import Pagination from "@/components/common/Pagination.vue";
-import { XMarkIcon } from "@heroicons/vue/24/outline";
-import { PaymentService } from "~/services/PaymentService";
-import ConfirmModal from "@/components/common/Modal.vue";
-
-definePageMeta({
-  layout: "auth-layout",
-});
-const inputClass =
-  "relative block w-full appearance-none rounded-md border-2 border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
-const selecboxClass =
-  "relative block w-full appearance-none px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10";
-const selectWrapper =
-  "rounded-md border-2 border-gray-300 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
-const route = useRoute();
-const router = useRouter();
-const startDate = ref("");
-const endDate = ref("");
-const paymentType = ref("");
-const paymentMethod = ref("");
-const selectedPaymentMethod = ref("cash");
-const paymentStatus = ref("");
-const transactions = ref([]);
-const isLoading = ref(false);
-const selectedPaymentLoading = ref(false);
-const perPage = ref(2);
-const lastPage = ref(null);
-const total = ref(null);
-const totalPerPage = ref(null);
-const page = ref(1);
-const showConfirmModal = ref(false);
-const checkoutLoading = ref(false);
-
-function getQueryString(query) {
-  const filteredQuery = {};
-
-  // Filter out null and undefined values
-  for (const key in query) {
-    if (query[key] !== null && query[key] !== undefined) {
-      filteredQuery[key] = query[key];
-    }
-  }
-
-  const params = new URLSearchParams(filteredQuery);
-  return `?${params.toString()}`;
-}
-const totals = computed(() => {
-  if (transactions.value && transactions.value.length) {
-    const acc = { payable: 0, paid: 0, discount: 0, due: 0 };
-    for (let index = 0; index < transactions.value.length; index++) {
-      const payment = transactions.value[index];
-
-      acc.payable += parseFloat(payment.total_payable);
-      acc.paid += parseFloat(payment.total_paid);
-      acc.due += parseFloat(payment.total_due);
-      acc.discount += parseFloat(payment.discount_amount);
-    }
-
-    return acc;
-    return transactions.value.reduce(
-      (acc, payment) => {
-        acc.total_payable += parseFloat(payment.total_payable);
-        acc.total_paid += parseFloat(payment.total_paid);
-        acc.total_due += parseFloat(payment.total_due);
-        acc.total_discount += parseFloat(payment.discount_amount);
-        return acc;
-      },
-      { total_payable: 0, total_paid: 0, total_due: 0, total_discount: 0 }
-    );
-  }
-  return 0.0;
-});
-const totalTransaction = computed(() => {
-  if (transactions.value && transactions.value.length) {
-    return transactions.value;
-  }
-  return 0.0;
-});
-
-const vehicleNumber = ref("");
-const vehicleList = ref([]);
-
-const search = async () => {
-  let query = "";
-  if (vehicleNumber.value) {
-    query += `?query=${vehicleNumber.value}`;
-    const newQuery = {
-      ...route.query,
-    };
-  }
-  const result = await VehicleService.getAll(query);
-  if (result?.data?.length) {
-    vehicleList.value = result.data;
-  }
-};
-const vehicleId = ref(null);
-const checkSelection = () => {
-  const data = vehicleList.value.find(
-    (item) => item.number == vehicleNumber.value
-  );
-  if (data) {
-    vehicleId.value = data.id;
-  }
-};
-const debouncedSearch = useDebounce(search, 500);
-const serverErros = ref({});
-const activeReport = ref(false);
-// const isTransactionReport = computed(
-//   () => activeReport.value == "transactions"
-// );
-const getTransactions = () => {
-  isLoading.value = true;
-  activeReport.value = true;
-  selected.value = [];
-  setTimeout(async () => {
-    try {
-      const q =
-        getQueryString(route.query) +
-        `&page=${page.value}&per_page=${perPage.value}`;
-      const res = await ReportService.getTransaction(q);
-      transactions.value = res.data.data;
-      const meta = res.data;
-      page.value = meta.current_page;
-      lastPage.value = meta.last_page;
-      total.value = meta.total;
-      totalPerPage.value = res.data.data.length;
-    } catch (error) {
-      serverErros.value = error.errors;
-    } finally {
-      isLoading.value = false;
-    }
-  }, 500);
-};
-
-watch(
-  route,
-  (o, n) => {
-    if (route.query) {
-      const newQuery = {
-        ...route.query,
-      };
-      console.log(route.query);
-      if (route.query.start_date) {
-        newQuery.start_date = route.query.start_date;
-      }
-      if (route.query.end_date) {
-        newQuery.end_date = route.query.end_date;
-      }
-      if (route.query.vehicle_id) {
-        newQuery.vehicle_id = route.query.vehicle_id;
-        vehicleId.value = route.query.vehicle_id;
-      }
-      if (route.query.status) {
-        newQuery.status = route.query.status;
-        paymentStatus.value = route.query.status;
-      }
-      if (route.query.payment_type) {
-        newQuery.payment_type = route.query.payment_type;
-        paymentType.value = route.query.payment_type;
-      }
-      if (route.query.method) {
-        newQuery.method = route.query.method;
-        paymentMethod.value = route.query.method;
-      }
-
-      activeReport.value = false;
-      router.push({ query: newQuery });
-    }
-  },
-  { deep: false, immediate: true }
-);
-
-watch(
-  [startDate, endDate, vehicleId],
-  (
-    [newStartDate, newEndDate, newVehicleId],
-    [oldStartDate, oldEndDate, oldVehicleId]
-  ) => {
-    const newQuery = { ...route.query };
-
-    if (newStartDate !== oldStartDate) {
-      if (newStartDate) {
-        newQuery.start_date = newStartDate;
-      } else {
-        delete newQuery.start_date;
-      }
-    }
-
-    if (newEndDate !== oldEndDate) {
-      if (newEndDate) {
-        newQuery.end_date = newEndDate;
-      } else {
-        delete newQuery.end_date;
-      }
-    }
-    if (newVehicleId !== oldVehicleId) {
-      if (newVehicleId) {
-        newQuery.vehicle_id = newVehicleId;
-      } else {
-        delete newQuery.vehicle_id;
-      }
-    }
-    activeReport.value = false;
-    router.push({ query: newQuery });
-  },
-  { deep: true, immediate: false }
-);
-
-watch(
-  [paymentType, paymentStatus],
-  ([newType, newStatus], [oldType, oldStatus]) => {
-    if (oldType != newType) {
-      paymentType.value = newType;
-      if (!newType) {
-        const newQuery = { ...route.query };
-        delete newQuery.payment_type;
-        router.push({ query: newQuery });
-      } else {
-        const newQuery = { ...route.query };
-        newQuery.payment_type = newType;
-        router.push({ query: newQuery });
-      }
-    }
-
-    if (newStatus != oldStatus) {
-      paymentStatus.value = newStatus;
-      console.log(newStatus, oldStatus, "status");
-      if (!newStatus) {
-        const newQuery = { ...route.query };
-        delete newQuery.status;
-        router.push({ query: newQuery });
-      } else {
-        const newQuery = { ...route.query };
-        newQuery.status = newStatus;
-        router.push({ query: newQuery });
-      }
-    }
-    activeReport.value = false;
-  }
-);
-
-watch([paymentMethod], ([newMethod], [oldMethod]) => {
-  if (oldMethod != newMethod) {
-    console.log(oldMethod, newMethod, "method");
-    paymentMethod.value = newMethod;
-    if (!newMethod) {
-      const newQuery = { ...route.query };
-      delete newQuery.method;
-      router.push({ query: newQuery });
-    } else {
-      const newQuery = { ...route.query };
-      newQuery.method = newMethod;
-      router.push({ query: newQuery });
-    }
-  }
-  activeReport.value = false;
-});
-
-const hasPartialOrPending = computed(() => {
-  return transactions.value.some(
-    (payment) =>
-      payment.payment_type == "partial" || payment.status !== "success"
-  );
-});
-const selected = ref([]);
-
-const totalPayableForSelectedTransaction = computed(() => {
-  if (!selected.value.length) {
-    return 0;
-  }
-  let sum = 0;
-  for (let index = 0; index < selected.value.length; index++) {
-    const item = selected.value[index];
-
-    if (item.status == "success" && item.payment_type == "partial") {
-      sum += parseFloat(item.total_due);
-      continue;
-    } else if (item.status != "success") {
-      sum += parseFloat(item.total_payable);
-      continue;
-    }
-  }
-  return sum;
-});
-const handleSelect = (item) => {
-  const index = selected.value.findIndex((i) => i.id == item.id);
-  console.log(index, "index");
-  if (index > -1) {
-    selected.value = selected.value.filter((i) => i.id != item.id);
-  } else {
-    selected.value.push(item);
-  }
-};
-const removeSelectedVehicleId = () => {
-  vehicleId.value = null;
-  vehicleNumber.value = "";
-};
-const getPaidAmount = (item) => {
-  // const amount = parseFloat(item.total_paid) + parseFloat(item.discount_amount);
-  const amount = parseFloat(item.total_paid);
-  return Number(amount).toFixed(2);
-};
-const repayLoading = ref(false);
-const payDUe = async (id) => {
-  repayLoading.value = true;
-  try {
-    const result = await PaymentService.payDue(id);
-
-    if (result?.data?.redirect_url) {
-      window.location.href = result.data.redirect_url;
-    }
-  } catch (error) {
-  } finally {
-  }
-};
-
-const getStatusWiseColor = ({ status, payment_type }) => {
-  if (status == "success") {
-    if (payment_type == "partial") {
-      return "bg-orange-400";
-    }
-    return "bg-green-500 ";
-  } else if (status == "pending") {
-    return "bg-yellow-600";
-  }
-  return "bg-red-600";
-};
-
-const repay = async (id) => {
-  repayLoading.value = true;
-  try {
-    const result = await PaymentService.repay(id);
-
-    // print();
-    if (result?.data?.redirect_url) {
-      window.location.href = result.data.redirect_url;
-    } else {
-      // vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
-    }
-  } catch (error) {
-  } finally {
-  }
-};
-const onPageChanged = (p) => {
-  page.value = p;
-  getTransactions();
-  // loadData();
-};
-const handlePerpageChange = () => {
-  getTransactions();
-  // loadData();
-};
-const confirmPay = async () => {
-  const paymentIds = selected.value.map((i) => i.id);
-  const query = {
-    paymentIds,
-    paymentMethod: selectedPaymentMethod.value,
-  };
-  try {
-    checkoutLoading.value = true;
-    const result = await PaymentService.payAllDue(query);
-
-    // print();
-    if (result?.data?.redirect_url) {
-      window.location.href = result.data.redirect_url;
-    } else {
-      // vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
-    }
-  } catch (error) {
-  } finally {
-    checkoutLoading.value = false;
-  }
-};
-const completeSelectedPayment = async () => {
-  showConfirmModal.value = true;
-};
-
-onMounted(() => {
-  startDate.value = formatDate(moment().subtract(1, "month"), "YYYY-MM-DD");
-  endDate.value = formatDate(moment(), "YYYY-MM-DD");
-  const newQuery = {
-    ...route.query,
-  };
-
-  newQuery.start_date = startDate.value;
-  newQuery.end_date = endDate.value;
-  router.push({ query: newQuery });
-});
-</script>
 
 <style lang="scss" scoped></style>

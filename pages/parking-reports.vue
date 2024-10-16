@@ -1,138 +1,4 @@
-<template>
-  <section>
-    <section class="grid grid-cols-3 gap-2">
-      <div class="grid gap-2">
-        <label class="text-gray-500">Start date</label>
-        <input
-          :class="inputClass"
-          v-model="startDate"
-          type="date"
-          placeholder="e.g. 20/01/2024"
-        />
-      </div>
-      <div class="grid gap-2">
-        <label class="text-gray-500">End date</label>
-        <input
-          :class="inputClass"
-          v-model="endDate"
-          type="date"
-          placeholder="e.g. 20/12/2024"
-        />
-      </div>
-      <div class="grid gap-2">
-        <label class="text-gray-500"
-          >Vehicle Number<span class="text-red-500">*</span></label
-        >
-        <input
-          :class="inputClass"
-          v-model="vehicleNumber"
-          type="text"
-          @input="debouncedSearch"
-          @change="checkSelection"
-          placeholder="e.g. Ka-12345"
-          list="cityname"
-        />
-        <!-- <input type="text" name="city" list="cityname" /> -->
-        <datalist id="cityname">
-          <option
-            v-for="item in vehicleList"
-            :key="item.id"
-            :value="item.number"
-          ></option>
-        </datalist>
-      </div>
-    </section>
-    <section class="text-center mt-4">
-      <button
-        :disabled="isLoading"
-        @click="getReports"
-        class="bg-indigo-600 text-white px-2 py-1 rounded-md"
-      >
-        Filter
-      </button>
-    </section>
-    <h2 style="text-align: center; margin-top: 20px; padding: 1rem">
-      Date-wise vehicle entry reports
-    </h2>
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px">
-      <thead>
-        <tr>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 8px;
-              text-align: center;
-              background-color: #f2f2f2;
-            "
-          >
-            Date
-          </th>
-          <!-- <th
-            style="
-              border: 1px solid #ddd;
-              padding: 8px;
-              text-align: center;
-              background-color: #f2f2f2;
-            "
-          >
-            Transaction Count
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 8px;
-              text-align: center;
-              background-color: #f2f2f2;
-            "
-          >
-            Total Payable
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 8px;
-              text-align: center;
-              background-color: #f2f2f2;
-            "
-          >
-            Total Paid
-          </th> -->
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 8px;
-              text-align: center;
-              background-color: #f2f2f2;
-            "
-          >
-            Vehicle entries count
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Dummy Data for reports -->
-        <tr v-for="(item, index) in reports" :key="index">
-          <td style="border: 1px solid #ddd; padding: 8px; text-align: center">
-            {{ item.entry_date }}
-          </td>
 
-          <td style="border: 1px solid #ddd; padding: 8px; text-align: center">
-            {{ item.vehicle_entries }}
-          </td>
-        </tr>
-        <tr v-if="reports.length == 0">
-          <td
-            colspan="5"
-            style="border: 1px solid #ddd; padding: 8px; text-align: center"
-          >
-            No data available
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-  <Loading v-if="isLoading" />
-</template>
 
 <script setup>
 import { computed, ref, watch, onMounted } from "vue";
@@ -285,4 +151,139 @@ onMounted(() => {
 });
 </script>
 
+<template>
+  <section>
+    <section class="grid grid-cols-3 gap-2">
+      <div class="grid gap-2">
+        <label class="text-gray-500">Start date</label>
+        <input
+          :class="inputClass"
+          v-model="startDate"
+          type="date"
+          placeholder="e.g. 20/01/2024"
+        />
+      </div>
+      <div class="grid gap-2">
+        <label class="text-gray-500">End date</label>
+        <input
+          :class="inputClass"
+          v-model="endDate"
+          type="date"
+          placeholder="e.g. 20/12/2024"
+        />
+      </div>
+      <div class="grid gap-2">
+        <label class="text-gray-500"
+          >Vehicle Number<span class="text-red-500">*</span></label
+        >
+        <input
+          :class="inputClass"
+          v-model="vehicleNumber"
+          type="text"
+          @input="debouncedSearch"
+          @change="checkSelection"
+          placeholder="e.g. Ka-12345"
+          list="cityname"
+        />
+        <!-- <input type="text" name="city" list="cityname" /> -->
+        <datalist id="cityname">
+          <option
+            v-for="item in vehicleList"
+            :key="item.id"
+            :value="item.number"
+          ></option>
+        </datalist>
+      </div>
+    </section>
+    <section class="text-center mt-4">
+      <button
+        :disabled="isLoading"
+        @click="getReports"
+        class="bg-indigo-600 text-white px-2 py-1 rounded-md"
+      >
+        Filter
+      </button>
+    </section>
+    <h2 style="text-align: center; margin-top: 20px; padding: 1rem">
+      Date-wise vehicle entry reports
+    </h2>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px">
+      <thead>
+        <tr>
+          <th
+            style="
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: center;
+              background-color: #f2f2f2;
+            "
+          >
+            Date
+          </th>
+          <!-- <th
+            style="
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: center;
+              background-color: #f2f2f2;
+            "
+          >
+            Transaction Count
+          </th>
+          <th
+            style="
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: center;
+              background-color: #f2f2f2;
+            "
+          >
+            Total Payable
+          </th>
+          <th
+            style="
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: center;
+              background-color: #f2f2f2;
+            "
+          >
+            Total Paid
+          </th> -->
+          <th
+            style="
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: center;
+              background-color: #f2f2f2;
+            "
+          >
+            Vehicle entries count
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Dummy Data for reports -->
+        <tr v-for="(item, index) in reports" :key="index">
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: center">
+            {{ item.entry_date }}
+          </td>
+
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: center">
+            {{ item.vehicle_entries }}
+          </td>
+        </tr>
+        <tr v-if="reports.length == 0">
+          <td
+            colspan="5"
+            style="border: 1px solid #ddd; padding: 8px; text-align: center"
+          >
+            No data available
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+  <Loading v-if="isLoading" />
+</template>
 <style lang="scss" scoped></style>

@@ -1,3 +1,77 @@
+<script setup>
+import { onMounted } from "vue";
+import Link from "@/components/common/Link.vue";
+import Pagination from "@/components/common/Pagination.vue";
+import Loading from "@/components/common/Loading.vue";
+import { UserService } from "@/services/UserService.js";
+import { TrashIcon } from "@heroicons/vue/20/solid";
+import Titlebar from "@/components/common/Titlebar.vue";
+
+definePageMeta({
+  layout: "auth-layout",
+});
+const users = ref([]);
+const loadingError = ref(null);
+const isLoading = ref(true);
+const serverErrors = ref(null);
+
+//pagination
+const page = ref(1);
+const perPage = ref(10);
+const lastPage = ref(null);
+const total = ref(null);
+const totalPerPage = ref(null);
+
+const searchQuery = computed(() => {
+  return `?page=${page.value}&per_page=${perPage.value}&include=user.roles`;
+});
+
+const loadData = async () => {
+  try {
+    isLoading.value = true;
+    const { meta, data } = await UserService.getAll(searchQuery.value);
+    users.value = data;
+    console.log(meta, meta.current_page);
+
+    page.value = meta.current_page;
+    lastPage.value = meta.last_page;
+    total.value = meta.total;
+    totalPerPage.value = data.length;
+
+    serverErrors.value = {};
+    // handleReset();
+  } catch (error) {
+    serverErrors.value = error.errors;
+  } finally {
+    isLoading.value = false;
+  }
+};
+const isDeleting = ref(false);
+const deleteRecord = async (id) => {
+  if (confirm("Are you sure to delete this record?")) {
+    try {
+      isDeleting.value = true;
+      const res = await UserService.delete(id);
+      users.value = users.value.filter((item) => item.id != id);
+
+      serverErrors.value = {};
+      // handleReset();
+    } catch (error) {
+      serverErrors.value = error.errors;
+    } finally {
+      isDeleting.value = false;
+    }
+  }
+};
+
+const onPageChanged = (p) => {
+  page.value = p;
+  loadData();
+};
+onMounted(() => {
+  loadData();
+});
+</script>
 <template>
   <div class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
     <div class="md:mt-8 flow-root">
@@ -101,77 +175,3 @@
     />
   </div>
 </template>
-<script setup>
-import { onMounted } from "vue";
-import Link from "@/components/common/Link.vue";
-import Pagination from "@/components/common/Pagination.vue";
-import Loading from "@/components/common/Loading.vue";
-import { UserService } from "@/services/UserService.js";
-import { TrashIcon } from "@heroicons/vue/20/solid";
-import Titlebar from "@/components/common/Titlebar.vue";
-
-definePageMeta({
-  layout: "auth-layout",
-});
-const users = ref([]);
-const loadingError = ref(null);
-const isLoading = ref(true);
-const serverErrors = ref(null);
-
-//pagination
-const page = ref(1);
-const perPage = ref(10);
-const lastPage = ref(null);
-const total = ref(null);
-const totalPerPage = ref(null);
-
-const searchQuery = computed(() => {
-  return `?page=${page.value}&per_page=${perPage.value}&include=user.roles`;
-});
-
-const loadData = async () => {
-  try {
-    isLoading.value = true;
-    const { meta, data } = await UserService.getAll(searchQuery.value);
-    users.value = data;
-    console.log(meta, meta.current_page);
-
-    page.value = meta.current_page;
-    lastPage.value = meta.last_page;
-    total.value = meta.total;
-    totalPerPage.value = data.length;
-
-    serverErrors.value = {};
-    // handleReset();
-  } catch (error) {
-    serverErrors.value = error.errors;
-  } finally {
-    isLoading.value = false;
-  }
-};
-const isDeleting = ref(false);
-const deleteRecord = async (id) => {
-  if (confirm("Are you sure to delete this record?")) {
-    try {
-      isDeleting.value = true;
-      const res = await UserService.delete(id);
-      users.value = users.value.filter((item) => item.id != id);
-
-      serverErrors.value = {};
-      // handleReset();
-    } catch (error) {
-      serverErrors.value = error.errors;
-    } finally {
-      isDeleting.value = false;
-    }
-  }
-};
-
-const onPageChanged = (p) => {
-  page.value = p;
-  loadData();
-};
-onMounted(() => {
-  loadData();
-});
-</script>

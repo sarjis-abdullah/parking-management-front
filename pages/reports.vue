@@ -1,3 +1,208 @@
+
+
+<script setup>
+import { computed, ref, watch, onMounted } from "vue";
+import moment from "moment";
+import { ReportService } from "@/services/ReportService";
+import { formatDate } from "@/utils/index";
+import { VehicleService } from "~/services/VehicleService";
+import { useDebounce } from "~/hooks/useDebounce";
+import Loading from "@/components/common/Loading.vue";
+import {
+  XMarkIcon,
+} from "@heroicons/vue/24/outline";
+
+definePageMeta({
+  layout: "auth-layout",
+});
+const inputClass =
+  "relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
+
+const route = useRoute();
+const router = useRouter();
+const startDate = ref("");
+const endDate = ref("");
+const transactions = ref([]);
+const isLoading = ref(true);
+
+function getQueryString(query) {
+  const filteredQuery = {};
+
+  // Filter out null and undefined values
+  for (const key in query) {
+    if (query[key] !== null && query[key] !== undefined) {
+      filteredQuery[key] = query[key];
+    }
+  }
+
+  const params = new URLSearchParams(filteredQuery);
+  return `?${params.toString()}`;
+}
+
+const vehicleNumber = ref("");
+const vehicleList = ref([]);
+
+const search = async () => {
+  let query = "";
+  if (vehicleNumber.value) {
+    query += `?query=${vehicleNumber.value}`;
+    const newQuery = {
+      ...route.query,
+    };
+  }
+  const result = await VehicleService.getAll(query);
+  if (result?.data?.length) {
+    vehicleList.value = result.data;
+  }
+};
+const vehicleId = ref(null);
+const checkSelection = () => {
+  const data = vehicleList.value.find(
+    (item) => item.number == vehicleNumber.value
+  );
+  if (data) {
+    vehicleId.value = data.id;
+  }
+};
+const debouncedSearch = useDebounce(search, 500);
+const serverErros = ref({});
+const activeReport = ref("");
+const getTransactions = () => {
+  isLoading.value = true;
+  activeReport.value = "transactions";
+  setTimeout(async () => {
+    try {
+      const q = getQueryString(route.query);
+      const res = await ReportService.getTransaction(q);
+      transactions.value = res.data;
+    } catch (error) {
+      serverErros.value = error.errors;
+    } finally {
+      isLoading.value = false;
+    }
+  }, 500);
+};
+const vehicleEntryReports = ref([]);
+const getVehicleEntryReports = () => {
+  isLoading.value = true;
+  activeReport.value = "vehicle-entry-reports";
+  setTimeout(async () => {
+    try {
+      const q = getQueryString(route.query);
+      const res = await ReportService.getVehicle(q);
+      vehicleEntryReports.value = res.data;
+    } catch (error) {
+      serverErros.value = error.errors;
+    } finally {
+      isLoading.value = false;
+    }
+  }, 500);
+};
+
+watch(
+  route,
+  (o, n) => {
+    if (route.query) {
+      const newQuery = {
+        ...route.query,
+      };
+      console.log(route.query);
+      if (route.query.start_date) {
+        newQuery.start_date = route.query.start_date;
+      }
+      if (route.query.end_date) {
+        newQuery.end_date = route.query.end_date;
+      }
+      if (route.query.vehicle_id) {
+        newQuery.vehicle_id = route.query.vehicle_id;
+      }
+
+      router.push({ query: newQuery });
+    }
+  },
+  { deep: false, immediate: true }
+);
+
+watch(
+  [startDate, endDate, vehicleId],
+  (
+    [newStartDate, newEndDate, newVehicleId],
+    [oldStartDate, oldEndDate, oldVehicleId]
+  ) => {
+    const newQuery = { ...route.query };
+
+    if (newStartDate !== oldStartDate) {
+      if (newStartDate) {
+        newQuery.start_date = newStartDate;
+      } else {
+        delete newQuery.start_date;
+      }
+    }
+
+    if (newEndDate !== oldEndDate) {
+      if (newEndDate) {
+        newQuery.end_date = newEndDate;
+      } else {
+        delete newQuery.end_date;
+      }
+    }
+    if (newVehicleId !== oldVehicleId) {
+      if (newVehicleId) {
+        newQuery.vehicle_id = newVehicleId;
+      } else {
+        delete newQuery.vehicle_id;
+      }
+    }
+
+    router.push({ query: newQuery });
+  },
+  { deep: true, immediate: false }
+);
+// watch(
+//   vehicleId,
+//   (o, n) => {
+//     if (o != n) {
+//       const newQuery = {
+//         ...route.query,
+//       };
+
+//       if (vehicleId.value) {
+//         newQuery.vehicle_id = vehicleId.value;
+//       }
+
+//       router.push({ query: newQuery });
+//     }
+//   },
+//   { deep: true, immediate: true }
+// );
+
+const removeSelectedVehicleId = () => {
+  
+  // let newQuery = {...route.query}
+  
+  // if (newQuery.vehicle_id) {
+  //   delete newQuery.vehicle_id
+  //   alert(111)
+  // }
+  vehicleId.value = null
+  vehicleNumber.value = ''
+  // router.push({ query: newQuery });
+}
+
+onMounted(() => {
+  startDate.value = formatDate(moment().subtract(1, "month"), "YYYY-MM-DD");
+  endDate.value = formatDate(moment(), "YYYY-MM-DD");
+  const newQuery = {
+    ...route.query,
+  };
+
+  newQuery.start_date = startDate.value;
+  newQuery.end_date = endDate.value;
+  router.push({ query: newQuery });
+
+  // getTransactions();
+});
+</script>
 <template>
   <section>
     <section class="grid md:grid-cols-3 gap-2">
@@ -260,209 +465,4 @@
   </section>
   <Loading v-if="isLoading" />
 </template>
-
-<script setup>
-import { computed, ref, watch, onMounted } from "vue";
-import moment from "moment";
-import { ReportService } from "@/services/ReportService";
-import { formatDate } from "@/utils/index";
-import { VehicleService } from "~/services/VehicleService";
-import { useDebounce } from "~/hooks/useDebounce";
-import Loading from "@/components/common/Loading.vue";
-import {
-  XMarkIcon,
-} from "@heroicons/vue/24/outline";
-
-definePageMeta({
-  layout: "auth-layout",
-});
-const inputClass =
-  "relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
-
-const route = useRoute();
-const router = useRouter();
-const startDate = ref("");
-const endDate = ref("");
-const transactions = ref([]);
-const isLoading = ref(true);
-
-function getQueryString(query) {
-  const filteredQuery = {};
-
-  // Filter out null and undefined values
-  for (const key in query) {
-    if (query[key] !== null && query[key] !== undefined) {
-      filteredQuery[key] = query[key];
-    }
-  }
-
-  const params = new URLSearchParams(filteredQuery);
-  return `?${params.toString()}`;
-}
-
-const vehicleNumber = ref("");
-const vehicleList = ref([]);
-
-const search = async () => {
-  let query = "";
-  if (vehicleNumber.value) {
-    query += `?query=${vehicleNumber.value}`;
-    const newQuery = {
-      ...route.query,
-    };
-  }
-  const result = await VehicleService.getAll(query);
-  if (result?.data?.length) {
-    vehicleList.value = result.data;
-  }
-};
-const vehicleId = ref(null);
-const checkSelection = () => {
-  const data = vehicleList.value.find(
-    (item) => item.number == vehicleNumber.value
-  );
-  if (data) {
-    vehicleId.value = data.id;
-  }
-};
-const debouncedSearch = useDebounce(search, 500);
-const serverErros = ref({});
-const activeReport = ref("");
-const getTransactions = () => {
-  isLoading.value = true;
-  activeReport.value = "transactions";
-  setTimeout(async () => {
-    try {
-      const q = getQueryString(route.query);
-      const res = await ReportService.getTransaction(q);
-      transactions.value = res.data;
-    } catch (error) {
-      serverErros.value = error.errors;
-    } finally {
-      isLoading.value = false;
-    }
-  }, 500);
-};
-const vehicleEntryReports = ref([]);
-const getVehicleEntryReports = () => {
-  isLoading.value = true;
-  activeReport.value = "vehicle-entry-reports";
-  setTimeout(async () => {
-    try {
-      const q = getQueryString(route.query);
-      const res = await ReportService.getVehicle(q);
-      vehicleEntryReports.value = res.data;
-    } catch (error) {
-      serverErros.value = error.errors;
-    } finally {
-      isLoading.value = false;
-    }
-  }, 500);
-};
-
-watch(
-  route,
-  (o, n) => {
-    if (route.query) {
-      const newQuery = {
-        ...route.query,
-      };
-      console.log(route.query);
-      if (route.query.start_date) {
-        newQuery.start_date = route.query.start_date;
-      }
-      if (route.query.end_date) {
-        newQuery.end_date = route.query.end_date;
-      }
-      if (route.query.vehicle_id) {
-        newQuery.vehicle_id = route.query.vehicle_id;
-      }
-
-      router.push({ query: newQuery });
-    }
-  },
-  { deep: false, immediate: true }
-);
-
-watch(
-  [startDate, endDate, vehicleId],
-  (
-    [newStartDate, newEndDate, newVehicleId],
-    [oldStartDate, oldEndDate, oldVehicleId]
-  ) => {
-    const newQuery = { ...route.query };
-
-    if (newStartDate !== oldStartDate) {
-      if (newStartDate) {
-        newQuery.start_date = newStartDate;
-      } else {
-        delete newQuery.start_date;
-      }
-    }
-
-    if (newEndDate !== oldEndDate) {
-      if (newEndDate) {
-        newQuery.end_date = newEndDate;
-      } else {
-        delete newQuery.end_date;
-      }
-    }
-    if (newVehicleId !== oldVehicleId) {
-      if (newVehicleId) {
-        newQuery.vehicle_id = newVehicleId;
-      } else {
-        delete newQuery.vehicle_id;
-      }
-    }
-
-    router.push({ query: newQuery });
-  },
-  { deep: true, immediate: false }
-);
-// watch(
-//   vehicleId,
-//   (o, n) => {
-//     if (o != n) {
-//       const newQuery = {
-//         ...route.query,
-//       };
-
-//       if (vehicleId.value) {
-//         newQuery.vehicle_id = vehicleId.value;
-//       }
-
-//       router.push({ query: newQuery });
-//     }
-//   },
-//   { deep: true, immediate: true }
-// );
-
-const removeSelectedVehicleId = () => {
-  
-  // let newQuery = {...route.query}
-  
-  // if (newQuery.vehicle_id) {
-  //   delete newQuery.vehicle_id
-  //   alert(111)
-  // }
-  vehicleId.value = null
-  vehicleNumber.value = ''
-  // router.push({ query: newQuery });
-}
-
-onMounted(() => {
-  startDate.value = formatDate(moment().subtract(1, "month"), "YYYY-MM-DD");
-  endDate.value = formatDate(moment(), "YYYY-MM-DD");
-  const newQuery = {
-    ...route.query,
-  };
-
-  newQuery.start_date = startDate.value;
-  newQuery.end_date = endDate.value;
-  router.push({ query: newQuery });
-
-  // getTransactions();
-});
-</script>
-
 <style lang="scss" scoped></style>

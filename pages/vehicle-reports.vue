@@ -1,245 +1,3 @@
-<template>
-  <section>
-    <section class="grid md:grid-cols-4 gap-2">
-      <div class="grid gap-2">
-        <label class="text-gray-500">Start date</label>
-        <input
-          :class="inputClass"
-          v-model="startDate"
-          type="date"
-          placeholder="e.g. 20/01/2024"
-        />
-      </div>
-      <div class="grid gap-2">
-        <label class="text-gray-500">End date</label>
-        <input
-          :class="inputClass"
-          v-model="endDate"
-          type="date"
-          placeholder="e.g. 20/12/2024"
-        />
-      </div>
-      <div class="grid gap-2">
-        <label class="text-gray-500"
-          >Vehicle Number<span class="text-red-500">*</span></label
-        >
-        <div
-          class="flex justify-between items-center gap-2"
-          :class="selectWrapper"
-        >
-          <div class="w-full">
-            <input
-              :class="selecboxClass"
-              class="focus:outline-none"
-              v-model="vehicleNumber"
-              type="text"
-              @input="debouncedSearch"
-              @change="checkSelection"
-              placeholder="e.g. Ka-12345"
-              list="cityname"
-            />
-            <!-- <input type="text" name="city" list="cityname" /> -->
-            <datalist id="cityname">
-              <option
-                v-for="item in vehicleList"
-                :key="item.id"
-                :value="item.number"
-              ></option>
-            </datalist>
-          </div>
-          <div v-if="vehicleId">
-            <XMarkIcon
-              @click="removeSelectedVehicleId"
-              class="h-5 w-5 text-red-500 cursor-pointer mr-2"
-              aria-hidden="true"
-            />
-          </div>
-        </div>
-      </div>
-      <section class="flex items-end">
-        <button
-          :disabled="isLoading"
-          @click="getVehicleEntryReports"
-          class="text-white px-2 py-1 rounded-md"
-          :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
-        >
-          Apply
-        </button>
-      </section>
-    </section>
-    <section>
-      <h2 style="text-align: center; margin-top: 20px; padding: 1rem">
-        Date-wise vehicle entry reports
-      </h2>
-      <table
-        style="width: 100%; border-collapse: collapse; margin-bottom: 20px"
-      >
-        <thead>
-          <tr>
-            <th
-              style="
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: center;
-                background-color: #f2f2f2;
-              "
-            >
-              SL No.
-            </th>
-            <th
-              style="
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: center;
-                background-color: #f2f2f2;
-              "
-            >
-              Date
-            </th>
-            <th
-              style="
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: center;
-                background-color: #f2f2f2;
-              "
-            >
-              Vehicle entries count
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Dummy Data for reports -->
-          <tr v-for="(item, index) in vehicleEntryReports" :key="index">
-            <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center"
-            >
-              {{ index + 1 }}
-            </td>
-            <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center"
-            >
-              {{ item.entry_date }}
-            </td>
-
-            <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center; display: flex; gap: 1rem; justify-content: center"
-            >
-              <span class="text-3xl">{{ item.vehicle_entries }}</span>
-              <button class="text-white px-2 py-1 rounded-md bg-indigo-400" :disabled="isLoading" @click="showDetails(item.entry_date)">Details</button>
-            </td>
-          </tr>
-          <tr v-if="vehicleEntryReports.length == 0">
-            <td
-              colspan="5"
-              style="border: 1px solid #ddd; padding: 8px; text-align: center"
-            >
-              No data available
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-  </section>
-  <Loading
-    v-if="isLoading"
-    parentClass="h-[50vh] flex  justify-center items-center"
-  />
-  <Pagination
-    class="mt-6"
-    :perPage="perPage"
-    :lastPage="lastPage"
-    :total="total"
-    :totalPerPage="totalPerPage"
-    @onChange="onPageChanged"
-  >
-    <div>
-      <div class="text-xs">Per page</div>
-      <select
-        v-model="perPage"
-        :class="selecboxClass"
-        @change="handlePerpageChange"
-        class="focus:outline-none rounded-md text-center"
-        style="padding: 0"
-      >
-        <option :value="2">2</option>
-        <option :value="10">10</option>
-        <option :value="50">50</option>
-        <option :value="100">100</option>
-        <option :value="500">500</option>
-      </select>
-    </div>
-  </Pagination>
-
-  <section v-if="!isLoading && details?.length">
-    <h2 style="text-align: center; margin-top: 20px; padding: 1rem">Details ({{ entryDate }})</h2>
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px">
-      <thead>
-        <tr>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 8px;
-              text-align: center;
-              background-color: #f2f2f2;
-            "
-          >
-            In/out time
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 8px;
-              text-align: center;
-              background-color: #f2f2f2;
-            "
-          >
-            Vehicle Info
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 8px;
-              text-align: center;
-              background-color: #f2f2f2;
-            "
-          >
-            Driver Info
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Dummy Data for reports -->
-        <tr v-for="(item, index) in details" :key="index">
-          <td style="border: 1px solid #ddd; padding: 8px; text-align: center">
-            <div>
-              <div>In: {{ item.in_time }}</div>
-              <div>Out: {{ item.out_time }}</div>
-            </div>
-          </td>
-
-          <td style="border: 1px solid #ddd; padding: 8px; text-align: center">
-            {{ item.vehicle?.number }}
-          </td>
-          <td style="border: 1px solid #ddd; padding: 8px; text-align: center">
-            <div>
-              <div>{{ item.vehicle?.driver_mobile }}</div>
-              <div>{{ item.vehicle?.driver_name }}</div>
-            </div>
-          </td>
-        </tr>
-        <tr v-if="details.length == 0">
-          <td
-            colspan="5"
-            style="border: 1px solid #ddd; padding: 8px; text-align: center"
-          >
-            No details available
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-</template>
 
 <script setup>
 import { computed, ref, watch, onMounted } from "vue";
@@ -508,5 +266,247 @@ onMounted(() => {
   router.push({ query: newQuery });
 });
 </script>
+<template>
+  <section>
+    <section class="grid md:grid-cols-4 gap-2">
+      <div class="grid gap-2">
+        <label class="text-gray-500">Start date</label>
+        <input
+          :class="inputClass"
+          v-model="startDate"
+          type="date"
+          placeholder="e.g. 20/01/2024"
+        />
+      </div>
+      <div class="grid gap-2">
+        <label class="text-gray-500">End date</label>
+        <input
+          :class="inputClass"
+          v-model="endDate"
+          type="date"
+          placeholder="e.g. 20/12/2024"
+        />
+      </div>
+      <div class="grid gap-2">
+        <label class="text-gray-500"
+          >Vehicle Number<span class="text-red-500">*</span></label
+        >
+        <div
+          class="flex justify-between items-center gap-2"
+          :class="selectWrapper"
+        >
+          <div class="w-full">
+            <input
+              :class="selecboxClass"
+              class="focus:outline-none"
+              v-model="vehicleNumber"
+              type="text"
+              @input="debouncedSearch"
+              @change="checkSelection"
+              placeholder="e.g. Ka-12345"
+              list="cityname"
+            />
+            <!-- <input type="text" name="city" list="cityname" /> -->
+            <datalist id="cityname">
+              <option
+                v-for="item in vehicleList"
+                :key="item.id"
+                :value="item.number"
+              ></option>
+            </datalist>
+          </div>
+          <div v-if="vehicleId">
+            <XMarkIcon
+              @click="removeSelectedVehicleId"
+              class="h-5 w-5 text-red-500 cursor-pointer mr-2"
+              aria-hidden="true"
+            />
+          </div>
+        </div>
+      </div>
+      <section class="flex items-end">
+        <button
+          :disabled="isLoading"
+          @click="getVehicleEntryReports"
+          class="text-white px-2 py-1 rounded-md"
+          :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
+        >
+          Apply
+        </button>
+      </section>
+    </section>
+    <section>
+      <h2 style="text-align: center; margin-top: 20px; padding: 1rem">
+        Date-wise vehicle entry reports
+      </h2>
+      <table
+        style="width: 100%; border-collapse: collapse; margin-bottom: 20px"
+      >
+        <thead>
+          <tr>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            >
+              SL No.
+            </th>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            >
+              Date
+            </th>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            >
+              Vehicle entries count
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dummy Data for reports -->
+          <tr v-for="(item, index) in vehicleEntryReports" :key="index">
+            <td
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              {{ index + 1 }}
+            </td>
+            <td
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              {{ item.entry_date }}
+            </td>
+
+            <td
+              style="border: 1px solid #ddd; padding: 8px; text-align: center; display: flex; gap: 1rem; justify-content: center"
+            >
+              <span class="text-3xl">{{ item.vehicle_entries }}</span>
+              <button class="text-white px-2 py-1 rounded-md bg-indigo-400" :disabled="isLoading" @click="showDetails(item.entry_date)">Details</button>
+            </td>
+          </tr>
+          <tr v-if="vehicleEntryReports.length == 0">
+            <td
+              colspan="5"
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              No data available
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </section>
+  <Loading
+    v-if="isLoading"
+    parentClass="h-[50vh] flex  justify-center items-center"
+  />
+  <Pagination
+    class="mt-6"
+    :perPage="perPage"
+    :lastPage="lastPage"
+    :total="total"
+    :totalPerPage="totalPerPage"
+    @onChange="onPageChanged"
+  >
+    <div>
+      <div class="text-xs">Per page</div>
+      <select
+        v-model="perPage"
+        :class="selecboxClass"
+        @change="handlePerpageChange"
+        class="focus:outline-none rounded-md text-center"
+        style="padding: 0"
+      >
+        <option :value="2">2</option>
+        <option :value="10">10</option>
+        <option :value="50">50</option>
+        <option :value="100">100</option>
+        <option :value="500">500</option>
+      </select>
+    </div>
+  </Pagination>
+
+  <section v-if="!isLoading && details?.length">
+    <h2 style="text-align: center; margin-top: 20px; padding: 1rem">Details ({{ entryDate }})</h2>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px">
+      <thead>
+        <tr>
+          <th
+            style="
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: center;
+              background-color: #f2f2f2;
+            "
+          >
+            In/out time
+          </th>
+          <th
+            style="
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: center;
+              background-color: #f2f2f2;
+            "
+          >
+            Vehicle Info
+          </th>
+          <th
+            style="
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: center;
+              background-color: #f2f2f2;
+            "
+          >
+            Driver Info
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Dummy Data for reports -->
+        <tr v-for="(item, index) in details" :key="index">
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: center">
+            <div>
+              <div>In: {{ item.in_time }}</div>
+              <div>Out: {{ item.out_time }}</div>
+            </div>
+          </td>
+
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: center">
+            {{ item.vehicle?.number }}
+          </td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: center">
+            <div>
+              <div>{{ item.vehicle?.driver_mobile }}</div>
+              <div>{{ item.vehicle?.driver_name }}</div>
+            </div>
+          </td>
+        </tr>
+        <tr v-if="details.length == 0">
+          <td
+            colspan="5"
+            style="border: 1px solid #ddd; padding: 8px; text-align: center"
+          >
+            No details available
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</template>
 
 <style lang="scss" scoped></style>
