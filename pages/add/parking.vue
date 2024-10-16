@@ -100,11 +100,17 @@ const postItem = async () => {
   }
 };
 const onSubmit = async () => {
-  const r = await validator.value.$validate();
-  if (r) {
-    postItem();
-  } else {
-    console.log("Please fillup the form!");
+  loading.value = true;
+  try {
+    const r = await validator.value.$validate();
+    if (r) {
+      postItem();
+    } else {
+      console.log("Please fillup the form!");
+    }
+  } catch (error) {
+  } finally {
+    loading.value = false;
   }
 };
 const places = ref([]);
@@ -119,50 +125,73 @@ const getPlaces = async () => {
     loading.value = false;
   }
 };
-const selectedFloor = ref('');
+const selectedFloor = ref("");
 const blocks = ref([]);
+const blockLoading = ref(false);
 const getBlocks = async () => {
-  const { data } = await BlockService.getAll(`?floor_id=${selectedFloor.value}`);
-  blocks.value = data;
+  try {
+    blockLoading.value = true;
+    const { data } = await BlockService.getAll(
+      `?floor_id=${selectedFloor.value}`
+    );
+    blocks.value = data;
+  } catch (error) {
+  } finally {
+    blockLoading.value = false;
+  }
 };
 
 const slots = ref([]);
-const selectedBlock = ref('');
+const selectedBlock = ref("");
+const slotLoading = ref(false);
 
 const getSlots = async () => {
-  const { data } = await SlotService.getAll(`?block_id=${selectedBlock.value}`);
-  slots.value = data;
+  try {
+    slotLoading.value = true;
+    const { data } = await SlotService.getAll(
+      `?block_id=${selectedBlock.value}`
+    );
+    slots.value = data;
+    u;
+  } catch (error) {
+  } finally {
+    slotLoading.value = false;
+  }
 };
 
 const categories = ref([]);
+const categoryLoading = ref(false);
 const getCategories = async () => {
   loading.value = true;
   try {
     state.category = "";
+    const categoryLoading = true;
     const { data } = await CategoryService.getAll();
     categories.value = data;
     return Promise.resolve(data);
   } catch (error) {
   } finally {
+    const categoryLoading = false;
     loading.value = false;
   }
 };
 const floors = ref([]);
+const floorLoading = ref(false);
 
 const getFloors = async () => {
   selectedSlot.value = null;
+  floorLoading.value = true;
   let query = `?include=f.blocks`;
   if (state.place) {
     query += `&place_id=${state.place}`;
   }
   try {
-    loading.value = true;
     const { data } = await FloorService.getAll(query);
     floors.value = data;
     return Promise.resolve(data);
   } catch (error) {
   } finally {
-    loading.value = false;
+    floorLoading.value = false;
   }
 };
 const handlePlaceChange = () => {
@@ -236,16 +265,20 @@ const debouncedSearch = useDebounce(search, 500);
 const tariffs = ref([]);
 const geTtariffs = async () => {
   try {
+    loading.value = true;
     const { data } = await TariffService.getAll();
     tariffs.value = data;
     return Promise.resolve(data);
   } catch (error) {}
+  finally {
+    loading.value = false
+  }
 };
 onMounted(async () => {
   try {
     await getPlaces();
     await getCategories();
-    await getFloors();
+    // await getFloors();
     await geTtariffs();
   } catch (error) {
   } finally {
@@ -260,7 +293,7 @@ const inputClass =
 <template>
   <section class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
     <header class="hidden md:flex justify-between text-gray-900 mb-3 text-xl">
-      <h6 class="hidden md:inline-block capitalize">{{ 'Add Parking' }}</h6>
+      <h6 class="hidden md:inline-block capitalize">{{ "Add Parking" }}</h6>
     </header>
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
       <section class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -277,7 +310,6 @@ const inputClass =
             placeholder="e.g. Ka-12345"
             list="cityname"
           />
-          <!-- <input type="text" name="city" list="cityname" /> -->
           <datalist id="cityname">
             <option
               v-for="item in vehicleNames"
@@ -285,8 +317,26 @@ const inputClass =
               :value="item.number"
             ></option>
           </datalist>
-
-          <!-- <ServerErrorMessage :errors="validator.vehicleNumber.$errors" /> -->
+        </div>
+        <div class="grid gap-2">
+          <label class="text-gray-500">Driver Name</label>
+          <input
+            :class="inputClass"
+            v-model="state.driverName"
+            type="text"
+            placeholder="e.g. John Doe"
+          />
+          <!-- <ServerErrorMessage :errors="validator.driverName.$errors" /> -->
+        </div>
+        <div class="grid gap-2">
+          <label class="text-gray-500">Driver Mobile</label>
+          <input
+            :class="inputClass"
+            v-model="state.driverMobile"
+            type="text"
+            placeholder="e.g. 01587616484"
+          />
+          <!-- <ServerErrorMessage :errors="validator.driverMobile.$errors" /> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500"
@@ -298,7 +348,7 @@ const inputClass =
             style="background: none"
             name="place"
             v-model="state.place"
-            @change="handlePlaceChange"
+            @change="getFloors"
           >
             <option disabled :value="''">Select place</option>
             <option v-for="place in places" :key="place.id" :value="place.id">
@@ -309,29 +359,6 @@ const inputClass =
           <!-- <ServerErrorMessage :errors="validator.place.$errors" /> -->
         </div>
 
-        <div class="grid gap-2">
-          <label class="text-gray-500"
-            >Category<span class="text-red-500">*</span></label
-          >
-          <select
-            class="focus:outline-none bg-none"
-            :class="inputClass"
-            style="background: none"
-            name="place"
-            v-model="state.category"
-          >
-            <option disabled :value="''">Select vehicle category</option>
-            <option
-              v-for="category in categories"
-              :key="category.id"
-              :value="category.id"
-            >
-              {{ category.name }}
-            </option>
-            <!-- Add more options as needed -->
-          </select>
-          <!-- <ServerErrorMessage :errors="validator.category.$errors" /> -->
-        </div>
         <div class="grid gap-2">
           <label class="text-gray-500"
             >Floor<span class="text-red-500">*</span></label
@@ -381,6 +408,29 @@ const inputClass =
           <!-- <ServerErrorMessage :errors="validator.category.$errors" /> -->
         </div>
         <div class="grid gap-2">
+          <label class="text-gray-500"
+            >Category<span class="text-red-500">*</span></label
+          >
+          <select
+            class="focus:outline-none bg-none"
+            :class="inputClass"
+            style="background: none"
+            name="place"
+            v-model="state.category"
+          >
+            <option disabled :value="''">Select vehicle category</option>
+            <option
+              v-for="category in categories"
+              :key="category.id"
+              :value="category.id"
+            >
+              {{ category.name }}
+            </option>
+            <!-- Add more options as needed -->
+          </select>
+          <!-- <ServerErrorMessage :errors="validator.category.$errors" /> -->
+        </div>
+        <div class="grid gap-2">
           <label class="text-gray-500">Tariff</label>
           <select
             class="focus:outline-none bg-none"
@@ -401,30 +451,10 @@ const inputClass =
           </select>
           <!-- <ServerErrorMessage :errors="validator.tariff.$errors" /> -->
         </div>
-        <div class="grid gap-2">
-          <label class="text-gray-500">Driver Name</label>
-          <input
-            :class="inputClass"
-            v-model="state.driverName"
-            type="text"
-            placeholder="e.g. John Doe"
-          />
-          <!-- <ServerErrorMessage :errors="validator.driverName.$errors" /> -->
-        </div>
-        <div class="grid gap-2">
-          <label class="text-gray-500">Driver Mobile</label>
-          <input
-            :class="inputClass"
-            v-model="state.driverMobile"
-            type="text"
-            placeholder="e.g. 01587616484"
-          />
-          <!-- <ServerErrorMessage :errors="validator.driverMobile.$errors" /> -->
-        </div>
       </section>
       <div
         class="grid gap-2 rounded-lg bg-indigo-100 shadow-lg p-6"
-        v-if="floors && floors.length"
+        v-if="slots && slots.length"
       >
         <label class="text-gray-500"
           >Slot<span class="text-red-500">*</span></label
@@ -473,7 +503,24 @@ const inputClass =
           </select> -->
         <!-- <ServerErrorMessage :errors="validator.slot.$errors" /> -->
       </div>
-      <div v-else-if="!initialLoading" class="text-red-500 text-center py-4">No floors are available</div>
+      <div
+        v-else-if="!floorLoading && !(floors && floors.length) && state.place"
+        class="text-red-500 text-center py-4"
+      >
+        No floors are available
+      </div>
+      <div
+        v-if="!slotLoading && !(slots && slots.length) && selectedBlock"
+        class="text-red-500 text-center py-4"
+      >
+        No slots are available
+      </div>
+      <div
+        v-if="!blockLoading && !(blocks && blocks.length) && state.floor"
+        class="text-red-500 text-center py-4"
+      >
+        No blocks are available
+      </div>
       <ServerError :error="serverErrors" />
       <ClientErrors :errors="validator.$errors" />
       <section>
@@ -495,6 +542,6 @@ const inputClass =
         </div>
       </section>
     </form>
-    <Loading v-if="loading" parentClass="flex justify-center" />
+    <Loading v-if="loading || slotLoading || blockLoading || floorLoading" parentClass="flex justify-center" />
   </section>
 </template>
