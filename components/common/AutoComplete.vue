@@ -6,6 +6,7 @@
       <input
         :value="modelValue"
         @input="handleInput"
+        @focus="handleFocus"
         :placeholder="placeholder"
         ref="inputRef"
         tabindex="0"
@@ -82,7 +83,7 @@ const chosenOption = ref("");
 const searchTerm = ref("");
 const inputRef = ref(null);
 
-const emit = defineEmits(["update:modelValue", "chosen"]);
+const emit = defineEmits(["update:modelValue", "chosen", "resetSearch"]);
 
 const emitValue = (e) => emit("update:modelValue", e.target.value);
 const searchResults = ref([]);
@@ -125,7 +126,15 @@ const debouncedSearch = useDebounce(search, 500);
 
 function reset() {
   emit("update:modelValue", "");
+  emit("resetSearch");
+  
   chosenOption.value = "";
+}
+
+function handleFocus() {
+  if (searchResults.value.length) {
+    showOptions.value = true; // Show options when input is focused if data exists
+  }
 }
 
 function handleInput(evt) {
@@ -140,7 +149,7 @@ function handleClick(item) {
   emit("chosen", item);
   chosenOption.value = item.number;
   showOptions.value = false;
-  inputRef.value?.focus();
+  // inputRef.value?.focus();
   // $refs.input.focus();
 }
 

@@ -11,6 +11,7 @@ import { XMarkIcon } from "@heroicons/vue/24/outline";
 import { PaymentService } from "~/services/PaymentService";
 import ConfirmModal from "@/components/common/Modal.vue";
 import AutoComplete from "@/components/common/AutoComplete.vue";
+import { CategoryService } from "~/services/CategoryService";
 
 definePageMeta({
   layout: "auth-layout",
@@ -24,6 +25,7 @@ const selectWrapper =
 const route = useRoute();
 const router = useRouter();
 const startDate = ref("");
+const selectedCategory = ref("");
 const endDate = ref("");
 const paymentType = ref("");
 const paymentMethod = ref("");
@@ -66,52 +68,23 @@ const totals = computed(() => {
     }
 
     return acc;
-    return transactions.value.reduce(
-      (acc, payment) => {
-        acc.total_payable += parseFloat(payment.total_payable);
-        acc.total_paid += parseFloat(payment.total_paid);
-        acc.total_due += parseFloat(payment.total_due);
-        acc.total_discount += parseFloat(payment.discount_amount);
-        return acc;
-      },
-      { total_payable: 0, total_paid: 0, total_due: 0, total_discount: 0 }
-    );
-  }
-  return 0.0;
-});
-const totalTransaction = computed(() => {
-  if (transactions.value && transactions.value.length) {
-    return transactions.value;
   }
   return 0.0;
 });
 
 const vehicleNumber = ref("");
-const vehicleList = ref([]);
 
-const search = async () => {
-  let query = "";
-  if (vehicleNumber.value) {
-    query += `?query=${vehicleNumber.value}`;
-    const newQuery = {
-      ...route.query,
-    };
-  }
-  const result = await VehicleService.getAll(query);
-  if (result?.data?.length) {
-    vehicleList.value = result.data;
-  }
-};
 const vehicleId = ref(null);
-const checkSelection = () => {
-  const data = vehicleList.value.find(
-    (item) => item.number == vehicleNumber.value
-  );
-  if (data) {
-    vehicleId.value = data.id;
+const resetSearch = () => {
+  const newQuery = {
+    ...route.query,
+  };
+  if (newQuery.vehicle_id) {
+    delete newQuery.vehicle_id
+    activeReport.value = false;
+      router.push({ query: newQuery });
   }
 };
-const debouncedSearch = useDebounce(search, 500);
 const serverErros = ref({});
 const activeReport = ref(false);
 // const isTransactionReport = computed(
@@ -123,9 +96,12 @@ const getTransactions = () => {
   selected.value = [];
   setTimeout(async () => {
     try {
-      const q =
+      let q =
         getQueryString(route.query) +
         `&page=${page.value}&per_page=${perPage.value}`;
+        if (selectedCategory.value) {
+          q += `&category=${selectedCategory.value}`
+        }
       const res = await ReportService.getTransaction(q);
       transactions.value = res.data.data;
       const meta = res.data;
@@ -141,10 +117,6 @@ const getTransactions = () => {
   }, 500);
 };
 
-const client = ref("aadfg");
-const handleChosen = (qq) => {
-  console.log(qq, 12345);
-};
 watch(
   route,
   (o, n) => {
@@ -152,7 +124,6 @@ watch(
       const newQuery = {
         ...route.query,
       };
-      console.log(route.query);
       if (route.query.start_date) {
         newQuery.start_date = route.query.start_date;
       }
@@ -161,7 +132,9 @@ watch(
       }
       if (route.query.vehicle_id) {
         newQuery.vehicle_id = route.query.vehicle_id;
-        vehicleId.value = route.query.vehicle_id;
+        delete newQuery.vehicle_id
+        router.push({ query: newQuery });
+        // vehicleId.value = route.query.vehicle_id;
       }
       if (route.query.status) {
         newQuery.status = route.query.status;
@@ -175,6 +148,10 @@ watch(
         newQuery.method = route.query.method;
         paymentMethod.value = route.query.method;
       }
+      if (route.query.category) {
+        newQuery.category = route.query.category;
+        selectedCategory.value = route.query.category;
+      }
 
       activeReport.value = false;
       router.push({ query: newQuery });
@@ -184,11 +161,8 @@ watch(
 );
 
 watch(
-  [startDate, endDate, vehicleId],
-  (
-    [newStartDate, newEndDate, newVehicleId],
-    [oldStartDate, oldEndDate, oldVehicleId]
-  ) => {
+  [startDate, endDate],
+  ([newStartDate, newEndDate], [oldStartDate, oldEndDate]) => {
     const newQuery = { ...route.query };
 
     if (newStartDate !== oldStartDate) {
@@ -206,13 +180,13 @@ watch(
         delete newQuery.end_date;
       }
     }
-    if (newVehicleId !== oldVehicleId) {
-      if (newVehicleId) {
-        newQuery.vehicle_id = newVehicleId;
-      } else {
-        delete newQuery.vehicle_id;
-      }
-    }
+    // if (newVehicleId !== oldVehicleId) {
+    //   if (newVehicleId) {
+    //     newQuery.vehicle_id = newVehicleId;
+    //   } else {
+    //     delete newQuery.vehicle_id;
+    //   }
+    // }
     activeReport.value = false;
     router.push({ query: newQuery });
   },
@@ -252,7 +226,7 @@ watch(
   }
 );
 
-watch([paymentMethod], ([newMethod], [oldMethod]) => {
+watch([paymentMethod, selectedCategory], ([newMethod, newCategory], [oldMethod, oldCategory]) => {
   if (oldMethod != newMethod) {
     console.log(oldMethod, newMethod, "method");
     paymentMethod.value = newMethod;
@@ -263,6 +237,45 @@ watch([paymentMethod], ([newMethod], [oldMethod]) => {
     } else {
       const newQuery = { ...route.query };
       newQuery.method = newMethod;
+      router.push({ query: newQuery });
+    }
+  }
+
+  if (oldCategory != newCategory) {
+    console.log(oldCategory, newCategory, "newCategory");
+    paymentMethod.value = newMethod;
+    if (!newCategory) {
+      const newQuery = { ...route.query };
+      delete newQuery.category;
+      router.push({ query: newQuery });
+    } else {
+      const newQuery = { ...route.query };
+      newQuery.category = newCategory;
+      router.push({ query: newQuery });
+    }
+  }
+  activeReport.value = false;
+});
+
+const client = ref("");
+const handleChosen = (item) => {
+  vehicleId.value = item.id;
+
+  const newQuery = { ...route.query };
+  newQuery.vehicle_id = vehicleId.value;
+  router.push({ query: newQuery });
+};
+watch([vehicleId], ([newVehicleId], [oldVehicleId]) => {
+  if (newVehicleId != oldVehicleId) {
+    console.log(oldVehicleId, newVehicleId, "newVehicleId");
+    vehicleId.value = newVehicleId;
+    if (!newVehicleId) {
+      const newQuery = { ...route.query };
+      delete newQuery.vehicle_id;
+      router.push({ query: newQuery });
+    } else {
+      const newQuery = { ...route.query };
+      newQuery.vehicle_id = newVehicleId;
       router.push({ query: newQuery });
     }
   }
@@ -387,7 +400,20 @@ const confirmPay = async () => {
 const completeSelectedPayment = async () => {
   showConfirmModal.value = true;
 };
-
+const categories = ref([]);
+const categoryLoading = ref(false);
+const getCategories = async () => {
+  categoryLoading.value = true;
+  try {
+    categoryLoading.value = true;
+    const { data } = await CategoryService.getAll();
+    categories.value = data;
+    return Promise.resolve(data);
+  } catch (error) {
+  } finally {
+    categoryLoading.value = false;
+  }
+};
 onMounted(() => {
   startDate.value = formatDate(moment().subtract(1, "month"), "YYYY-MM-DD");
   endDate.value = formatDate(moment(), "YYYY-MM-DD");
@@ -398,6 +424,7 @@ onMounted(() => {
   newQuery.start_date = startDate.value;
   newQuery.end_date = endDate.value;
   router.push({ query: newQuery });
+  getCategories()
 });
 </script>
 <template>
@@ -493,6 +520,29 @@ onMounted(() => {
         </div>
       </div>
       <div class="grid gap-2">
+        <label class="text-gray-500">Vehicle category</label>
+        <div :class="selectWrapper" class="flex items-center">
+          <select
+            class="focus:outline-none bg-none"
+            :class="selecboxClass"
+            style="background: none"
+            name="place"
+            v-model="selectedCategory"
+          >
+            <option disabled :value="''">Select</option>
+            <option :value="item.id" v-for="item in categories" :key="item.id">
+              {{ item.name }}
+            </option>
+          </select>
+          <XMarkIcon
+            v-if="selectedCategory"
+            @click="selectedCategory = ''"
+            class="h-5 w-5 text-red-500 cursor-pointer mr-2"
+            aria-hidden="true"
+          />
+        </div>
+      </div>
+      <div class="grid gap-2">
         <label class="text-gray-500"
           >Vehicle Number<span class="text-red-500">*</span></label
         >
@@ -505,10 +555,11 @@ onMounted(() => {
             {
               name: 'qwer',
               id: 'qwer',
-            }
+            },
           ]"
           v-model="client"
           @chosen="handleChosen"
+          @resetSearch="resetSearch"
           placeholder="Search for state..."
         ></AutoComplete>
         <!-- <div

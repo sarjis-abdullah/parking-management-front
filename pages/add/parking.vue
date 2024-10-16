@@ -167,13 +167,13 @@ const getCategories = async () => {
   loading.value = true;
   try {
     state.category = "";
-    const categoryLoading = true;
+    categoryLoading.value = true;
     const { data } = await CategoryService.getAll();
     categories.value = data;
     return Promise.resolve(data);
   } catch (error) {
   } finally {
-    const categoryLoading = false;
+    categoryLoading.value = false;
     loading.value = false;
   }
 };
