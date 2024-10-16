@@ -141,7 +141,7 @@ const floors = ref([]);
 
 const getFloors = async () => {
   selectedSlot.value = null;
-  let query = `?include=f.slots`;
+  let query = `?include=f.blocks`;
   if (state.place) {
     query += `&place_id=${state.place}`;
   }

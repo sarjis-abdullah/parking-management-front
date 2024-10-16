@@ -11,7 +11,7 @@
           @filterOrderBy="filterOrderBy"
           @downloadOrderStatement="downloadOrderStatement"
         /> -->
-        <Titlebar title="slot"></Titlebar>
+        <Titlebar title="block"></Titlebar>
 
           <div v-if="!loadingError && !isLoading">
             <table
@@ -30,25 +30,7 @@
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Place
-                  </th>
-                  <th
-                    scope="col"
-                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
                     Floor
-                  </th>
-                  <th
-                    scope="col"
-                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Category
-                  </th>
-                  <th
-                    scope="col"
-                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Status
                   </th>
                   <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                     Action
@@ -78,17 +60,9 @@
                     </div>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                    {{ singleData?.place?.name }}
-                  </td>
-                  <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
                     {{ singleData?.floor?.name }}
                   </td>
-                  <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                    {{ singleData?.category?.name }}
-                  </td>
-                  <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                    {{ singleData?.status }}
-                  </td>
+                  
                   <td
                     class="flex justify-center gap-1 relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
                   >
@@ -161,6 +135,7 @@ import {
   CheckIcon,
   XMarkIcon,
 } from "@heroicons/vue/20/solid";
+import { BlockService } from "~/services/BlockService";
 definePageMeta({
   layout: "auth-layout",
 });
@@ -180,13 +155,13 @@ const total = ref(null);
 const totalPerPage = ref(null);
 
 const searchQuery = computed(() => {
-  return `?page=${page.value}&per_page=${perPage.value}&include=s.place,s.category,s.floor`;
+  return `?page=${page.value}&per_page=${perPage.value}&include=b.floor`;
 });
 
 const loadData = async () => {
   try {
     isLoading.value = true;
-    const { meta, data } = await SlotService.getAll(searchQuery.value);
+    const { meta, data } = await BlockService.getAll(searchQuery.value);
     list.value = data;
 
     page.value = meta.current_page;
@@ -256,12 +231,10 @@ const cancelUpdatingRecord = async (id) => {
 const updateRecord = async (id) => {
   try {
     isUpdating.value = true;
-    const res = await SlotService.put(id, updateableRecord.value);
+    const res = await BlockService.put(id, updateableRecord.value);
     list.value = list.value.map((item) => {
       if (item.id == id) {
         item.name = record.name;
-        item.description = record.description;
-        // item.end_date = record.endDate;
         item.editMode = false;
         return item;
       }

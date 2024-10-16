@@ -73,6 +73,16 @@ export const useMenu = () => {
         ],
       },
       {
+        name: "Block",
+        href: "/block",
+        icon: shallowRef(FloorIcon),
+        show: false,
+        children: [
+          { name: "Add", href: "/add/block", icon: PlusIcon },
+          { name: "List", href: "/block", icon: TableCellsIcon },
+        ],
+      },
+      {
         name: "Tariff",
         href: "/tariff",
         icon: shallowRef(TariffIcon),

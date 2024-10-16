@@ -11,6 +11,7 @@ import { CategoryService } from "~/services/CategoryService";
 import { FloorService } from "~/services/FloorService";
 import ClientErrors from "@/components/common/ClientErrors.vue";
 import ServerError from "@/components/common/Error.vue";
+import { BlockService } from "~/services/BlockService";
 
 definePageMeta({
   layout: "auth-layout",
@@ -87,10 +88,10 @@ const getPlaces = async () => {
   const { data } = await PlaceService.getAll("");
   places.value = data;
 };
-const categories = ref([]);
-const getCategories = async () => {
-  const { data } = await CategoryService.getAll();
-  categories.value = data;
+const blocks = ref([]);
+const getBlocks = async () => {
+  const { data } = await BlockService.getAll(`?floor_id=${state.floor}`);
+  blocks.value = data;
 };
 const floors = ref([]);
 const getFloors = async () => {
@@ -115,13 +116,6 @@ const inputClass =
       <h6 class="hidden md:inline-block capitalize">{{ 'Add Slot' }}</h6>
     </header>
     <form @submit.prevent="onSubmit" ref="formRef" class="grid gap-3">
-      <ul>
-        <li v-for="item in serverErrors" :key="item">
-          <span class="text-red-500">
-            -{{ item?.length ? item.toString() : 2 }}
-          </span>
-        </li>
-      </ul>
       <section class="grid grid-cols-1 gap-3">
         <div class="grid gap-2">
           <label class="text-gray-500"
@@ -188,6 +182,7 @@ const inputClass =
             style="background: none"
             name="place"
             v-model="state.floor"
+            @change="getBlocks"
           >
             <option disabled :value="''">Select floor name</option>
             <option v-for="floor in floors" :key="floor.id" :value="floor.id">
@@ -207,7 +202,7 @@ const inputClass =
             v-model="state.block"
           >
             <option disabled :value="''">Select block name</option>
-            <option v-for="floor in floors" :key="floor.id" :value="floor.id">
+            <option v-for="floor in blocks" :key="floor.id" :value="floor.id">
               {{ floor.name }}
             </option>
           </select>

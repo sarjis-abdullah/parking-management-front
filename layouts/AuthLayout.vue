@@ -316,6 +316,8 @@ const getTitle = computed(() => {
       return "Add user";
     case "add-floor":
       return "Add floor";
+    case "add-block":
+      return "Add block";
     case "add-category":
       return "Add category";
     case "add-membership-type":
@@ -336,6 +338,8 @@ const getTitle = computed(() => {
       return "Failed";
     case "cancel":
       return "Canceled";
+    case "block":
+      return "Block";
 
     default:
       return routeName;
