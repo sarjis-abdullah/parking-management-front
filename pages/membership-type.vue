@@ -78,6 +78,7 @@ const record = reactive({
   name: "",
   discount_amount: "",
   discount_type: "",
+  allow_separate_discount: false,
   default: false,
 });
 const editRecord = (props) => {
@@ -85,6 +86,7 @@ const editRecord = (props) => {
   record.name = props.name;
   record.discount_amount = props.discount_amount;
   record.discount_type = props.discount_type;
+  record.allow_separate_discount = props.allow_separate_discount;
   record.default = props.default;
   list.value = list.value.map((item) => {
     if (item.id == props.id) {
@@ -105,6 +107,7 @@ const updateableRecord = computed(() => {
     name: record.name,
     discount_amount: record.discount_amount,
     discount_type: record.discount_type,
+    allow_separate_discount: record.allow_separate_discount,
     default: record.default,
   };
 });
@@ -127,6 +130,7 @@ const updateRecord = async (id) => {
           item.discount_amount = res.data.discount_amount;
           item.discount_type = record.discount_type;
           item.default = record.default;
+          item.allow_separate_discount = record.allow_separate_discount;
           item.editMode = false;
           return item;
         }
@@ -198,6 +202,12 @@ onMounted(() => {
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
                     Default Status
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
+                    Allow separate discount
                   </th>
                   <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                     Action
@@ -275,15 +285,26 @@ onMounted(() => {
                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
                       />
                       <label class="text-gray-500">Marked as default</label>
-                      <!-- <input
-                        :class="inputClass"
-                        v-model="record.discount_amount"
-                        type="text"
-                        placeholder="e.g. Text about place"
-                      /> -->
                     </div>
                     <span v-else class="text-gray-900">{{
                       singleData.default ? "Yes" : "No"
+                    }}</span>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-5 text-sm">
+                    <div
+                      v-if="singleData.editMode"
+                      class="flex items-center gap-1 mt-1 text-gray-500"
+                    >
+                      <input
+                        v-model="record.allow_separate_discount"
+                        type="checkbox"
+                        value=""
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                      />
+                      <label class="text-gray-500">Allow other discount with this</label>
+                    </div>
+                    <span v-else class="text-gray-900">{{
+                      singleData.allow_separate_discount ? "Allowed" : "Not allowed"
                     }}</span>
                   </td>
                   <td
