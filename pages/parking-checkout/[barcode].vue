@@ -5,7 +5,7 @@
         <div class="inline-block min-w-full align-middle sm:px-6 lg:px-8">
           <div v-if="!loadingError && !isLoading">
             <div
-              v-if="list && list?.length > 0"
+              v-if="listAllData && listAllData?.length > 0"
               class="grid md:grid-cols-3 justify-center gap-4"
             >
               <div>
@@ -48,7 +48,7 @@
 
                     <dl style="margin-top: 0.75rem">
                       <div
-                        v-for="(item, index) in list"
+                        v-for="(item, index) in listAllData"
                         :key="index"
                         style="
                           display: flex;
@@ -65,77 +65,135 @@
                           {{ item.value }}
                         </dd>
                       </div>
-
-                      <div
-                        id="paymentMethodId"
-                        v-if="!parkingResponse.out_time"
-                        style="
-                          display: flex;
-                          align-items: center;
-                          justify-content: space-between;
-                          border-top: 1px solid rgb(229, 231, 235);
-                          padding-top: 1rem;
-                        "
-                      >
-                        <dt
-                          data-v-61884e8b=""
-                          style="font-size: 0.875rem; color: rgb(107, 114, 128)"
+                      <section v-if="!parkingResponse.out_time">
+                        <div
+                          id="paymentMethodId"
+                          v-if="!parkingResponse.out_time"
+                          style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            border-top: 1px solid rgb(229, 231, 235);
+                            padding: 0.5rem 0 0.5rem 0;
+                          "
                         >
-                          Payment method
-                        </dt>
-                        <select
-                          class="focus:outline-none bg-none"
-                          :class="inputClass"
-                          style="background: none"
-                          name="place"
-                          v-model="paymentMethod"
-                        >
-                          <option
-                            v-for="category in ['cash', 'online', 'due']"
-                            :key="category"
-                            :value="category"
+                          <dt
+                            data-v-61884e8b=""
+                            style="
+                              font-size: 0.875rem;
+                              color: rgb(107, 114, 128);
+                            "
                           >
-                            {{ category }}
-                          </option>
-                        </select>
-                      </div>
-                      <div
-                        v-if="!parkingResponse.out_time"
-                        style="
-                          display: none;
-                          align-items: center;
-                          justify-content: space-between;
-                          border-top: 1px solid rgb(229, 231, 235);
-                          padding-top: 1rem;
-                        "
-                      ></div>
-                      <div
-                        id="receivedAmountId"
-                        v-if="!parkingResponse.out_time"
-                        style="
-                          display: flex;
-                          align-items: center;
-                          justify-content: space-between;
-                          border-top: 1px solid rgb(229, 231, 235);
-                          padding-top: 1rem;
-                        "
-                      >
-                        <dt
-                          data-v-61884e8b=""
-                          style="font-size: 0.875rem; color: rgb(107, 114, 128)"
+                            Payment method
+                          </dt>
+                          <select
+                            class="focus:outline-none bg-none"
+                            :class="inputClass"
+                            style="background: none"
+                            name="place"
+                            v-model="paymentMethod"
+                          >
+                            <option
+                              v-for="category in ['cash', 'online', 'due']"
+                              :key="category"
+                              :value="category"
+                            >
+                              {{ category }}
+                            </option>
+                          </select>
+                        </div>
+                        <div
+                          v-if="!parkingResponse.out_time"
+                          style="
+                            display: none;
+                            align-items: center;
+                            justify-content: space-between;
+                            border-top: 1px solid rgb(229, 231, 235);
+                            padding-top: 1rem;
+                          "
+                        ></div>
+                        <div
+                          v-if="!parkingResponse.out_time"
+                          style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            border-top: 1px solid rgb(229, 231, 235);
+                            padding: 0.5rem 0 0.5rem 0;
+                          "
                         >
-                          Received amount
-                        </dt>
-                        <input
-                          class="focus:outline-none bg-none text-right"
-                          :class="inputClass"
-                          type="number"
-                          v-model="receivedAmount"
-                          placeholder="0.00 taka"
-                          ref="receivedAmountRef"
-                        />
-                      </div>
-                      <div
+                          <select
+                            class="focus:outline-none bg-none"
+                            :class="inputClass"
+                            style="background: none"
+                            name="place"
+                            v-model="selectedDiscountType"
+                          >
+                            <option
+                              v-for="category in ['Discount', 'Coupon code']"
+                              :key="category"
+                              :value="category"
+                            >
+                              {{ category }}
+                            </option>
+                          </select>
+                          <div
+                            class="flex justify-between items-center"
+                            v-if="selectedDiscountType == 'Discount'"
+                          >
+                            <input
+                              class="focus:outline-none bg-none text-right"
+                              :class="inputClass"
+                              type="number"
+                              v-model="instantDiscount"
+                              placeholder="0.00 taka"
+                            />
+                          </div>
+                          <div class="flex justify-between items-center" v-else>
+                            <input
+                              class="focus:outline-none bg-none text-right max-w-[8rem]"
+                              :class="inputClass"
+                              type="text"
+                              v-model="couponCode"
+                              placeholder="Type a code"
+                            />
+                            <button
+                              @click="applyCouponCode"
+                              class="bg-indigo-600 text-white px-2 py- rounded-md ml-1"
+                            >
+                              Apply
+                            </button>
+                          </div>
+                        </div>
+                        <div
+                          v-if="!parkingResponse.out_time"
+                          style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            border-top: 1px solid rgb(229, 231, 235);
+                            padding-top: 1rem;
+                          "
+                        >
+                          <dt
+                            data-v-61884e8b=""
+                            style="
+                              font-size: 0.875rem;
+                              color: rgb(107, 114, 128);
+                            "
+                          >
+                            Received amount
+                          </dt>
+                          <input
+                            class="focus:outline-none bg-none text-right"
+                            :class="inputClass"
+                            type="number"
+                            v-model="receivedAmount"
+                            placeholder="0.00 taka"
+                          />
+                        </div>
+                      </section>
+                      <!-- <div
                         style="
                           position: relative;
                           width: 100%;
@@ -160,7 +218,7 @@
                         </div>
 
                         <div style="position: absolute; inset: 0"></div>
-                      </div>
+                      </div> -->
                     </dl>
                   </div>
                 </div>
@@ -222,13 +280,17 @@
                   >
                     <button
                       @click="showPaymentConfirmModaDialog()"
-                      class="rounded-md border w-full border-transparent px-3 py-2 bg-green-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                      :disabled="disabledPaymentButton"
+                      :class="disabledPaymentButton ? 'bg-slate-500' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500 '"
+                      class="rounded-md border w-full border-transparent px-3 py-2 text-white text-base font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50"
                     >
                       Payment
                     </button>
                     <button
                       @click="toggleQrCode"
-                      class="mt-2 rounded-md border w-full border-transparent px-3 py-2 bg-indigo-600 text-white text-base font-medium shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                      :disabled="disabledPaymentButton"
+                      :class="disabledPaymentButton ? 'bg-slate-500' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500 '"
+                      class="mt-2 rounded-md border w-full border-transparent px-3 py-2 text-white text-base font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50"
                     >
                       Payment by QR code
                     </button>
@@ -383,6 +445,7 @@ import { formatDate } from "@/utils/index";
 import moment from "moment";
 import { PaymentService } from "~/services/PaymentService";
 import QrcodeVue from "qrcode.vue";
+import { DiscountService } from "~/services/DiscountService";
 
 definePageMeta({
   layout: "auth-layout",
@@ -406,7 +469,10 @@ const total = ref(null);
 const totalPerPage = ref(null);
 const paymentMethod = ref("cash");
 const receivedAmount = ref(0);
-const payableAmount = ref(0);
+const instantDiscount = ref(0);
+const couponCode = ref("");
+const selectedDiscountType = ref("Discount");
+const couponCodeResponse = ref(null);
 const parkingId = ref(null);
 
 const route = useRoute();
@@ -438,6 +504,7 @@ const durationInMinutes = computed(() => {
   // Extract total time in minutes
   return Math.ceil(duration.asMinutes());
 });
+const formatDecimalNumber = (number) => Number(number).toFixed(2)
 const totalCost = computed(() => {
   const durations = durationInMinutes.value;
   const halfHourSegments = Math.ceil(durations / 30); // Number of half-hour segments
@@ -458,16 +525,15 @@ const totalCost = computed(() => {
 
   return Math.round(Number(total).toFixed(2));
 });
-const parkingData = computed(() => {
-  const discount =  Math.floor(discountAmount.value)
+const parkingDataToCheckout = computed(() => {
   const obj = {
     out_time: formatDate(currentTime.value, "YYYY-MM-DD HH:mm:ss"),
     duration: durationInMinutes.value,
     payment: {
       method: paymentMethod.value,
       paid_amount: Math.round(receivedAmount.value),
-      payable_amount: Math.round(totalCost.value) - discount,
-      discount_amount: discount,
+      payable_amount: finalTotalAmount.value,
+      discount_amount: totalDiscount.value,
     },
   };
   return obj;
@@ -523,7 +589,7 @@ const membershipDiscount = computed(() => {
   if (!membership?.active) {
     return 0;
   }
-  let discount = 0
+  let discount = 0;
   if (membership?.membership_type) {
     const { discount_type, discount_amount } = membership.membership_type;
     if (discount_type == "percentage") {
@@ -536,7 +602,102 @@ const membershipDiscount = computed(() => {
       discount = totalCost.value;
     }
   }
-  return discount
+  return discount;
+});
+const calculatedCouponDiscount = computed(()=> {
+  let couponDis = 0
+  if (couponCodeResponse.value?.id && couponCodeResponse.value?.is_active && selectedDiscountType.value != 'Discount') {
+     couponDis = Number(couponCodeResponse.value.amount).toFixed(2)
+     return {
+      key: 'Discount on Promocode',
+      value: formatDecimalNumber(Math.abs(parseFloat(couponDis)))
+     }
+  }
+  if (instantDiscount.value && selectedDiscountType.value == 'Discount') {
+    couponDis = Number(instantDiscount.value).toFixed(2)
+    return {
+      key: 'Instant discount',
+      value: formatDecimalNumber(Math.abs(parseFloat(couponDis))),
+    }
+  }
+  return 0
+})
+
+const totalDiscount = computed(()=> {
+  let cDiscount = parseFloat(calculatedCouponDiscount.value?.value ?? 0)
+  return Math.floor(discountAmount.value + cDiscount)
+})
+
+const finalTotalAmount = computed(()=> {
+  return Number(
+        Math.round(Number(totalCost.value - totalDiscount.value))
+      ).toFixed(2)
+})
+const listAllData = computed(() => {
+  const item = parkingResponse.value;
+  let presentTime = moment();
+  if (item.out_time) {
+    presentTime = moment(item.out_time);
+  }
+  const duration = moment.duration(presentTime.diff(item.in_time));
+  const hours = Math.floor(duration.asHours());
+  const minutes = Math.floor(duration.minutes());
+  const seconds = Math.floor(duration.seconds());
+  const totalTime = `${hours}h ${minutes}m ${seconds}s`;
+
+  const list = [
+    {
+      key: "Checkout Time",
+      value: formatDate(presentTime),
+    },
+    {
+      key: "Vehicle No",
+      value: item.vehicle?.number,
+    },
+    {
+      key: "type",
+      value: item.category?.name,
+    },
+    {
+      key: "Block",
+      value: item.place?.name,
+    },
+    {
+      key: "Slot",
+      value: item.slot?.name,
+    },
+    {
+      key: "Floor",
+      value: item.floor?.name,
+    },
+    {
+      key: "Duration",
+      value: totalTime,
+    },
+    {
+      key: "Parking fee",
+      value: "৳ " + Number(totalCost.value).toFixed(2),
+    },
+    {
+      key: "Membership Discount",
+      value: "৳ " + Number(discountAmount.value).toFixed(2),
+    },
+  ];
+
+  if (calculatedCouponDiscount.value?.value) {
+    const {key, value} = calculatedCouponDiscount.value
+    list.push({
+      key,
+      value: "৳ " + value
+    });
+  }
+
+  list.push({
+    key: "Subtotal",
+    value:
+      "৳ " + finalTotalAmount.value,
+  });
+  return list;
 });
 const loadData = async () => {
   try {
@@ -544,7 +705,6 @@ const loadData = async () => {
     const { data } = await ParkingService.getAll(searchQuery.value);
     if (data?.length) {
       const result = data[0];
-      console.log(result, "result");
       parkingResponse.value = data[0];
       barcodeImage.value = result.barcode_image;
       parkingId.value = result.id;
@@ -552,60 +712,10 @@ const loadData = async () => {
       vehicle.value = result?.vehicle;
       parking_rates.value = result.tariff.parking_rates;
       discountAmount.value = membershipDiscount.value;
-      const item = data[0];
-      if (item.out_time) {
-        currentTime.value = moment(item.out_time);
+      if (result.out_time) {
+        currentTime.value = moment(result.out_time);
       }
-      const duration = moment.duration(currentTime.value.diff(item.in_time));
-      const hours = Math.floor(duration.asHours());
-      const minutes = Math.floor(duration.minutes());
-      const seconds = Math.floor(duration.seconds());
-      const totalTime = `${hours}h ${minutes}m ${seconds}s`;
-      
-      list.value = [
-        {
-          key: "Checkout Time",
-          value: formatDate(currentTime.value),
-        },
-        {
-          key: "Vehicle No",
-          value: item.vehicle?.number,
-        },
-        {
-          key: "type",
-          value: item.category?.name,
-        },
-        {
-          key: "Block",
-          value: item.place?.name,
-        },
-        {
-          key: "Slot",
-          value: item.slot?.name,
-        },
-        {
-          key: "Floor",
-          value: item.floor?.name,
-        },
-        {
-          key: "Duration",
-          value: totalTime,
-        },
-        {
-          key: "Parking fee",
-          value: "৳ " + Number(totalCost.value).toFixed(2),
-        },
-        {
-          key: "Discounts",
-          value: "৳ " + Number(discountAmount.value).toFixed(2),
-        },
-        {
-          key: "Total Amount",
-          value:
-            "৳ " +
-            Number(Math.round(Number(totalCost.value - discountAmount.value))).toFixed(2),
-        },
-      ];
+     
       /*
       //old calculation
       return {
@@ -651,52 +761,7 @@ const loadData = async () => {
 };
 
 const emailTemplate = ref(null);
-const print = () => {
-  document.getElementById("receivedAmountId").style.display = "none";
-  document.getElementById("paymentMethodId").style.display = "none";
-  list.value[0]["Payment method"] = paymentMethod.value ?? "";
-  list.value[0]["Received amount"] = receivedAmount.value ?? "";
 
-  nextTick(() => {
-    const emailT = emailTemplate.value.outerHTML;
-
-    const printWindow = window.open(
-      "",
-      "",
-      "left=0,top=0,right=0,width=800,height=900,toolbar=0,scrollbars=0,status=0"
-    );
-    //   printWindow.document.open();
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Mart technologies Ltd.</title>
-          <style>
-            /* Add CSS styles for printing */
-            body {
-              font-family: Arial, sans-serif;
-              font-size: 14px;
-            }
-            h1 {
-              color: #333;
-            }
-            p {
-              margin-bottom: 10px;
-            }
-          </style>
-        </head>
-        <body>
-          <section style="max-width: 40rem; margin: auto;">
-          ${emailT}
-        </section>
-          </body>
-      </html>
-    `);
-
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-  });
-};
 const subtotal = computed(() =>
   Math.ceil(totalCost.value - discountAmount.value)
 );
@@ -709,7 +774,7 @@ const confirmCheckout = async () => {
   try {
     const result = await ParkingService.handleCheckout(
       parkingId.value + "?include=p.vehicle,v.membership",
-      parkingData.value
+      parkingDataToCheckout.value
     );
 
     // print();
@@ -726,7 +791,7 @@ const confirmCheckout = async () => {
   }
 };
 const showAlertMessage = computed(() => {
-  const subtotal = Math.ceil(totalCost.value - discountAmount.value);
+  const subtotal = finalTotalAmount.value;
   const result = subtotal == receivedAmount.value;
   if (result) {
     return "";
@@ -736,52 +801,15 @@ const showAlertMessage = computed(() => {
   return "Are you sure receiving less amount than total? Payment will be due.";
 });
 
-const checkoutAndprint = () => {
-  try {
-    const subtotal = Math.ceil(totalCost.value - discountAmount.value);
-    const result = subtotal == receivedAmount.value;
-    const total = subtotal;
-    // console.log(
-    //   { totalCost: totalCost.value },
-    //   { receivedAmount: receivedAmount.value },
-    //   { discountAmount: discountAmount.value },
-    //   { subtotal: subtotal },
-    //   {
-    //     "totalCost.value - discountAmount.value": Math.ceil(
-    //       totalCost.value - discountAmount.value
-    //     ),
-    //   }
-    // );
-
-    //return
-    if (result) {
-      confirmCheckout();
-    } else {
-      if (subtotal < receivedAmount.value) {
-        if (confirm("Are you sure receiving more amount than total?")) {
-          confirmCheckout();
-        }
-      } else {
-        const text =
-          "Are you sure receiving less amount than total? Payment will be due.";
-        if (confirm(text)) {
-          paymentMethod.value = "due";
-          confirmCheckout();
-          // const errors = {
-          //   paidAmount: [`Please pay ${totalCost.value} taka`],
-          // };
-          // throw new CustomError("Validation error", errors);
-        } else {
-          paymentMethod.value = "cash";
-        }
-      }
-    }
-  } catch (error) {
-    if (error.errors) {
-      serverErrors.value = error.errors;
-    }
+const disabledPaymentButton = computed(()=> {
+  if (parseFloat(finalTotalAmount.value) < 0) {
+    return true
   }
-};
+  if (totalCost.value < totalDiscount.value) {
+    return true
+  }
+  return false
+})
 
 const payDue = async () => {
   const payable_amount = parseFloat(duePayment.value.payable_amount);
@@ -819,22 +847,54 @@ const toggleQrCode = () => {
   showQrCode.value = true;
   console.log(route, router);
 };
-watch(() => receivedAmount, (newValue, oldValue) => {
-  if (receivedAmount.value && receivedAmount.value > 0 && paymentMethod.value == 'due') {
-    paymentMethod.value = 'cash'
+const applyCouponCode = async () => {
+  if (!couponCode.value) {
+    return;
   }
-}, {
-  deep: true,
-  immediate: false,
-})
-watch(() => paymentMethod, (newValue, oldValue) => {
-  if (receivedAmount.value && receivedAmount.value > 0 && paymentMethod.value == 'due') {
-    receivedAmount.value = 0
+  couponCodeResponse.value = []
+  try {
+    const query = `?promo_code=${couponCode.value}`;
+    const result = await DiscountService.getAll(query);
+    console.log(result, 1234);
+    if (result?.data?.length) {
+      couponCodeResponse.value = result.data[0];
+    }
+  } catch (error) {
+    couponCodeResponse.value = []
   }
-}, {
-  deep: true,
-  immediate: false,
-})
+};
+watch(
+  () => receivedAmount,
+  (newValue, oldValue) => {
+    if (
+      receivedAmount.value &&
+      receivedAmount.value > 0 &&
+      paymentMethod.value == "due"
+    ) {
+      paymentMethod.value = "cash";
+    }
+  },
+  {
+    deep: true,
+    immediate: false,
+  }
+);
+watch(
+  () => paymentMethod,
+  (newValue, oldValue) => {
+    if (
+      receivedAmount.value &&
+      receivedAmount.value > 0 &&
+      paymentMethod.value == "due"
+    ) {
+      receivedAmount.value = 0;
+    }
+  },
+  {
+    deep: true,
+    immediate: false,
+  }
+);
 onMounted(() => {
   loadData();
 });
