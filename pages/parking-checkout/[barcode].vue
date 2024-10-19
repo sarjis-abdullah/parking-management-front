@@ -607,7 +607,17 @@ const membershipDiscount = computed(() => {
 const calculatedCouponDiscount = computed(()=> {
   let couponDis = 0
   if (couponCodeResponse.value?.id && couponCodeResponse.value?.is_active && selectedDiscountType.value != 'Discount') {
-     couponDis = Number(couponCodeResponse.value.amount).toFixed(2)
+     
+     let discount = 0
+     const {discount_type, amount} = couponCodeResponse.value
+     if (discount_type == "percentage") {
+      if (amount) {
+        discount = (totalCost.value * parseFloat(amount)) / 100;
+      }
+    } else if (discount_type == "flat") {
+      discount = parseFloat(amount) ?? 0;
+    }
+    couponDis = Number(discount).toFixed(2)
      return {
       key: 'Discount on Promocode',
       value: formatDecimalNumber(Math.abs(parseFloat(couponDis)))
