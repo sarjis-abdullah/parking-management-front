@@ -687,12 +687,31 @@ const listAllData = computed(() => {
     {
       key: "Parking fee",
       value: "৳ " + Number(totalCost.value).toFixed(2),
-    },
-    {
+    }
+  ];
+
+  if (item?.vehicle?.status == 'checked_out' && item?.payment?.discount_amount) {
+    list.push({
+      key: "Total discount",
+      value: "৳ " + item?.payment?.discount_amount
+    })
+
+    list.push({
+      key: "Payable amount",
+      value: "৳ " + item?.payment?.payable_amount
+    })
+
+    list.push({
+      key: "Paid amount",
+      value: "৳ " + item?.payment?.paid_amount
+    })
+    return list
+  }else {
+    list.push({
       key: "Membership Discount",
       value: "৳ " + Number(discountAmount.value).toFixed(2),
-    },
-  ];
+    })
+  }
 
   if (calculatedCouponDiscount.value?.value) {
     const {key, value} = calculatedCouponDiscount.value
