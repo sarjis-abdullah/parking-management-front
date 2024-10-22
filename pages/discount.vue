@@ -15,6 +15,7 @@ import {
 import Loading from "@/components/common/Loading.vue";
 import ClientErrors from "@/components/common/ClientErrors.vue";
 import ServerError from "@/components/common/Error.vue";
+import { DiscountService } from "~/services/DiscountService";
 
 definePageMeta({
   layout: "auth-layout",
@@ -34,21 +35,14 @@ const lastPage = ref(null);
 const total = ref(null);
 const totalPerPage = ref(null);
 
-const getTodayDate = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const day = String(today.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
 const searchQuery = computed(() => {
-  return `?page=${page.value}&per_page=${perPage.value}&include=t.parking_rates`;
+  return `?page=${page.value}&per_page=${perPage.value}`;
 });
 
 const loadData = async () => {
   try {
     isLoading.value = true;
-    const { meta, data } = await TariffService.getAll(searchQuery.value);
+    const { meta, data } = await DiscountService.getAll(searchQuery.value);
     list.value = data;
 
     page.value = meta.current_page;
@@ -70,7 +64,7 @@ const deleteRecord = async (id) => {
   if (confirm("Are you sure to delete this record?")) {
     try {
       isDeleting.value = true;
-      const res = await TariffService.delete(id);
+      const res = await DiscountService.delete(id);
       list.value = list.value.filter((item) => item.id != id);
 
       serverErrors.value = {};
@@ -84,10 +78,8 @@ const deleteRecord = async (id) => {
 };
 const record = reactive({
   id: "",
-  name: "",
-  startDate: "",
-  endDate: "",
-  default: false,
+  promoCode: "",
+  isActive: false,
 });
 const formatDateForInput = (date) => {
   if (!date) {
@@ -98,10 +90,10 @@ const formatDateForInput = (date) => {
 };
 const editRecord = (props) => {
   record.id = props.id;
-  record.name = props.name;
-  record.default = props.default ? true : false;
-  record.startDate = formatDateForInput(props.start_date);
-  record.endDate = formatDateForInput(props.end_date);
+  record.promoCode = props.promo_code;
+  record.isActive = props.is_active ? true : false;
+  // record.startDate = formatDateForInput(props.start_date);
+  // record.endDate = formatDateForInput(props.end_date);
   list.value = list.value.map((item) => {
     if (item.id == props.id) {
       return {
@@ -118,10 +110,8 @@ const editRecord = (props) => {
 const isUpdating = ref(false);
 const updateableRecord = computed(() => {
   return {
-    name: record.name,
-    start_date: record.startDate,
-    end_date: record.endDate,
-    default: record.default,
+    promo_code: record.promoCode,
+    is_active: record.isActive,
   };
 });
 const cancelUpdatingRecord = async (id) => {
@@ -135,19 +125,19 @@ const cancelUpdatingRecord = async (id) => {
 const updateRecord = async (id) => {
   try {
     isUpdating.value = true;
-    const res = await TariffService.put(id, updateableRecord.value);
+    const res = await DiscountService.put(id, updateableRecord.value);
     list.value = list.value.map((item) => {
       if (item.id == id) {
-        item.name = record.name;
-        item.start_date = record.startDate;
-        item.end_date = record.endDate;
-        item.default = record.default;
+        item.promo_code = record.promoCode;
+        item.is_active = record.isActive;
+        // item.end_date = record.endDate;
+        // item.default = record.default;
         item.editMode = false;
         return item;
       }
-      if (record.default) {
-        item.default = false;
-      }
+      // if (record.default) {
+      //   item.default = false;
+      // }
       return item;
     });
 
@@ -193,31 +183,25 @@ onMounted(() => {
                     scope="col"
                     class="py-3.5 pl-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
                   >
-                    Name
+                    Promo code
+                  </th>
+                  <th
+                    scope="col"
+                    class="py-3.5 pl-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
+                  >
+                    Amount
                   </th>
                   <th
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Start date
+                    Type
                   </th>
                   <th
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    End date
-                  </th>
-                  <th
-                    scope="col"
-                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Default Status
-                  </th>
-                  <th
-                    scope="col"
-                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Rates
+                  Active Status
                   </th>
                   <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                     Action
@@ -236,50 +220,32 @@ onMounted(() => {
                         >
                           <input
                             :class="inputClass"
-                            v-model="record.name"
+                            v-model="record.promoCode"
                             type="text"
                             placeholder="e.g. Tariff: Eid parking"
                           />
                         </div>
                         <div v-else class="font-medium text-gray-900">
-                          {{ singleData.name }}
+                          {{ singleData.promo_code }}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
-                    <div v-if="singleData.editMode">
+                    <!-- <div v-if="singleData.editMode">
                       <input
                         :class="inputClass"
-                        v-model="record.startDate"
-                        type="date"
-                        :min="getTodayDate()"
-                        placeholder="e.g. 20/01/2024"
+                        v-model="record.amount"
+                        type="number"
+                        placeholder="e.g. 10/15/20 etc."
                       />
-                    </div>
-                    <span v-else class="text-gray-900">{{
-                      singleData?.start_date
-                        ? formatDate(singleData.start_date, "DD-MM-YYYY")
-                        : "--"
-                    }}</span>
+                    </div> -->
+                    <span class="text-gray-900">
+                      {{ singleData?.amount }}</span>
                   </td>
-                  <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                    <div v-if="singleData.editMode">
-                      <input
-                        :class="inputClass"
-                        v-model="record.endDate"
-                        type="date"
-                        :min="getTodayDate()"
-                        placeholder="e.g. 20/01/2024"
-                      />
-                    </div>
-                    <span v-else>
-                      {{
-                        singleData?.end_date
-                          ? formatDate(singleData.end_date, "DD-MM-YYYY")
-                          : "--"
-                      }}
-                    </span>
+                  <td class="whitespace-nowrap px-3 py-5 text-sm">
+                    <span class="text-gray-900">
+                      {{ singleData?.type ?? singleData?.discount_type }}</span>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
                     <div
@@ -287,44 +253,16 @@ onMounted(() => {
                       class="flex items-center gap-1 mt-1 text-gray-500"
                     >
                       <input
-                        v-model="record.default"
+                        v-model="record.isActive"
                         type="checkbox"
                         value=""
                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
                       />
-                      <label class="text-gray-500">Marked as default</label>
-                      <!-- <input
-                        :class="inputClass"
-                        v-model="record.discount_amount"
-                        type="text"
-                        placeholder="e.g. Text about place"
-                      /> -->
+                      <label class="text-gray-500">Activate Discount</label>
                     </div>
                     <span v-else class="text-gray-900">{{
-                      singleData.default ? "Yes" : "No"
+                      singleData.is_active ? "Active" : "Inactive"
                     }}</span>
-                  </td>
-                  <!-- <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                    {{ singleData.default ? "Default" : "" }}
-                  </td> -->
-                  <td class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                    <!-- Display payment rates -->
-                    <ul>
-                      <li
-                        v-for="(item, index) in singleData.parking_rates"
-                        :key="item.id"
-                      >
-                        <span v-if="singleData?.parking_rates?.length == 1">
-                          Each half hour rate {{ item.rate }} taka
-                        </span>
-                        <span v-else>
-                          {{
-                            index == 0 ? "First half hour" : "Next half hour"
-                          }}
-                          {{ item.rate }} taka
-                        </span>
-                      </li>
-                    </ul>
                   </td>
                   <td
                     class="flex justify-center gap-1 relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"

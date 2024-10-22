@@ -76,18 +76,19 @@ const deleteRecord = async (id) => {
 const record = reactive({
   id: "",
   name: "",
-  discount_amount: "",
-  discount_type: "",
-  allow_separate_discount: false,
+  // discount_amount: "",
+  // discount_type: "",
+  // allow_separate_discount: false,
   default: false,
 });
 const editRecord = (props) => {
   record.id = props.id;
   record.name = props.name;
-  record.discount_amount = props.discount_amount;
-  record.discount_type = props.discount_type;
-  record.allow_separate_discount = props.allow_separate_discount;
-  record.default = props.default;
+  //record.discount_amount = props.discount_amount;
+  //record.discount_type = props.discount_type;
+  //record.allow_separate_discount = props.allow_separate_discount;
+  record.default = props.default ? true : false;
+  console.log(record, props);
   list.value = list.value.map((item) => {
     if (item.id == props.id) {
       return {
@@ -105,9 +106,9 @@ const isUpdating = ref(false);
 const updateableRecord = computed(() => {
   return {
     name: record.name,
-    discount_amount: record.discount_amount,
-    discount_type: record.discount_type,
-    allow_separate_discount: record.allow_separate_discount,
+    // discount_amount: record.discount_amount,
+    // discount_type: record.discount_type,
+    // allow_separate_discount: record.allow_separate_discount,
     default: record.default,
   };
 });
@@ -127,10 +128,10 @@ const updateRecord = async (id) => {
       list.value = list.value.map((item) => {
         if (item.id == id) {
           item.name = record.name;
-          item.discount_amount = res.data.discount_amount;
-          item.discount_type = record.discount_type;
+          // item.discount_amount = res.data.discount_amount;
+          // item.discount_type = record.discount_type;
           item.default = record.default;
-          item.allow_separate_discount = record.allow_separate_discount;
+          // item.allow_separate_discount = record.allow_separate_discount;
           item.editMode = false;
           return item;
         }
@@ -203,12 +204,12 @@ onMounted(() => {
                   >
                     Default Status
                   </th>
-                  <th
+                  <!-- <th
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
                     Allow separate discount
-                  </th>
+                  </th> -->
                   <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                     Action
                   </th>
@@ -237,7 +238,7 @@ onMounted(() => {
                     </div>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
-                    <div v-if="singleData.editMode" class="mt-1 text-gray-500">
+                    <!-- <div v-if="singleData.editMode" class="mt-1 text-gray-500">
                       <select
                         class="focus:outline-none bg-none"
                         :class="inputClass"
@@ -249,27 +250,21 @@ onMounted(() => {
                         <option value="percentage">Percentage</option>
                         <option value="free">Free</option>
                       </select>
-                      <!-- <input
-                        :class="inputClass"
-                        v-model="record.discount_type"
-                        type="text"
-                        placeholder="e.g. Text about place"
-                      /> -->
-                    </div>
-                    <span v-else class="text-gray-900">{{
+                    </div> -->
+                    <span class="text-gray-900">{{
                       singleData.discount_type
                     }}</span>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
-                    <div v-if="singleData.editMode" class="mt-1 text-gray-500">
+                    <!-- <div v-if="singleData.editMode" class="mt-1 text-gray-500">
                       <input
                         :class="inputClass"
                         v-model="record.discount_amount"
                         type="text"
                         placeholder="e.g. Text about place"
                       />
-                    </div>
-                    <span v-else class="text-gray-900">{{
+                    </div> -->
+                    <span class="text-gray-900">{{
                       singleData.discount_amount
                     }}</span>
                   </td>
@@ -290,7 +285,7 @@ onMounted(() => {
                       singleData.default ? "Yes" : "No"
                     }}</span>
                   </td>
-                  <td class="whitespace-nowrap px-3 py-5 text-sm">
+                  <!-- <td class="whitespace-nowrap px-3 py-5 text-sm">
                     <div
                       v-if="singleData.editMode"
                       class="flex items-center gap-1 mt-1 text-gray-500"
@@ -306,7 +301,7 @@ onMounted(() => {
                     <span v-else class="text-gray-900">{{
                       singleData.allow_separate_discount ? "Allowed" : "Not allowed"
                     }}</span>
-                  </td>
+                  </td> -->
                   <td
                     class="flex justify-center gap-1 relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
                   >

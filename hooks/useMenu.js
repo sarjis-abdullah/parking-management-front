@@ -51,17 +51,7 @@ export const useMenu = () => {
           { name: "List", href: "/place", icon: TableCellsIcon },
         ],
       },
-      {
-        name: "Category",
-        href: "/category",
-        icon: shallowRef(CategoryIcon),
-        svg: true,
-        show: false,
-        children: [
-          { name: "Add", href: "/add/category", icon: PlusIcon },
-          { name: "List", href: "/category", icon: TableCellsIcon },
-        ],
-      },
+      
       {
         name: "Floor",
         href: "/floor",
@@ -82,6 +72,28 @@ export const useMenu = () => {
           { name: "List", href: "/block", icon: TableCellsIcon },
         ],
       },
+      
+      {
+        name: "Slot",
+        href: "/slot",
+        icon: shallowRef(SlotIcon),
+        show: false,
+        children: [
+          { name: "Add", href: "/add/slot", icon: PlusIcon },
+          { name: "List", href: "/slot", icon: TableCellsIcon },
+        ],
+      },
+      {
+        name: "Category",
+        href: "/category",
+        icon: shallowRef(CategoryIcon),
+        svg: true,
+        show: false,
+        children: [
+          { name: "Add", href: "/add/category", icon: PlusIcon },
+          { name: "List", href: "/category", icon: TableCellsIcon },
+        ],
+      },
       {
         name: "Tariff",
         href: "/tariff",
@@ -90,16 +102,6 @@ export const useMenu = () => {
         children: [
           { name: "Add", href: "/add/tariff", icon: PlusIcon },
           { name: "List", href: "/tariff", icon: TableCellsIcon },
-        ],
-      },
-      {
-        name: "Slot setup",
-        href: "/slot",
-        icon: shallowRef(SlotIcon),
-        show: false,
-        children: [
-          { name: "Add", href: "/add/slot", icon: PlusIcon },
-          { name: "List", href: "/slot", icon: TableCellsIcon },
         ],
       },
       {
@@ -123,6 +125,16 @@ export const useMenu = () => {
         // ],
       },
       {
+        name: "Discount",
+        href: "/discount",
+        icon: shallowRef(UserGroupIcon),
+        show: false,
+        children: [
+          { name: "Add", href: "/add/discount", icon: PlusIcon },
+          { name: "List", href: "/discount", icon: TableCellsIcon },
+        ],
+      },
+      {
         name: "Parking",
         href: "/parking",
         icon: shallowRef(ParkingIcon),
@@ -142,7 +154,16 @@ export const useMenu = () => {
           { name: "Vehicle reports", href: "/vehicle-reports", icon: TableCellsIcon },
         ],
       },
-      
+      {
+        name: "Cashflow",
+        href: "/cashflow",
+        icon: shallowRef(UserGroupIcon),
+        show: false,
+        children: [
+          { name: "Add", href: "/add/cashflow", icon: PlusIcon },
+          { name: "List", href: "/cashflow", icon: TableCellsIcon },
+        ],
+      },
       // {
       //   name: "Reports",
       //   href: "/reports",
