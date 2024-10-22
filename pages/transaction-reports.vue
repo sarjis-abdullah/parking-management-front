@@ -90,7 +90,7 @@ const activeReport = ref(false);
 // const isTransactionReport = computed(
 //   () => activeReport.value == "transactions"
 // );
-const getTransactions = () => {
+const getTransactions = (extraQuery='') => {
   isLoading.value = true;
   activeReport.value = true;
   selected.value = [];
@@ -100,7 +100,10 @@ const getTransactions = () => {
         getQueryString(route.query) +
         `&page=${page.value}&per_page=${perPage.value}`;
         if (selectedCategory.value) {
-          q += `&category=${selectedCategory.value}`
+          q += `&category=${selectedCategory.value}&${extraQuery}`
+        }
+        if (extraQuery) {
+          q+=`${extraQuery}`
         }
       const res = await ReportService.getTransaction(q);
       transactions.value = res.data.data;
@@ -109,6 +112,12 @@ const getTransactions = () => {
       lastPage.value = meta.last_page;
       total.value = meta.total;
       totalPerPage.value = res.data.data.length;
+      if (res.pdfUrl) {
+        window.open(
+          res.pdfUrl,
+          '_blank'
+        );
+      }
     } catch (error) {
       serverErros.value = error.errors;
     } finally {
@@ -602,6 +611,14 @@ onMounted(() => {
           :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
         >
           Apply
+        </button>
+        <button
+          :disabled="isLoading"
+          @click="getTransactions('&format=pdf')"
+          class="text-white px-2 py-1 rounded-md"
+          :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
+        >
+          Download
         </button>
       </section>
     </section>

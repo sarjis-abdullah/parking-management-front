@@ -86,7 +86,7 @@
                 </div>
                 <nav class="flex flex-1 flex-col">
                   <!-- Mobile view -->
-                  <ul role="list" class="flex flex-1 flex-col gap-y-7">
+                  <ul role="list" class="flex flex-1 flex-col gap-y-2">
                     <li>
                       <ul
                         role="list"
@@ -122,7 +122,7 @@
                           </a>
                           <ul
                             v-if="item.show && item.children"
-                            class="ml-8 mt-4"
+                            class="ml-4 mt-2"
                           >
                             <li
                               v-for="(child, idx) in item.children"
@@ -169,7 +169,7 @@
           />
         </div>
         <nav class="flex flex-1 flex-col">
-          <ul role="list" class="flex flex-1 flex-col gap-y-7">
+          <ul role="list" class="flex flex-1 flex-col gap-y-2">
             <!-- Desktop view -->
 
             <li
@@ -188,7 +188,7 @@
                 }}</nuxt-link>
                 <span v-else>{{ item.name }}</span>
               </div>
-              <ul v-if="item.show && item.children" class="ml-8 mt-4">
+              <ul v-if="item.show && item.children" class="ml-4 mt-2">
                 <li
                   v-for="(child, idx) in item.children"
                   :key="idx"
