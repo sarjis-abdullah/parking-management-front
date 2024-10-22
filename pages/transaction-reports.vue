@@ -12,10 +12,16 @@ import { PaymentService } from "~/services/PaymentService";
 import ConfirmModal from "@/components/common/Modal.vue";
 import AutoComplete from "@/components/common/AutoComplete.vue";
 import { CategoryService } from "~/services/CategoryService";
+import { mkConfig, generateCsv, download } from "export-to-csv";
 
 definePageMeta({
   layout: "auth-layout",
 });
+const csvConfig = mkConfig({
+  useKeysAsHeaders: true,
+  filename: "customer-list",
+});
+
 const inputClass =
   "relative block w-full appearance-none rounded-md border-2 border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
 const selecboxClass =
@@ -41,6 +47,45 @@ const totalPerPage = ref(null);
 const page = ref(1);
 const showConfirmModal = ref(false);
 const checkoutLoading = ref(false);
+
+const downloadCsv = () => {
+  isLoading.value = true;
+  const updatedArray = transactions.value.map((item) => {
+    return {
+      ...item,
+      vehicle: item.vehicle?.number,
+    };
+  });
+  const newArray = updatedArray.map((obj, index) => {
+    // Iterate over each property in the object
+    const newObj = {};
+    for (const key in obj) {
+      // Check if the property value is null
+      if (obj[key] == null || obj[key] == undefined) {
+        newObj[key] = "";
+      } else {
+        newObj[key] = obj[key].toString();
+      }
+    }
+    return {
+      "SL No": index + 1,
+      Vehicle: newObj.vehicle,
+      Date: newObj.transaction_date,
+      Payable: newObj.total_payable,
+      Paid: newObj.total_paid,
+      Discount: newObj.discount_amount,
+      Due: newObj.total_due,
+      "Payment type": newObj.payment_type,
+      Status: newObj.status,
+      Method: newObj.method,
+    };
+  });
+  const csv = generateCsv(csvConfig)(newArray);
+  download(csvConfig)(csv);
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 1000);
+};
 
 function getQueryString(query) {
   const filteredQuery = {};
@@ -80,9 +125,9 @@ const resetSearch = () => {
     ...route.query,
   };
   if (newQuery.vehicle_id) {
-    delete newQuery.vehicle_id
+    delete newQuery.vehicle_id;
     activeReport.value = false;
-      router.push({ query: newQuery });
+    router.push({ query: newQuery });
   }
 };
 const serverErros = ref({});
@@ -90,7 +135,7 @@ const activeReport = ref(false);
 // const isTransactionReport = computed(
 //   () => activeReport.value == "transactions"
 // );
-const getTransactions = (extraQuery='') => {
+const getTransactions = (extraQuery = "") => {
   isLoading.value = true;
   activeReport.value = true;
   selected.value = [];
@@ -99,12 +144,12 @@ const getTransactions = (extraQuery='') => {
       let q =
         getQueryString(route.query) +
         `&page=${page.value}&per_page=${perPage.value}`;
-        if (selectedCategory.value) {
-          q += `&category=${selectedCategory.value}&${extraQuery}`
-        }
-        if (extraQuery) {
-          q+=`${extraQuery}`
-        }
+      if (selectedCategory.value) {
+        q += `&category=${selectedCategory.value}`;
+      }
+      if (extraQuery != "") {
+        q += `${extraQuery}`;
+      }
       const res = await ReportService.getTransaction(q);
       transactions.value = res.data.data;
       const meta = res.data;
@@ -113,10 +158,7 @@ const getTransactions = (extraQuery='') => {
       total.value = meta.total;
       totalPerPage.value = res.data.data.length;
       if (res.pdfUrl) {
-        window.open(
-          res.pdfUrl,
-          '_blank'
-        );
+        window.open(res.pdfUrl, "_blank");
       }
     } catch (error) {
       serverErros.value = error.errors;
@@ -141,7 +183,7 @@ watch(
       }
       if (route.query.vehicle_id) {
         newQuery.vehicle_id = route.query.vehicle_id;
-        delete newQuery.vehicle_id
+        delete newQuery.vehicle_id;
         router.push({ query: newQuery });
         // vehicleId.value = route.query.vehicle_id;
       }
@@ -235,36 +277,39 @@ watch(
   }
 );
 
-watch([paymentMethod, selectedCategory], ([newMethod, newCategory], [oldMethod, oldCategory]) => {
-  if (oldMethod != newMethod) {
-    console.log(oldMethod, newMethod, "method");
-    paymentMethod.value = newMethod;
-    if (!newMethod) {
-      const newQuery = { ...route.query };
-      delete newQuery.method;
-      router.push({ query: newQuery });
-    } else {
-      const newQuery = { ...route.query };
-      newQuery.method = newMethod;
-      router.push({ query: newQuery });
+watch(
+  [paymentMethod, selectedCategory],
+  ([newMethod, newCategory], [oldMethod, oldCategory]) => {
+    if (oldMethod != newMethod) {
+      console.log(oldMethod, newMethod, "method");
+      paymentMethod.value = newMethod;
+      if (!newMethod) {
+        const newQuery = { ...route.query };
+        delete newQuery.method;
+        router.push({ query: newQuery });
+      } else {
+        const newQuery = { ...route.query };
+        newQuery.method = newMethod;
+        router.push({ query: newQuery });
+      }
     }
-  }
 
-  if (oldCategory != newCategory) {
-    console.log(oldCategory, newCategory, "newCategory");
-    paymentMethod.value = newMethod;
-    if (!newCategory) {
-      const newQuery = { ...route.query };
-      delete newQuery.category;
-      router.push({ query: newQuery });
-    } else {
-      const newQuery = { ...route.query };
-      newQuery.category = newCategory;
-      router.push({ query: newQuery });
+    if (oldCategory != newCategory) {
+      console.log(oldCategory, newCategory, "newCategory");
+      paymentMethod.value = newMethod;
+      if (!newCategory) {
+        const newQuery = { ...route.query };
+        delete newQuery.category;
+        router.push({ query: newQuery });
+      } else {
+        const newQuery = { ...route.query };
+        newQuery.category = newCategory;
+        router.push({ query: newQuery });
+      }
     }
+    activeReport.value = false;
   }
-  activeReport.value = false;
-});
+);
 
 const client = ref("");
 const handleChosen = (item) => {
@@ -433,7 +478,7 @@ onMounted(() => {
   newQuery.start_date = startDate.value;
   newQuery.end_date = endDate.value;
   router.push({ query: newQuery });
-  getCategories()
+  getCategories();
 });
 </script>
 <template>
@@ -606,26 +651,41 @@ onMounted(() => {
       <section class="flex items-end gap-2">
         <button
           :disabled="isLoading"
-          @click="getTransactions"
+          @click="getTransactions('')"
           class="text-white px-2 py-1 rounded-md"
           :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
         >
           Apply
         </button>
-        <button
-          :disabled="isLoading"
-          @click="getTransactions('&format=pdf')"
-          class="text-white px-2 py-1 rounded-md"
-          :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
-        >
-          Download
-        </button>
       </section>
     </section>
     <section>
-      <h2 style="text-align: center; margin-top: 20px; padding: 1rem">
-        Date-wise Transactions
-      </h2>
+      <header class="flex" :class="transactions?.length ? 'justify-between' : 'justify-center'">
+        <div>
+          <h2 style="text-align: center; margin-top: 20px;" class="text-2xl font-bold text-gray-800 p-4">
+            Date-wise Transactions
+          </h2>
+        </div>
+        <section class="flex items-end gap-2 p-4" v-if="transactions?.length">
+          <button
+            :disabled="isLoading"
+            @click="getTransactions('&format=pdf')"
+            class="text-white px-2 py-1 rounded-md"
+            :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
+          >
+            Download PDF
+          </button>
+          <button
+            :disabled="isLoading"
+            @click="downloadCsv"
+            class="text-white px-2 py-1 rounded-md"
+            :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
+          >
+            Download CSV
+          </button>
+        </section>
+      </header>
+
       <table
         style="width: 100%; border-collapse: collapse; margin-bottom: 20px"
       >
