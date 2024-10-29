@@ -309,6 +309,7 @@ import {
   TransitionChild,
   TransitionRoot,
 } from "@headlessui/vue";
+import { formatDate } from "@/utils/index.js";
 import { XMarkIcon } from "@heroicons/vue/20/solid";
 import moment from "moment";
 const props = defineProps({

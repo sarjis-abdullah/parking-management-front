@@ -160,7 +160,7 @@ export const useMenu = () => {
         icon: shallowRef(UserGroupIcon),
         show: false,
         children: [
-          { name: "Add", href: "/add/cashflow", icon: PlusIcon },
+          { name: "Start", href: "/add/cashflow", icon: PlusIcon },
           { name: "List", href: "/cashflow", icon: TableCellsIcon },
         ],
       },
