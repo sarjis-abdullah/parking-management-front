@@ -150,6 +150,15 @@ const updateRecord = async (id) => {
   }
 };
 
+const getDiscount = (item) => {
+  if (item.discount_type == 'percentage') {
+    return parseInt(item.discount_amount) + '%'
+  } else if (item.discount_type == 'flat') {
+    return '৳ ' + Number(parseFloat(item.discount_amount)).toFixed(2)
+  }
+  return ''
+}
+
 const onPageChanged = (p) => {
   page.value = p;
   loadData();
@@ -196,7 +205,7 @@ onMounted(() => {
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Discount amount
+                    Discount
                   </th>
                   <th
                     scope="col"
@@ -265,7 +274,7 @@ onMounted(() => {
                       />
                     </div> -->
                     <span class="text-gray-900">{{
-                      singleData.discount_amount
+                      getDiscount(singleData)
                     }}</span>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
@@ -281,7 +290,7 @@ onMounted(() => {
                       />
                       <label class="text-gray-500">Marked as default</label>
                     </div>
-                    <span v-else class="text-gray-900">{{
+                    <span v-else :class="singleData.default ? 'bg-indigo-500 text-white px-4 py-2 rounded-md' : 'text-gray-900'">{{
                       singleData.default ? "Yes" : "No"
                     }}</span>
                   </td>

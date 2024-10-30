@@ -40,7 +40,7 @@ const paymentStatus = ref("");
 const transactions = ref([]);
 const isLoading = ref(false);
 const selectedPaymentLoading = ref(false);
-const perPage = ref(2);
+const perPage = ref(50);
 const lastPage = ref(null);
 const total = ref(null);
 const totalPerPage = ref(null);
@@ -1097,8 +1097,6 @@ onMounted(() => {
         class="focus:outline-none rounded-md text-center"
         style="padding: 0"
       >
-        <option :value="2">2</option>
-        <option :value="10">10</option>
         <option :value="50">50</option>
         <option :value="100">100</option>
         <option :value="500">500</option>

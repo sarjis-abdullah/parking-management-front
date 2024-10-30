@@ -388,7 +388,7 @@ const checkoutData = computed(() => {
     totalMinutes = minutes,
     totalSeconds = seconds,
     parkingFee = parseFloat(payment.paid_amount),
-    discounts = parseFloat(payment.discount_amount),
+    discounts = parseFloat(payment.discount_amount) + parseFloat(payment.membership_discount),
     floor = parking.floor.name,
     totalAmount = parseFloat(payment.paid_amount), // Assuming no additional calculations needed
     totalDue = parseFloat(payment.due_amount), // Assuming no additional calculations needed
