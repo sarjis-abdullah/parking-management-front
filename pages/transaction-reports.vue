@@ -102,12 +102,17 @@ function getQueryString(query) {
 }
 const totals = computed(() => {
   if (transactions.value && transactions.value.length) {
-    const acc = { payable: 0, paid: 0, discount: 0, due: 0 };
+    const acc = { payable: 0, paid: 0, pending_Payment: 0, discount: 0, due: 0 };
     for (let index = 0; index < transactions.value.length; index++) {
       const payment = transactions.value[index];
 
+      if (payment.status == 'success') {
+        acc.paid += parseFloat(payment.total_paid)
+      }else {
+        acc.pending_Payment += parseFloat(payment.total_paid)
+      }
       acc.payable += parseFloat(payment.total_payable);
-      acc.paid += parseFloat(payment.total_paid);
+      // acc.paid += parseFloat(payment.total_paid);
       acc.due += parseFloat(payment.total_due);
       acc.discount += parseFloat(payment.discount_amount);
     }
