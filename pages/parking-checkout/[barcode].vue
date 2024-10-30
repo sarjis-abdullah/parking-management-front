@@ -248,7 +248,7 @@
                           Number(
                             duePayment.payable_amount -
                               duePayment.paid_amount -
-                              discountAmount
+                              membershipDiscountAmount
                           ).toFixed(2)
                         }}</span>
                       </li>
@@ -525,19 +525,7 @@ const totalCost = computed(() => {
 
   return Math.round(Number(total).toFixed(2));
 });
-const parkingDataToCheckout = computed(() => {
-  const obj = {
-    out_time: formatDate(currentTime.value, "YYYY-MM-DD HH:mm:ss"),
-    duration: durationInMinutes.value,
-    payment: {
-      method: paymentMethod.value,
-      paid_amount: Math.round(receivedAmount.value),
-      payable_amount: finalTotalAmount.value,
-      discount_amount: totalDiscount.value,
-    },
-  };
-  return obj;
-});
+
 const hasDuePayment = computed(() => {
   if (parkingResponse.value?.payment) {
     const payment = parkingResponse.value.payment;
@@ -580,8 +568,7 @@ const membershipHasPercentageDiscount = computed(() => {
   const type = vehicle.value?.membership?.membership_type?.discount_type;
   return type == "percentage";
 });
-const discountAmount = ref(0);
-const membershipDiscount = computed(() => {
+const membershipDiscountAmount = computed(() => {
   if (!parkingResponse.value || !totalCost.value) {
     return 0;
   }
@@ -635,7 +622,7 @@ const calculatedCouponDiscount = computed(()=> {
 
 const totalDiscount = computed(()=> {
   let cDiscount = parseFloat(calculatedCouponDiscount.value?.value ?? 0)
-  return Math.floor(discountAmount.value + cDiscount)
+  return Math.floor(membershipDiscountAmount.value + cDiscount)
 })
 
 const finalTotalAmount = computed(()=> {
@@ -709,7 +696,7 @@ const listAllData = computed(() => {
   }else {
     list.push({
       key: "Membership Discount",
-      value: "৳ " + Number(discountAmount.value).toFixed(2),
+      value: "৳ " + Number(membershipDiscountAmount.value).toFixed(2),
     })
   }
 
@@ -740,7 +727,6 @@ const loadData = async () => {
       vehicleId.value = result?.vehicle?.id;
       vehicle.value = result?.vehicle;
       parking_rates.value = result.tariff.parking_rates;
-      discountAmount.value = membershipDiscount.value;
       if (result.out_time) {
         currentTime.value = moment(result.out_time);
       }
@@ -788,11 +774,24 @@ const loadData = async () => {
     isLoading.value = false;
   }
 };
-
+const parkingDataToCheckout = computed(() => {
+  const obj = {
+    out_time: formatDate(currentTime.value, "YYYY-MM-DD HH:mm:ss"),
+    duration: durationInMinutes.value,
+    payment: {
+      method: paymentMethod.value,
+      paid_amount: Math.round(receivedAmount.value),
+      payable_amount: finalTotalAmount.value,
+      discount_amount: calculatedCouponDiscount.value?.value,
+      membership_discount: membershipDiscountAmount.value,
+    },
+  };
+  return obj;
+});
 const emailTemplate = ref(null);
 
 const subtotal = computed(() =>
-  Math.ceil(totalCost.value - discountAmount.value)
+  Math.ceil(totalCost.value - membershipDiscountAmount.value)
 );
 const checkoutLoading = ref(false);
 const confirmCheckout = async () => {
@@ -843,14 +842,14 @@ const disabledPaymentButton = computed(()=> {
 const payDue = async () => {
   const payable_amount = parseFloat(duePayment.value.payable_amount);
   const paid_amount = parseFloat(duePayment.value.paid_amount);
-  const remaining = payable_amount - paid_amount - discountAmount.value;
+  const remaining = payable_amount - paid_amount - membershipDiscountAmount.value;
   if (receivedAmount.value == remaining) {
     const obj = {
       paid_amount:
         parseFloat(receivedAmount.value) +
         parseFloat(duePayment.value.paid_amount),
       method: paymentMethod.value,
-      discount_amount: discountAmount.value,
+      discount_amount: membershipDiscountAmount.value,
     };
     try {
       await PaymentService.update(duePayment.value.id, obj);

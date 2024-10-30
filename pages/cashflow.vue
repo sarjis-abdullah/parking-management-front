@@ -177,7 +177,7 @@ onMounted(() => {
               <NuxtLink
                 to="/add/cashflow"
                 class="bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600 w-full md:w-auto text-center"
-              >
+              >           
                 Add opening balance</NuxtLink>
             </div>
           </header>
