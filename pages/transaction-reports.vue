@@ -19,7 +19,7 @@ definePageMeta({
 });
 const csvConfig = mkConfig({
   useKeysAsHeaders: true,
-  filename: "customer-list",
+  filename: "transaction-report",
 });
 
 const inputClass =
@@ -36,6 +36,7 @@ const endDate = ref("");
 const paymentType = ref("");
 const paymentMethod = ref("");
 const selectedPaymentMethod = ref("cash");
+const selectedDiscountFilter = ref("");
 const paymentStatus = ref("");
 const transactions = ref([]);
 const isLoading = ref(false);
@@ -122,6 +123,10 @@ const totals = computed(() => {
   return 0.0;
 });
 
+const showExtraCOlumn = computed(()=> {
+  return totals.value.paid != totals.value.payable
+})
+
 const vehicleNumber = ref("");
 
 const vehicleId = ref(null);
@@ -152,6 +157,9 @@ const getTransactions = (extraQuery = "") => {
       if (selectedCategory.value) {
         q += `&category=${selectedCategory.value}`;
       }
+      // if (selectedDiscountFilter.value) {
+      //   q += `&discount_filter=${selectedDiscountFilter.value}`;
+      // }
       if (extraQuery != "") {
         q += `${extraQuery}`;
       }
@@ -207,6 +215,10 @@ watch(
       if (route.query.category) {
         newQuery.category = route.query.category;
         selectedCategory.value = route.query.category;
+      }
+      if (route.query.discount_filter) {
+        newQuery.discount_filter = route.query.discount_filter;
+        selectedDiscountFilter.value = route.query.discount_filter;
       }
 
       activeReport.value = false;
@@ -312,6 +324,28 @@ watch(
         router.push({ query: newQuery });
       }
     }
+
+    activeReport.value = false;
+  }
+);
+
+watch(
+  [selectedDiscountFilter],
+  ([newF], [oldF]) => {
+    if (oldF != newF) {
+      console.log(oldF, newF);
+      selectedDiscountFilter.value = newF;
+      if (!newF) {
+        const newQuery = { ...route.query };
+        delete newQuery.discount_filter;
+        router.push({ query: newQuery });
+      } else {
+        const newQuery = { ...route.query };
+        newQuery.discount_filter = newF;
+        console.log(newQuery, 'newQuery');
+        router.push({ query: newQuery });
+      }
+    }
     activeReport.value = false;
   }
 );
@@ -326,7 +360,6 @@ const handleChosen = (item) => {
 };
 watch([vehicleId], ([newVehicleId], [oldVehicleId]) => {
   if (newVehicleId != oldVehicleId) {
-    console.log(oldVehicleId, newVehicleId, "newVehicleId");
     vehicleId.value = newVehicleId;
     if (!newVehicleId) {
       const newQuery = { ...route.query };
@@ -602,6 +635,27 @@ onMounted(() => {
         </div>
       </div>
       <div class="grid gap-2">
+        <label class="text-gray-500">Discount filters</label>
+        <div :class="selectWrapper" class="flex items-center">
+          <select v-model="selectedDiscountFilter" class="focus:outline-none bg-none"
+            :class="selecboxClass"
+            style="background: none">
+            <option disabled :value="''">Select</option>
+            <option value="all">All</option>
+            <option value="membership_discount">Membership Discount</option>
+            <option value="other_discount">Other Discount</option>
+            <option value="no_discount">Data having no Discount</option>
+          </select>
+
+          <XMarkIcon
+            v-if="selectedDiscountFilter"
+            @click="selectedDiscountFilter = ''"
+            class="h-5 w-5 text-red-500 cursor-pointer mr-2"
+            aria-hidden="true"
+          />
+        </div>
+      </div>
+      <div class="grid gap-2">
         <label class="text-gray-500"
           >Vehicle Number<span class="text-red-500">*</span></label
         >
@@ -653,17 +707,23 @@ onMounted(() => {
           </div>
         </div> -->
       </div>
-      <section class="flex items-end gap-2">
+      
+    </section>
+    <section class="grid grid-cols-5 gap-2 mt-4">
+      <div></div>
+      <div></div>
         <button
           :disabled="isLoading"
           @click="getTransactions('')"
-          class="text-white px-2 py-1 rounded-md"
+          class="text-white px-2 py-3 rounded-md w-full cursor-pointer"
           :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
         >
           Apply
         </button>
+      <div></div>
+      <div></div>
+
       </section>
-    </section>
     <section class="grid grid-cols-4 gap-4 mt-6">
       
       <div v-for="(total, index) in totals"
@@ -781,14 +841,14 @@ onMounted(() => {
           <button
             :disabled="isLoading"
             @click="getTransactions('&format=pdf')"
-            class="border px-2 py-1 rounded-md"
+            class="border px-2 py-1 rounded-md cursor-pointer"
           >
             Download PDF
           </button>
           <button
             :disabled="isLoading"
             @click="downloadCsv"
-            class="border px-2 py-1 rounded-md"
+            class="border px-2 py-1 rounded-md cursor-pointer"
           >
             Download CSV
           </button>
@@ -801,6 +861,7 @@ onMounted(() => {
         <thead>
           <tr>
             <th
+            v-if="showExtraCOlumn"
               style="
                 border: 1px solid #ddd;
                 padding: 8px;
@@ -909,6 +970,7 @@ onMounted(() => {
               Method
             </th>
             <th
+              v-if="showExtraCOlumn"
               style="
                 border: 1px solid #ddd;
                 padding: 8px;
@@ -924,6 +986,7 @@ onMounted(() => {
           <!-- Dummy Data for Transactions -->
           <tr v-for="(item, index) in transactions" :key="index">
             <td
+            v-if="showExtraCOlumn"
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
               <input
@@ -963,7 +1026,10 @@ onMounted(() => {
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              {{ "৳ " + item.discount_amount }}
+              <div class="flex flex-col items-end gap-2">
+                <div v-if="item.membership_discount">{{ "Membership ৳ " + item.membership_discount }}</div>
+                <div v-if="item.discount_amount">{{ "Other: ৳ " + item.discount_amount }}</div>
+              </div>
             </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
@@ -1000,6 +1066,7 @@ onMounted(() => {
               <span class="px-4 py-1 rounded-md">{{ item.method }}</span>
             </td>
             <td
+            v-if="showExtraCOlumn"
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
               <div v-if="item.payment_type == 'partial'">
