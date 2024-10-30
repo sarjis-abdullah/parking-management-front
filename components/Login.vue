@@ -64,7 +64,8 @@
 <script setup>
 import { ref } from "vue";
 import Login from "../components/Login.vue";
-// import AccountStorage from "../storage/Index";
+import { authUser, superAdmin, operator } from "~/hooks/useMenu";
+
 
 const route = useRoute();
 const router = useRouter();
@@ -115,7 +116,10 @@ const submitForm = () => {
         localStorage.setItem("LOGIN_ACCOUNT", JSON.stringify(data.user));
         localStorage.setItem("ACCESS_TOKEN", data.accessToken);
         isLogin.value = true;
-        router.push("/dashboard");
+        if (data.user?.roles?.find(item => item?.name == 'operator')) {
+          router.push("/cashflow");
+        }
+        else router.push("/dashboard");
         // Reload the page
         // window.location.reload();
       }

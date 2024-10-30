@@ -102,10 +102,10 @@
                             class="flex gap-2 items-center"
                           >
                             <!-- Use the icon dynamically -->
-                            <component
+                            <!-- <component
                               class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
                               :is="item.icon"
-                            ></component>
+                            ></component> -->
                             <nuxt-link
                               v-if="!item?.children?.length"
                               @click="sidebarOpen = false"
@@ -179,8 +179,10 @@
             >
               <div @click.prevent="toggleMenu(index)" class="flex gap-2">
                 <!-- Use the icon dynamically -->
+                 <img v-if="item.imageIcon" :src="item.imageIcon" class="h-6 w-6"/>
                 <component
-                  class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
+                v-else
+                  class="h-6 w-6 shrink-0 text-[#3591ca] group-hover:text-indigo-600"
                   :is="item.icon"
                 ></component>
                 <nuxt-link v-if="!item?.children?.length" :to="item.href">{{

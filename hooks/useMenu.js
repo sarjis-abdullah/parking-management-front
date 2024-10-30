@@ -1,6 +1,6 @@
 // composables/useMenu.js
 
-import { reactive, shallowRef } from "vue";
+import { reactive, shallowRef, computed } from "vue";
 import { useRouter } from "vue-router";
 import {
   Bars3Icon,
@@ -25,11 +25,52 @@ import FloorIcon from "@/components/icon/FloorIcon.vue";
 import TariffIcon from "@/components/icon/TariffIcon.vue";
 import SlotIcon from "@/components/icon/SlotIcon.vue";
 import ParkingIcon from "@/components/icon/ParkingIcon.vue";
+import cashflowIcon from "@/assets/cash-flow.png";
+import reportIcon from "@/assets/report.png";
+import customerPointsIcon from "@/assets/customerPoints.png";
+import memberTypeIcon from "@/assets/memberType.png";
 const category = ``;
+
+const authUser = computed(()=> {
+  if (window && window.localStorage && localStorage.getItem("LOGIN_ACCOUNT")) {
+    return JSON.parse(localStorage.getItem("LOGIN_ACCOUNT"))
+  }
+  return null
+});
+
+const operator = computed(()=> authUser.value?.roles?.find(item => item?.name == 'operator'))
+const superAdmin = computed(()=> authUser.value?.roles?.find(item => item?.name == 'super_admin'))
+
+export {
+  authUser,
+  operator,
+  superAdmin
+}
 export const useMenu = () => {
   const router = useRouter();
+  const cashflow = {
+    name: "Cashflow",
+    href: "/cashflow",
+    icon: shallowRef(UserGroupIcon),
+    imageIcon: cashflowIcon,
+    show: false,
+    children: [
+      { name: "Start", href: "/add/cashflow", icon: PlusIcon },
+      { name: "List", href: "/cashflow", icon: TableCellsIcon },
+    ],
+  }
+  const parking = {
+    name: "Parking",
+    href: "/parking",
+    icon: shallowRef(ParkingIcon),
+    show: false,
+    children: [
+      { name: "Add", href: "/add/parking", icon: PlusIcon },
+      { name: "List", href: "/parking", icon: TableCellsIcon },
+    ],
+  }
   const state = reactive({
-    menuItems: [
+    menuItems: !authUser.value ? [] : operator.value?.name ? [cashflow, parking] : [
       { name: "Dashboard", href: "/dashboard", icon: HomeIcon, show: false },
       {
         name: "User",
@@ -107,7 +148,7 @@ export const useMenu = () => {
       {
         name: "Member type",
         href: "/membership",
-        icon: shallowRef(UserGroupIcon),
+        imageIcon: memberTypeIcon,
         show: false,
         children: [
           { name: "Add", href: "/add/membership-type", icon: PlusIcon },
@@ -128,42 +169,26 @@ export const useMenu = () => {
         name: "Discount",
         href: "/discount",
         icon: shallowRef(UserGroupIcon),
+        imageIcon: customerPointsIcon,
         show: false,
         children: [
           { name: "Add", href: "/add/discount", icon: PlusIcon },
           { name: "List", href: "/discount", icon: TableCellsIcon },
         ],
       },
-      {
-        name: "Parking",
-        href: "/parking",
-        icon: shallowRef(ParkingIcon),
-        show: false,
-        children: [
-          { name: "Add", href: "/add/parking", icon: PlusIcon },
-          { name: "List", href: "/parking", icon: TableCellsIcon },
-        ],
-      },
+      parking,
       {
         name: "Reporting",
-        href: "/parking",
-        icon: shallowRef(ParkingIcon),
+        href: "/reporting",
+        // icon: shallowRef(ParkingIcon),
+        imageIcon: reportIcon,
         show: false,
         children: [
           { name: "Transaction reports", href: "/transaction-reports", icon: PlusIcon },
           { name: "Vehicle reports", href: "/vehicle-reports", icon: TableCellsIcon },
         ],
       },
-      {
-        name: "Cashflow",
-        href: "/cashflow",
-        icon: shallowRef(UserGroupIcon),
-        show: false,
-        children: [
-          { name: "Start", href: "/add/cashflow", icon: PlusIcon },
-          { name: "List", href: "/cashflow", icon: TableCellsIcon },
-        ],
-      },
+      cashflow
       // {
       //   name: "Reports",
       //   href: "/reports",

@@ -7,7 +7,7 @@
     stroke="currentColor"
     aria-hidden="true"
     data-slot="icon"
-    class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
+    class="h-6 w-6 shrink-0 text-[#3591ca] group-hover:text-indigo-600"
   >
     <path
       stroke-linecap="round"
