@@ -154,7 +154,7 @@
                                             margin-bottom: 5px;
                                           "
                                         >
-                                          Invoice No:
+                                          Transaction No:
                                           <span style="font-weight: 400"
                                             >{{transactionId}}</span
                                           >
@@ -387,7 +387,7 @@ const checkoutData = computed(() => {
     totalHours = hours,
     totalMinutes = minutes,
     totalSeconds = seconds,
-    parkingFee = parseFloat(payment.paid_amount),
+    parkingFee = parseFloat(payment.payable_amount),
     discounts = parseFloat(payment.discount_amount) + parseFloat(payment.membership_discount),
     floor = parking.floor.name,
     totalAmount = parseFloat(payment.paid_amount), // Assuming no additional calculations needed

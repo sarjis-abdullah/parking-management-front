@@ -781,8 +781,9 @@ const parkingDataToCheckout = computed(() => {
     payment: {
       method: paymentMethod.value,
       paid_amount: Math.round(receivedAmount.value),
-      payable_amount: finalTotalAmount.value,
-      discount_amount: calculatedCouponDiscount.value?.value ?? 0,
+      payable_amount: parseFloat(totalCost.value),
+      // payable_amount: finalTotalAmount.value,
+      discount_amount: parseFloat(calculatedCouponDiscount.value?.value ?? 0),
       membership_discount: membershipDiscountAmount.value ?? 0,
     },
   };

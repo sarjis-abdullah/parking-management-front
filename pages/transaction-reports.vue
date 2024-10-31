@@ -12,6 +12,7 @@ import { PaymentService } from "~/services/PaymentService";
 import ConfirmModal from "@/components/common/Modal.vue";
 import AutoComplete from "@/components/common/AutoComplete.vue";
 import { CategoryService } from "~/services/CategoryService";
+import QrcodeVue from "qrcode.vue";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 
 definePageMeta({
@@ -473,15 +474,17 @@ const handlePerpageChange = () => {
   getTransactions();
   // loadData();
 };
+const config = useRuntimeConfig();
+const BASE_API_URL = config.public.BASE_URL;
+const routeName = computed(() => router);
+const paymentIds = computed(()=> selected.value?.map((i) => i.id).join(','));
+// const qrCodeUrl = computed(() => url + route.href);
+const qrCodeUrl = computed(()=> `${BASE_API_URL}payment/pay-all?paymentIds=${paymentIds.value}&paymentMethod=online`)
 const confirmPay = async () => {
-  const paymentIds = selected.value.map((i) => i.id);
-  const query = {
-    paymentIds,
-    paymentMethod: selectedPaymentMethod.value,
-  };
+  const query = `?paymentIds=${paymentIds.value}&paymentMethod=${selectedPaymentMethod.value}&process=app`;
   try {
     checkoutLoading.value = true;
-    const result = await PaymentService.payAllDue(query);
+    const result = await PaymentService.payAll(query);
 
     // print();
     if (result?.data?.redirect_url) {
@@ -789,7 +792,7 @@ onMounted(() => {
             <button
               :disabled="selectedPaymentLoading"
               @click="completeSelectedPayment()"
-              class="bg-indigo-400 text-white rounded-md text-center px-4 py-1 mt-2 font-bold"
+              class="bg-indigo-400 text-white rounded-md text-center px-4 py-1 mt-2"
             >
               Pay now
             </button>
@@ -1033,7 +1036,7 @@ onMounted(() => {
               <span class="px-4 py-1 rounded-md">{{ item.method }}</span>
             </td>
             <td
-              v-if="showExtraCOlumn"
+              v-if="showExtraCOlumn && false"
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
               <div v-if="item.payment_type == 'partial'">
@@ -1166,8 +1169,10 @@ onMounted(() => {
       </select>
     </div>
     <div class="mt-6">
-      <p class="bg-indigo-600 text-white rounded-md px-4 py-1">
-        Total payable
+      <qrcode-vue v-if="selectedPaymentMethod == 'online'" :value="qrCodeUrl" :size="300" level="H" class="m-auto" />
+      <p class="text-indigo-600 text font-bold border-b rounded-md px-4 py-2 text-center mt-4">
+        
+        {{ selectedPaymentMethod == 'online' ? 'Scan & pay' : 'Payable' }}
         <strong>{{ "৳ " + totalPayableForSelectedTransaction }}</strong>
       </p>
     </div>
@@ -1180,6 +1185,7 @@ onMounted(() => {
           Cancel
         </button>
         <button
+          v-if="selectedPaymentMethod == 'cash'"
           :disabled="checkoutLoading"
           @click="confirmPay"
           :class="
