@@ -17,7 +17,7 @@
 
       <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div
-          class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0"
+          class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0"
         >
           <TransitionChild
             as="template"
@@ -32,7 +32,7 @@
               class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 w-full text-left shadow-xl transition-all sm:my-8 w-min-full md:w-full sm:p-6"
               :class="[maxWidth, minWidth]"
             >
-              <qrcode-vue :value="value" :size="300" level="H" />
+              <qrcode-vue class="mx-auto" :value="value" :size="300" level="H" />
               <slot />
               <div class="mt-5 sm:mt-6">
                 <div class="flex justify-end gap-2 mt-4">

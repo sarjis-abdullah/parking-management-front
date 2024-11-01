@@ -37,6 +37,7 @@ const endDate = ref("");
 const paymentType = ref("");
 const paymentMethod = ref("");
 const selectedPaymentMethod = ref("cash");
+const transactionId = ref("");
 const selectedDiscountFilter = ref("");
 const paymentStatus = ref("");
 const transactions = ref([]);
@@ -124,6 +125,7 @@ const totals = computed(() => {
       // acc.paid += parseFloat(payment.total_paid);
       acc.due += parseFloat(payment.total_due);
       acc.discount += parseFloat(payment.discount_amount);
+      acc.discount += parseFloat(payment.membership_discount);
     }
 
     return acc;
@@ -161,14 +163,13 @@ const getTransactions = (extraQuery = "") => {
   setTimeout(async () => {
     try {
       let q =
-        getQueryString(route.query) +
-        `&page=${page.value}&per_page=${perPage.value}`;
+        getQueryString(route.query) 
       if (selectedCategory.value) {
         q += `&category=${selectedCategory.value}`;
       }
-      // if (selectedDiscountFilter.value) {
-      //   q += `&discount_filter=${selectedDiscountFilter.value}`;
-      // }
+      if (transactionId.value) {
+        q += `&transaction_id=${transactionId.value}`;
+      }
       if (extraQuery != "") {
         q += `${extraQuery}`;
       }
@@ -242,21 +243,21 @@ watch(
   ([newStartDate, newEndDate], [oldStartDate, oldEndDate]) => {
     const newQuery = { ...route.query };
 
-    if (newStartDate !== oldStartDate) {
-      if (newStartDate) {
-        newQuery.start_date = newStartDate;
-      } else {
-        delete newQuery.start_date;
-      }
-    }
+    // if (newStartDate !== oldStartDate) {
+    //   if (newStartDate) {
+    //     newQuery.start_date = newStartDate;
+    //   } else {
+    //     delete newQuery.start_date;
+    //   }
+    // }
 
-    if (newEndDate !== oldEndDate) {
-      if (newEndDate) {
-        newQuery.end_date = newEndDate;
-      } else {
-        delete newQuery.end_date;
-      }
-    }
+    // if (newEndDate !== oldEndDate) {
+    //   if (newEndDate) {
+    //     newQuery.end_date = newEndDate;
+    //   } else {
+    //     delete newQuery.end_date;
+    //   }
+    // }
     // if (newVehicleId !== oldVehicleId) {
     //   if (newVehicleId) {
     //     newQuery.vehicle_id = newVehicleId;
@@ -400,7 +401,7 @@ const totalPayableForSelectedTransaction = computed(() => {
       sum += parseFloat(item.total_due);
       continue;
     } else if (item.status != "success") {
-      sum += parseFloat(item.total_payable);
+      sum += parseFloat(item.total_payable) - parseFloat(item.discount_amount) - parseFloat(item.membership_discount);
       continue;
     }
   }
@@ -531,6 +532,15 @@ onMounted(() => {
   <section>
     <section class="grid md:grid-cols-4 gap-2">
       <div class="grid gap-2">
+        <label class="text-gray-500">Transaction ID</label>
+        <input
+          :class="inputClass"
+          v-model="transactionId"
+          type="text"
+          placeholder="Transaction ID"
+        />
+      </div>
+      <div class="grid gap-2">
         <label class="text-gray-500">Start date</label>
         <input
           :class="inputClass"
@@ -539,6 +549,7 @@ onMounted(() => {
           placeholder="e.g. 20/01/2024"
         />
       </div>
+      
       <div class="grid gap-2">
         <label class="text-gray-500">End date</label>
         <input
@@ -832,7 +843,7 @@ onMounted(() => {
       </header>
 
       <table
-        style="width: 100%; border-collapse: collapse; margin-bottom: 20px"
+        style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;"
       >
         <thead>
           <tr>
@@ -846,6 +857,16 @@ onMounted(() => {
               "
             >
               SL No.
+            </th>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            >
+            Transaction ID
             </th>
             <th
               style="
@@ -938,7 +959,7 @@ onMounted(() => {
               Method
             </th>
             <th
-              v-if="showExtraCOlumn"
+              v-if="showExtraCOlumn && false"
               style="
                 border: 1px solid #ddd;
                 padding: 8px;
@@ -956,8 +977,8 @@ onMounted(() => {
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              <div class="flex items-center gap-2">
-                <div>{{ index + 1 }}</div>
+              <div class="flex items-center gap-2" :class="item.status != 'success' || item.payment_type == 'partial' ? '' : 'justify-center'">
+                
                 <input
                   v-if="
                     item.status != 'success' || item.payment_type == 'partial'
@@ -966,7 +987,13 @@ onMounted(() => {
                   type="checkbox"
                   style="width: 30px; height: 30px"
                 />
+                <div>{{ index + 1 }}</div>
               </div>
+            </td>
+            <td
+              style="border: 1px solid #ddd; padding: 8px; text-align: center"
+            >
+              {{ item.transaction_id }}
             </td>
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
@@ -976,7 +1003,8 @@ onMounted(() => {
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              {{ item.transaction_date }}
+              <div>{{ formatDate(item.transaction_date, 'DD-MM-YYYY') }}</div>
+              <div>{{ formatDate(item.transaction_date, 'hh:mm A') }}</div>
             </td>
 
             <td
@@ -994,10 +1022,10 @@ onMounted(() => {
             >
               <div class="flex flex-col items-end gap-2">
                 <div v-if="item.membership_discount">
-                  {{ "Membership ৳ " + item.membership_discount }}
+                  <span class="text-xs">Membership ৳ </span>{{ item.membership_discount }}
                 </div>
                 <div v-if="item.discount_amount">
-                  {{ "Other: ৳ " + item.discount_amount }}
+                  <span class="text-xs">Other ৳ </span>{{ item.discount_amount }}
                 </div>
               </div>
             </td>
@@ -1182,7 +1210,7 @@ onMounted(() => {
           @click="showConfirmModal = false"
           class="px-2 py-1 border-red-300 rounded-md"
         >
-          Cancel
+          {{ selectedPaymentMethod == 'cash' ? 'Cancel' : 'Done' }}
         </button>
         <button
           v-if="selectedPaymentMethod == 'cash'"

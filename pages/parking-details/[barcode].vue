@@ -210,44 +210,8 @@ const print = () => {
   printWindow.document.close();
   printWindow.focus();
   printWindow.print();
-  //   printWindow.close();
 };
-// const emailTemplate = ref(null);
-// const print = () => {
-//     nextTick(()=> {
-//         console.log(emailTemplate.value);
-//     })
 
-//   return;
-//   const emailTemplate = emailTemplate.value.innerHTML;
-//   const printWindow = window.open("", "_blank");
-//   printWindow.document.open();
-//   printWindow.document.write(`
-//         <html>
-//           <head>
-//             <title>Email Template</title>
-//             <style>
-//               /* Add CSS styles for printing */
-//               body {
-//                 font-family: Arial, sans-serif;
-//                 font-size: 14px;
-//               }
-//               h1 {
-//                 color: #333;
-//               }
-//               p {
-//                 margin-bottom: 10px;
-//               }
-//             </style>
-//           </head>
-//           <body>
-//             ${emailTemplate.value}
-//           </body>
-//         </html>
-//       `);
-//   printWindow.document.close();
-//   printWindow.print();
-// };
 onMounted(() => {
   loadData();
 });

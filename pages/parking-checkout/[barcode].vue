@@ -6,7 +6,7 @@
           <div v-if="!loadingError && !isLoading">
             <div
               v-if="listAllData && listAllData?.length > 0"
-              class="grid md:grid-cols-3 justify-center gap-4"
+              class="grid md:grid-cols-3 md:justify-center gap-4 p-4 md:p-0"
             >
               <div>
                 <div ref="emailTemplate">
@@ -67,7 +67,6 @@
                       </div>
                       <section v-if="!parkingResponse.out_time">
                         <div
-                          id="paymentMethodId"
                           v-if="!parkingResponse.out_time"
                           style="
                             display: flex;
@@ -87,6 +86,7 @@
                             Payment method
                           </dt>
                           <select
+                            v-if="authUser?.id"
                             class="focus:outline-none bg-none"
                             :class="inputClass"
                             style="background: none"
@@ -94,13 +94,16 @@
                             v-model="paymentMethod"
                           >
                             <option
-                              v-for="category in ['cash', 'online', 'due']"
+                              v-for="category in ['cash', 'online']"
                               :key="category"
                               :value="category"
                             >
                               {{ category }}
                             </option>
                           </select>
+                          <span v-else class="capitalize">
+                            {{ paymentMethod }}
+                          </span>
                         </div>
                         <div
                           v-if="!parkingResponse.out_time"
@@ -142,20 +145,25 @@
                             v-if="selectedDiscountType == 'Discount'"
                           >
                             <input
-                              class="focus:outline-none bg-none text-right"
+                              v-if="authUser?.id"
+                              class="focus:outline-none bg-none text-right max-w-[5rem]"
                               :class="inputClass"
                               type="number"
+                              :disabled="!authUser?.id"
                               v-model="instantDiscount"
                               placeholder="0.00 taka"
                             />
+                            <span v-else>
+                              {{'৳ ' + instantDiscount}}
+                            </span>
                           </div>
-                          <div class="flex justify-between items-center" v-else>
+                          <div class="flex justify-between items-center gap-1" v-else>
                             <input
-                              class="focus:outline-none bg-none text-right max-w-[8rem]"
+                              class="focus:outline-none bg-none text-right max-w-[6rem]"
                               :class="inputClass"
                               type="text"
                               v-model="couponCode"
-                              placeholder="Type a code"
+                              placeholder="Coupon"
                             />
                             <button
                               @click="applyCouponCode"
@@ -185,11 +193,11 @@
                             Received amount
                           </dt>
                           <input
-                            class="focus:outline-none bg-none text-right"
+                            class="focus:outline-none bg-none text-right max-w-[5rem]"
                             :class="inputClass"
                             type="number"
                             v-model="receivedAmount"
-                            placeholder="0.00 taka"
+                            placeholder="৳ 0.00"
                           />
                         </div>
                       </section>
@@ -279,6 +287,7 @@
                     class="mx-4 mt-4 px-3"
                   >
                     <button
+                      v-if="paymentMethod=='cash'"
                       @click="showPaymentConfirmModaDialog()"
                       :disabled="disabledPaymentButton"
                       :class="disabledPaymentButton ? 'bg-slate-500' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500 '"
@@ -287,12 +296,22 @@
                       Payment
                     </button>
                     <button
+                    v-if="paymentMethod=='online' && authUser?.id"
                       @click="toggleQrCode"
                       :disabled="disabledPaymentButton"
                       :class="disabledPaymentButton ? 'bg-slate-500' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500 '"
                       class="mt-2 rounded-md border w-full border-transparent px-3 py-2 text-white text-base font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50"
                     >
                       Payment by QR code
+                    </button>
+                    <button
+                    v-else
+                      @click="confirmCheckout"
+                      :disabled="checkoutLoading"
+                      :class="checkoutLoading ? 'bg-slate-500' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500 '"
+                      class="mt-2 rounded-md border w-full border-transparent px-3 py-2 text-white text-base font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50"
+                    >
+                      Continue
                     </button>
                   </div>
                 </div>
@@ -421,7 +440,7 @@
       </ConfirmModal>
       <QrCodeModal
         :open="showQrCode"
-        @onClose="showQrCode = false"
+        @onClose="closeQrCodeModal"
         :value="qrCodeUrl"
       >
       </QrCodeModal>
@@ -446,12 +465,13 @@ import moment from "moment";
 import { PaymentService } from "~/services/PaymentService";
 import QrcodeVue from "qrcode.vue";
 import { DiscountService } from "~/services/DiscountService";
+import { authUser } from "~/hooks/useMenu";
 
 definePageMeta({
   layout: "auth-layout",
 });
 const inputClass =
-  "relative appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
+  "relative appearance-none rounded-md border border-gray-300 px-3 md:py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:outline-none focus:ring-blue-500 sm:text-sm focus:border-blue-500";
 
 const list = ref([]);
 const loadingError = ref(null);
@@ -482,7 +502,6 @@ const config = useRuntimeConfig();
 const url = config.public.APP_URL;
 const routeName = computed(() => router);
 const qrCodeUrl = computed(() => url + route.href);
-const authUser = computed(() => localStorage.getItem("LOGIN_ACCOUNT"));
 
 const searchQuery = computed(() => {
   return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.vehicle,v.membership,m.mt,p.tariff,t.parking_rates,p.payment`;
@@ -874,8 +893,27 @@ const showPaymentConfirmModaDialog = () => {
 };
 const toggleQrCode = () => {
   showQrCode.value = true;
-  console.log(route, router);
+  const newQuery = {
+    ...route.query,
+    receivedAmount: receivedAmount.value,
+    selectedDiscountType: selectedDiscountType.value,
+    paymentMethod: paymentMethod.value,
+  };
+
+  if (selectedDiscountType.value == 'Discount') {
+    newQuery.instantDiscount = instantDiscount.value
+  }else {
+    if (couponCodeResponse.value?.id && couponCode.value) {
+      newQuery.couponCode = couponCode.value
+    }
+  }
+  
+  router.push({ query: newQuery });
 };
+const closeQrCodeModal = ()=> {
+  showQrCode.value = false
+  router.push({ query: {} });
+}
 const applyCouponCode = async () => {
   if (!couponCode.value) {
     return;
@@ -923,6 +961,35 @@ watch(
     deep: true,
     immediate: false,
   }
+);
+watch(
+  route,
+  (o, n) => {
+    if (route.query) {
+      const newQuery = {
+        ...route.query,
+      };
+      if (route.query.receivedAmount) {
+        receivedAmount.value = route.query.receivedAmount
+      }
+      if (route.query.selectedDiscountType) {
+        selectedDiscountType.value = route.query.selectedDiscountType
+      }
+      if (route.query.paymentMethod) {
+        paymentMethod.value = route.query.paymentMethod
+      }
+      if (route.query.instantDiscount) {
+        instantDiscount.value = route.query.instantDiscount
+      }
+      if (route.query.couponCode) {
+        couponCode.value = route.query.couponCode
+        applyCouponCode()
+      }
+
+      router.push({ query: newQuery });
+    }
+  },
+  { deep: false, immediate: true }
 );
 onMounted(() => {
   loadData();

@@ -13,14 +13,7 @@
   ```
 -->
 <template>
-  <!--
-    This example requires updating your template:
-
-    ```
-    <html class="h-full bg-white">
-    <body class="h-full">
-    ```
-  -->
+  
   <div>
     <TransitionRoot as="template" :show="sidebarOpen">
       <Dialog
