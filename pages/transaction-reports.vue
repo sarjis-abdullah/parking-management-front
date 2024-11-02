@@ -109,7 +109,7 @@ const totals = computed(() => {
     const acc = {
       payable: 0,
       paid: 0,
-      pending_Payment: 0,
+      // pending_payment: 0,
       discount: 0,
       due: 0,
     };
@@ -119,7 +119,7 @@ const totals = computed(() => {
       if (payment.status == "success") {
         acc.paid += parseFloat(payment.total_paid);
       } else {
-        acc.pending_Payment += parseFloat(payment.total_paid);
+        // acc.pending_payment += parseFloat(payment.total_paid);
       }
       acc.payable += parseFloat(payment.total_payable);
       // acc.paid += parseFloat(payment.total_paid);
