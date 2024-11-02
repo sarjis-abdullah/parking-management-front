@@ -852,7 +852,9 @@ const showAlertMessage = computed(() => {
   } else if (subtotal < receivedAmount.value) {
     return "Are you sure receiving more amount than total?";
   }
-  return "Are you sure receiving less amount than total? Payment will be due.";
+  const amount = Number(parseFloat(receivedAmount.value)).toFixed(2)
+  const remaining = Number(parseFloat(subtotal) - parseFloat(receivedAmount.value)).toFixed(2)
+  return `You are paying ৳ ${amount} towards a ৳ ${subtotal} subtotal. A remaining balance of ৳ ${remaining} will be due.`
 });
 
 const disabledPaymentButton = computed(()=> {
