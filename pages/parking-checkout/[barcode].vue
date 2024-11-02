@@ -305,7 +305,7 @@
                       Payment by QR code
                     </button>
                     <button
-                    v-else
+                    v-else-if="paymentMethod=='online' && !authUser?.id"
                       @click="confirmCheckout"
                       :disabled="checkoutLoading"
                       :class="checkoutLoading ? 'bg-slate-500' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500 '"

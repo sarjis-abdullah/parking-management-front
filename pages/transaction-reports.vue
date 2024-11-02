@@ -160,10 +160,10 @@ const getTransactions = (extraQuery = "") => {
   activeReport.value = true;
   showTransactions.value = true;
   selected.value = [];
+  transactions.value = []
   setTimeout(async () => {
     try {
-      let q =
-        getQueryString(route.query) 
+      let q = getQueryString(route.query);
       if (selectedCategory.value) {
         q += `&category=${selectedCategory.value}`;
       }
@@ -243,28 +243,22 @@ watch(
   ([newStartDate, newEndDate], [oldStartDate, oldEndDate]) => {
     const newQuery = { ...route.query };
 
-    // if (newStartDate !== oldStartDate) {
-    //   if (newStartDate) {
-    //     newQuery.start_date = newStartDate;
-    //   } else {
-    //     delete newQuery.start_date;
-    //   }
-    // }
+    if (newStartDate !== oldStartDate) {
+      if (newStartDate) {
+        newQuery.start_date = newStartDate;
+      } else {
+        delete newQuery.start_date;
+      }
+    }
 
-    // if (newEndDate !== oldEndDate) {
-    //   if (newEndDate) {
-    //     newQuery.end_date = newEndDate;
-    //   } else {
-    //     delete newQuery.end_date;
-    //   }
-    // }
-    // if (newVehicleId !== oldVehicleId) {
-    //   if (newVehicleId) {
-    //     newQuery.vehicle_id = newVehicleId;
-    //   } else {
-    //     delete newQuery.vehicle_id;
-    //   }
-    // }
+    if (newEndDate !== oldEndDate) {
+      if (newEndDate) {
+        newQuery.end_date = newEndDate;
+      } else {
+        delete newQuery.end_date;
+      }
+    }
+
     activeReport.value = false;
     router.push({ query: newQuery });
   },
@@ -401,7 +395,10 @@ const totalPayableForSelectedTransaction = computed(() => {
       sum += parseFloat(item.total_due);
       continue;
     } else if (item.status != "success") {
-      sum += parseFloat(item.total_payable) - parseFloat(item.discount_amount) - parseFloat(item.membership_discount);
+      sum +=
+        parseFloat(item.total_payable) -
+        parseFloat(item.discount_amount) -
+        parseFloat(item.membership_discount);
       continue;
     }
   }
@@ -478,9 +475,12 @@ const handlePerpageChange = () => {
 const config = useRuntimeConfig();
 const BASE_API_URL = config.public.BASE_URL;
 const routeName = computed(() => router);
-const paymentIds = computed(()=> selected.value?.map((i) => i.id).join(','));
+const paymentIds = computed(() => selected.value?.map((i) => i.id).join(","));
 // const qrCodeUrl = computed(() => url + route.href);
-const qrCodeUrl = computed(()=> `${BASE_API_URL}payment/pay-all?paymentIds=${paymentIds.value}&paymentMethod=online`)
+const qrCodeUrl = computed(
+  () =>
+    `${BASE_API_URL}payment/pay-all?paymentIds=${paymentIds.value}&paymentMethod=online`
+);
 const confirmPay = async () => {
   const query = `?paymentIds=${paymentIds.value}&paymentMethod=${selectedPaymentMethod.value}&process=app`;
   try {
@@ -516,48 +516,76 @@ const getCategories = async () => {
   }
 };
 onMounted(() => {
-  startDate.value = formatDate(moment().subtract(1, "month"), "YYYY-MM-DD");
-  endDate.value = formatDate(moment(), "YYYY-MM-DD");
-  const newQuery = {
-    ...route.query,
-  };
+  // startDate.value = formatDate(moment().subtract(1, "month"), "YYYY-MM-DD");
+  // endDate.value = formatDate(moment(), "YYYY-MM-DD");
+  // const newQuery = {
+  //   ...route.query,
+  // };
 
-  newQuery.start_date = startDate.value;
-  newQuery.end_date = endDate.value;
-  router.push({ query: newQuery });
+  // newQuery.start_date = startDate.value;
+  // newQuery.end_date = endDate.value;
+  // router.push({ query: newQuery });
   getCategories();
 });
 </script>
 <template>
   <section>
-    <section class="grid md:grid-cols-4 gap-2">
-      <div class="grid gap-2">
-        <label class="text-gray-500">Transaction ID</label>
-        <input
-          :class="inputClass"
-          v-model="transactionId"
-          type="text"
-          placeholder="Transaction ID"
-        />
+    <section class="grid md:grid-cols-5 gap-2">
+      <div class="flex items-end">
+        <div class="grid gap-2 w-full">
+          <label class="text-gray-500">Transaction ID</label>
+          <input
+            :class="inputClass"
+            v-model="transactionId"
+            type="text"
+            placeholder="Transaction ID"
+          />
+        </div>
+        <XMarkIcon
+            v-if="transactionId"
+            @click="transactionId = ''"
+            class="h-5 w-5 text-red-500 cursor-pointer mr-2 mb-3"
+            aria-hidden="true"
+          />
       </div>
       <div class="grid gap-2">
-        <label class="text-gray-500">Start date</label>
-        <input
-          :class="inputClass"
-          v-model="startDate"
-          type="date"
-          placeholder="e.g. 20/01/2024"
-        />
+        <div class="flex items-end">
+          <div class="grid gap-2 w-full">
+            <label class="text-gray-500">Start date</label>
+            <input
+              :class="inputClass"
+              v-model="startDate"
+              type="date"
+              placeholder="e.g. 20/01/2024"
+            />
+          </div>
+          <XMarkIcon
+            v-if="startDate"
+            @click="startDate = ''"
+            class="h-5 w-5 text-red-500 cursor-pointer mr-2 mb-3"
+            aria-hidden="true"
+          />
+        </div>
       </div>
-      
+
       <div class="grid gap-2">
-        <label class="text-gray-500">End date</label>
-        <input
-          :class="inputClass"
-          v-model="endDate"
-          type="date"
-          placeholder="e.g. 20/12/2024"
-        />
+        <div class="flex items-end">
+          <div class="grid gap-2 w-full">
+            <label class="text-gray-500">End date</label>
+            <input
+              :class="inputClass"
+              v-model="endDate"
+              type="date"
+              placeholder="e.g. 20/12/2024"
+            />
+          </div>
+          <XMarkIcon
+            v-if="endDate"
+            @click="endDate = ''"
+            class="h-5 w-5 text-red-500 cursor-pointer mr-2 mb-3"
+            aria-hidden="true"
+          />
+        </div>
       </div>
       <div class="grid gap-2">
         <label class="text-gray-500">Payment Method</label>
@@ -620,6 +648,7 @@ onMounted(() => {
             <option value="success">success</option>
             <option value="failed">failed</option>
             <option value="pending">pending</option>
+            <option value="unpaid">unpaid</option>
             <!-- Add more options as needed -->
           </select>
           <XMarkIcon
@@ -792,10 +821,10 @@ onMounted(() => {
       <div></div>
       <div></div>
       <div></div>
-      <div class="flex justify-center fixed bottom-3 right-14 text-blue-500 bg-green-400 rounded-full w-[8rem] h-[8rem] p-4">
-        <div
-          class="flex gap-4 items-center "
-        >
+      <div
+        class="flex justify-center fixed bottom-3 right-14 text-blue-500 bg-green-400 rounded-full w-[8rem] h-[8rem] p-4"
+      >
+        <div class="flex gap-4 items-center">
           <div>
             <p class="text-white rounded-md text-center font-bold">
               Total {{ "৳ " + totalPayableForSelectedTransaction }}
@@ -843,7 +872,12 @@ onMounted(() => {
       </header>
 
       <table
-        style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;"
+        style="
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 20px;
+          font-size: 14px;
+        "
       >
         <thead>
           <tr>
@@ -866,7 +900,7 @@ onMounted(() => {
                 background-color: #f2f2f2;
               "
             >
-            Transaction ID
+              Transaction ID
             </th>
             <th
               style="
@@ -977,8 +1011,14 @@ onMounted(() => {
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              <div class="flex items-center gap-2" :class="item.status != 'success' || item.payment_type == 'partial' ? '' : 'justify-center'">
-                
+              <div
+                class="flex items-center gap-2"
+                :class="
+                  item.status != 'success' || item.payment_type == 'partial'
+                    ? ''
+                    : 'justify-center'
+                "
+              >
                 <input
                   v-if="
                     item.status != 'success' || item.payment_type == 'partial'
@@ -1003,8 +1043,8 @@ onMounted(() => {
             <td
               style="border: 1px solid #ddd; padding: 8px; text-align: center"
             >
-              <div>{{ formatDate(item.transaction_date, 'DD-MM-YYYY') }}</div>
-              <div>{{ formatDate(item.transaction_date, 'hh:mm A') }}</div>
+              <div>{{ formatDate(item.transaction_date, "DD-MM-YYYY") }}</div>
+              <div>{{ formatDate(item.transaction_date, "hh:mm A") }}</div>
             </td>
 
             <td
@@ -1022,10 +1062,12 @@ onMounted(() => {
             >
               <div class="flex flex-col items-end gap-2">
                 <div v-if="item.membership_discount">
-                  <span class="text-xs">Membership ৳ </span>{{ item.membership_discount }}
+                  <span class="text-xs">Membership ৳ </span
+                  >{{ item.membership_discount }}
                 </div>
                 <div v-if="item.discount_amount">
-                  <span class="text-xs">Other ৳ </span>{{ item.discount_amount }}
+                  <span class="text-xs">Other ৳ </span
+                  >{{ item.discount_amount }}
                 </div>
               </div>
             </td>
@@ -1197,10 +1239,17 @@ onMounted(() => {
       </select>
     </div>
     <div class="mt-6">
-      <qrcode-vue v-if="selectedPaymentMethod == 'online'" :value="qrCodeUrl" :size="300" level="H" class="m-auto" />
-      <p class="text-indigo-600 text font-bold border-b rounded-md px-4 py-2 text-center mt-4">
-        
-        {{ selectedPaymentMethod == 'online' ? 'Scan & pay' : 'Payable' }}
+      <qrcode-vue
+        v-if="selectedPaymentMethod == 'online'"
+        :value="qrCodeUrl"
+        :size="300"
+        level="H"
+        class="m-auto"
+      />
+      <p
+        class="text-indigo-600 text font-bold border-b rounded-md px-4 py-2 text-center mt-4"
+      >
+        {{ selectedPaymentMethod == "online" ? "Scan & pay" : "Payable" }}
         <strong>{{ "৳ " + totalPayableForSelectedTransaction }}</strong>
       </p>
     </div>
@@ -1210,7 +1259,7 @@ onMounted(() => {
           @click="showConfirmModal = false"
           class="px-2 py-1 border-red-300 rounded-md"
         >
-          {{ selectedPaymentMethod == 'cash' ? 'Cancel' : 'Done' }}
+          {{ selectedPaymentMethod == "cash" ? "Cancel" : "Done" }}
         </button>
         <button
           v-if="selectedPaymentMethod == 'cash'"

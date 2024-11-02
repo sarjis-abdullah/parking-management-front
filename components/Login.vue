@@ -112,7 +112,7 @@ const submitForm = () => {
     })
     .then((data) => {
       loading.value = false;
-      if (data.user) {
+      if (data.user && window && window.localStorage) {
         localStorage.setItem("LOGIN_ACCOUNT", JSON.stringify(data.user));
         localStorage.setItem("ACCESS_TOKEN", data.accessToken);
         isLogin.value = true;
