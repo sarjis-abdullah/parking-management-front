@@ -170,7 +170,7 @@ onMounted(() => {
           @filterOrderBy="filterOrderBy"
           @downloadOrderStatement="downloadOrderStatement"
         /> -->
-        <Titlebar title="tariff"></Titlebar>
+        <Titlebar title="Discount"></Titlebar>
 
           <div v-if="!loadingError && !isLoading">
             <table

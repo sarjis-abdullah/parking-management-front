@@ -1,4 +1,3 @@
-
 <script setup>
 import { computed, ref, watch, onMounted } from "vue";
 import moment from "moment";
@@ -10,6 +9,7 @@ import Loading from "@/components/common/Loading.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { XMarkIcon } from "@heroicons/vue/24/outline";
 import { PaymentService } from "~/services/PaymentService";
+import AutoComplete from "@/components/common/AutoComplete.vue";
 
 definePageMeta({
   layout: "auth-layout",
@@ -28,7 +28,7 @@ const paymentType = ref("");
 const paymentStatus = ref("");
 const transactions = ref([]);
 const isLoading = ref(false);
-const perPage = ref(2);
+const perPage = ref(50);
 const lastPage = ref(null);
 const total = ref(null);
 const totalPerPage = ref(null);
@@ -78,14 +78,21 @@ const serverErros = ref({});
 const activeReport = ref(false);
 
 const vehicleEntryReports = ref([]);
-const getVehicleEntryReports = () => {
+const getVehicleEntryReports = (extraQuery = "") => {
   isLoading.value = true;
   activeReport.value = true;
   setTimeout(async () => {
     try {
-      const q =
-        getQueryString(route.query) +
+      let q = ''
+      if (extraQuery) {
+        query += extraQuery;
+      }
+      q += getQueryString(route.query) +
         `&page=${page.value}&per_page=${perPage.value}`;
+      console.log(extraQuery, 'extraQuery');
+        
+
+      console.log(q, 12345);
       const res = await ReportService.getVehicle(q);
       vehicleEntryReports.value = res.data.data;
       const meta = res.data;
@@ -101,15 +108,15 @@ const getVehicleEntryReports = () => {
   }, 500);
 };
 const details = ref([]);
-const entryDate = ref('');
+const entryDate = ref("");
 const showDetails = async (date) => {
   try {
-    entryDate.value = date
+    entryDate.value = date;
     // const q =
     //       getQueryString(route.query) +
     //       `&page=${page.value}&per_page=${perPage.value}`;
     const q = `?entry_date=${date}`;
-    isLoading.value = true
+    isLoading.value = true;
     const res = await ReportService.getDetailVehicleReport(q);
     console.log(res.data);
     details.value = res.data.details;
@@ -123,6 +130,24 @@ const showDetails = async (date) => {
     serverErros.value = error.errors;
   } finally {
     isLoading.value = false;
+  }
+};
+const client = ref("");
+const handleChosen = (item) => {
+  vehicleId.value = item.id;
+
+  const newQuery = { ...route.query };
+  newQuery.vehicle_id = vehicleId.value;
+  router.push({ query: newQuery });
+};
+const resetSearch = () => {
+  const newQuery = {
+    ...route.query,
+  };
+  if (newQuery.vehicle_id) {
+    delete newQuery.vehicle_id;
+    activeReport.value = false;
+    router.push({ query: newQuery });
   }
 };
 
@@ -291,6 +316,17 @@ onMounted(() => {
         <label class="text-gray-500"
           >Vehicle Number<span class="text-red-500">*</span></label
         >
+        <AutoComplete
+          v-model="client"
+          @chosen="handleChosen"
+          @resetSearch="resetSearch"
+          placeholder="Search for vehicle"
+        ></AutoComplete>
+      </div>
+      <div class="grid gap-2" v-if="false">
+        <label class="text-gray-500"
+          >Vehicle Number<span class="text-red-500">*</span></label
+        >
         <div
           class="flex justify-between items-center gap-2"
           :class="selectWrapper"
@@ -324,21 +360,53 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      <section class="flex items-end">
+      <div class="flex items-end">
         <button
           :disabled="isLoading"
-          @click="getVehicleEntryReports"
-          class="text-white px-2 py-1 rounded-md"
+          @click="getVehicleEntryReports('')"
+          class="text-white px-2 py-2 rounded-md w-full cursor-pointer"
           :class="activeReport ? 'bg-indigo-600' : 'bg-gray-600'"
         >
           Apply
         </button>
-      </section>
+      </div>
     </section>
+
     <section>
-      <h2 style="text-align: center; margin-top: 20px; padding: 1rem">
-        Date-wise vehicle entry reports
-      </h2>
+      <header
+        class="flex"
+        :class="
+          vehicleEntryReports?.length ? 'justify-between' : 'justify-center'
+        "
+      >
+        <div>
+          <h2
+            style="text-align: center; margin-top: 20px"
+            class="text-2xl font-bold text-gray-800 p-4"
+          >
+            Vehicle entry reports
+          </h2>
+        </div>
+        <section
+          class="flex items-end gap-2 p-4"
+          v-if="vehicleEntryReports?.length"
+        >
+          <button
+            :disabled="isLoading"
+            @click="getVehicleEntryReports('&format=pdf')"
+            class="border px-2 py-1 rounded-md cursor-pointer"
+          >
+            Download PDF
+          </button>
+          <button
+            :disabled="isLoading"
+            @click="downloadCsv"
+            class="border px-2 py-1 rounded-md cursor-pointer"
+          >
+            Download CSV
+          </button>
+        </section>
+      </header>
       <table
         style="width: 100%; border-collapse: collapse; margin-bottom: 20px"
       >
@@ -391,10 +459,23 @@ onMounted(() => {
             </td>
 
             <td
-              style="border: 1px solid #ddd; padding: 8px; text-align: center; display: flex; gap: 1rem; justify-content: center"
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+              "
             >
               <span class="text-3xl">{{ item.vehicle_entries }}</span>
-              <button class="text-white px-2 py-1 rounded-md bg-indigo-400" :disabled="isLoading" @click="showDetails(item.entry_date)">Details</button>
+              <button
+                class="text-white px-2 py-1 rounded-md bg-indigo-400"
+                :disabled="isLoading"
+                @click="showDetails(item.entry_date)"
+              >
+                Details
+              </button>
             </td>
           </tr>
           <tr v-if="vehicleEntryReports.length == 0">
@@ -440,7 +521,9 @@ onMounted(() => {
   </Pagination>
 
   <section v-if="!isLoading && details?.length">
-    <h2 style="text-align: center; margin-top: 20px; padding: 1rem">Details ({{ entryDate }})</h2>
+    <h2 style="text-align: center; margin-top: 20px; padding: 1rem">
+      Details ({{ entryDate }})
+    </h2>
     <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px">
       <thead>
         <tr>

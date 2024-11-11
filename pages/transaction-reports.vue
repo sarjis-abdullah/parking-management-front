@@ -711,52 +711,11 @@ onMounted(() => {
           >Vehicle Number<span class="text-red-500">*</span></label
         >
         <AutoComplete
-          :data="[
-            {
-              id: 'abcd',
-              name: 'abcd',
-            },
-            {
-              name: 'qwer',
-              id: 'qwer',
-            },
-          ]"
           v-model="client"
           @chosen="handleChosen"
           @resetSearch="resetSearch"
-          placeholder="Search for state..."
+          placeholder="Search for vehicle"
         ></AutoComplete>
-        <!-- <div
-          class="flex justify-between items-center gap-2"
-          :class="selectWrapper"
-        >
-          <div class="w-full">
-            <input
-              :class="selecboxClass"
-              class="focus:outline-none"
-              v-model="vehicleNumber"
-              type="text"
-              @input="debouncedSearch"
-              @change="checkSelection"
-              placeholder="e.g. Ka-12345"
-              list="cityname"
-            />
-            <datalist id="cityname">
-              <option
-                v-for="item in vehicleList"
-                :key="item.id"
-                :value="item.number"
-              ></option>
-            </datalist>
-          </div>
-          <div v-if="vehicleId">
-            <XMarkIcon
-              @click="removeSelectedVehicleId"
-              class="h-5 w-5 text-red-500 cursor-pointer mr-2"
-              aria-hidden="true"
-            />
-          </div>
-        </div> -->
       </div>
     </section>
     <section class="grid grid-cols-5 gap-2 mt-4">

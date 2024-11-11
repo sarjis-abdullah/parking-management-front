@@ -1,5 +1,5 @@
 export class BaseHttpRequester {
-  static BASE_URL = "http://192.168.0.196:8190/api/v1/";
+  static BASE_URL = "http://192.168.0.114:8190/api/v1/";
   static getToken() {
     return window.localStorage.getItem("ACCESS_TOKEN");
   }

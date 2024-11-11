@@ -114,9 +114,10 @@ const onSubmit = async () => {
   }
 };
 const places = ref([]);
+const selectedFloor = ref("");
 const getPlaces = async () => {
   try {
-    selectedFloor.value = null
+    selectedFloor.value = ''
     floors.value = []
     loading.value = true;
     const { data } = await PlaceService.getAll("");
@@ -127,7 +128,6 @@ const getPlaces = async () => {
     loading.value = false;
   }
 };
-const selectedFloor = ref("");
 const blocks = ref([]);
 const blockLoading = ref(false);
 const getBlocks = async () => {
@@ -181,8 +181,8 @@ const floors = ref([]);
 const floorLoading = ref(false);
 
 const getFloors = async () => {
-  selectedSlot.value = null;
-  selectedBlock.value = null;
+  selectedSlot.value = '';
+  selectedBlock.value = '';
   blocks.value = [];
   floorLoading.value = true;
   let query = `?include=f.blocks`;
