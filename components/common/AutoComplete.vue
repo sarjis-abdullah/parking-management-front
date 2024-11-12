@@ -7,6 +7,7 @@
         :value="modelValue"
         @input="handleInput"
         @focus="handleFocus"
+        @blur="handleOnblur"
         :placeholder="placeholder"
         ref="inputRef"
         tabindex="0"
@@ -22,21 +23,32 @@
     <div
       v-show="modelValue && showOptions"
       @click.self="handleSelf()"
-      @focusout="showOptions = false"
+      @focusout="handleFocusOut"
       tabindex="0"
-      :class="dropdownClass"
+      :class="showList ? 'hidden' : dropdownClass"
     >
       <ul class="py-1">
         <li
+          v-if="isLoading"
+          class="px-3 py-2 text-center"
+        >
+          Loading
+        </li>
+        
+        <li
+          v-else-if="!searchResults.length && showNoDataMsg"
+          class="px-3 py-2 text-center"
+        >
+          No Matching results
+        </li>
+        <li
+          v-else
           v-for="(item, index) in searchResults"
           :key="index"
           @click="handleClick(item)"
           class="px-3 py-2 cursor-pointer hover:bg-gray-200"
         >
           {{ item.number }}
-        </li>
-        <li v-if="!searchResults.length" class="px-3 py-2 text-center">
-          No Matching Results
         </li>
       </ul>
     </div>
@@ -59,9 +71,9 @@ const props = defineProps({
     required: false,
     default: "Enter text here.",
   },
-  data: {
-    type: Array,
-    required: true,
+  showNoDataMsg: {
+    type: Boolean,
+    default: true,
   },
   inputClass: {
     type: String,
@@ -83,51 +95,39 @@ const chosenOption = ref("");
 const searchTerm = ref("");
 const inputRef = ref(null);
 
-const emit = defineEmits(["update:modelValue", "chosen", "resetSearch"]);
+const emit = defineEmits(["update:modelValue", "chosen", "resetSearch", "createNew"]);
 
 const emitValue = (e) => emit("update:modelValue", e.target.value);
 const searchResults = ref([]);
+const isLoading = ref(false);
 
+const showList = computed(
+  () => !!(!props.showNoDataMsg && !searchResults.value.length)
+);
 const search = async () => {
-  let query = "";
-  if (searchTerm.value) {
-    query += `?query=${searchTerm.value}`;
-    // const newQuery = {
-    //   ...route.query,
-    // };
-  }
-  const result = await VehicleService.getAll(query);
-  if (result?.data?.length) {
-    searchResults.value = result.data;
-  } else {
-    searchResults.value = [];
+  try {
+    isLoading.value = true;
+    let query = "";
+    if (searchTerm.value) {
+      query += `?query=${searchTerm.value}`;
+    }
+    const result = await VehicleService.getAll(query);
+    if (result?.data?.length) {
+      searchResults.value = result.data;
+    } else {
+      searchResults.value = [];
+    }
+  } catch (error) {}
+  finally {
+    isLoading.value = false
   }
 };
 const debouncedSearch = useDebounce(search, 500);
-// const fetchResults = debounce(async (query) => {
-//   if (query) {
-//     try {
-//       const response = await fetch(`your-api-endpoint?q=${query}`);
-//       const data = await response.json();
-//       searchResults.value = data; // Assuming `data` is the array of results
-//     } catch (error) {
-//       console.error("Error fetching data:", error);
-//     }
-//   } else {
-//     searchResults.value = [];
-//   }
-// }, 300);
-
-// const searchResults = computed(() => {
-//   return props.data.filter((item) => {
-//     return item?.name?.toLowerCase()?.includes(searchTerm.value?.toLowerCase());
-//   });
-// });
 
 function reset() {
   emit("update:modelValue", "");
   emit("resetSearch");
-  
+
   chosenOption.value = "";
 }
 
@@ -158,6 +158,18 @@ function clickedOutside() {
 
   if (!chosenOption.value) {
     emit("update:modelValue", "");
+  }
+}
+function handleFocusOut() {
+  showOptions.value = false;
+  console.log(1234);
+}
+function handleOnblur() {
+  if (props.showNoDataMsg) {
+    return;
+  }
+  if (!props.showNoDataMsg && props.modelValue && !searchResults.value.length) {
+    emit("createNew");
   }
 }
 </script>

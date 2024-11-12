@@ -17,6 +17,7 @@ import { VehicleService } from "~/services/VehicleService";
 import ClientErrors from "@/components/common/ClientErrors.vue";
 import ServerError from "@/components/common/Error.vue";
 import { BlockService } from "~/services/BlockService";
+import AutoComplete from "@/components/common/AutoComplete.vue";
 
 definePageMeta({
   layout: "auth-layout",
@@ -117,8 +118,8 @@ const places = ref([]);
 const selectedFloor = ref("");
 const getPlaces = async () => {
   try {
-    selectedFloor.value = ''
-    floors.value = []
+    selectedFloor.value = "";
+    floors.value = [];
     loading.value = true;
     const { data } = await PlaceService.getAll("");
     places.value = data;
@@ -181,8 +182,8 @@ const floors = ref([]);
 const floorLoading = ref(false);
 
 const getFloors = async () => {
-  selectedSlot.value = '';
-  selectedBlock.value = '';
+  selectedSlot.value = "";
+  selectedBlock.value = "";
   blocks.value = [];
   floorLoading.value = true;
   let query = `?include=f.blocks`;
@@ -228,6 +229,40 @@ const handleSelectedSlot = (slot) => {
   }
 };
 const vehicleNames = ref([]);
+const vehicleName = ref("");
+const handleChosen = (data) => {
+  // vehicleId.value = item.id;
+
+  state.vehicleNumber = data.number;
+  state.driverName = data.driver_name;
+  state.driverMobile = data.driver_mobile;
+  // categories.value.push(data.category);
+  state.category = data.category_id;
+
+  // const newQuery = { ...route.query };
+  // newQuery.vehicle_id = vehicleId.value;
+  // router.push({ query: newQuery });
+};
+const resetSearch = () => {
+  state.vehicleNumber = '';
+  state.driverName = '';
+  state.driverMobile = '';
+  // categories.value.push(data.category);
+  state.category = '';
+  // const newQuery = {
+  //   ...route.query,
+  // };
+  // if (newQuery.vehicle_id) {
+  //   delete newQuery.vehicle_id;
+  //   activeReport.value = false;
+  //   router.push({ query: newQuery });
+  // }
+};
+const createNewVehicle = () => {
+  state.driverName = '';
+  state.driverMobile = '';
+  state.category = '';
+};
 const search = async () => {
   let query = "?include=p.category";
   if (state.vehicleNumber) {
@@ -273,9 +308,9 @@ const geTtariffs = async () => {
     const { data } = await TariffService.getAll();
     tariffs.value = data;
     return Promise.resolve(data);
-  } catch (error) {}
-  finally {
-    loading.value = false
+  } catch (error) {
+  } finally {
+    loading.value = false;
   }
 };
 onMounted(async () => {
@@ -305,7 +340,15 @@ const inputClass =
           <label class="text-gray-500"
             >Vehicle Number<span class="text-red-500">*</span></label
           >
-          <input
+          <AutoComplete
+            v-model="state.vehicleNumber"
+            @chosen="handleChosen"
+            @resetSearch="resetSearch"
+            @createNew="createNewVehicle"
+            placeholder="Search for vehicle"
+            :showNoDataMsg="false"
+          ></AutoComplete>
+          <!-- <input
             :class="inputClass"
             v-model="state.vehicleNumber"
             type="text"
@@ -320,7 +363,7 @@ const inputClass =
               :key="item.id"
               :value="item.number"
             ></option>
-          </datalist>
+          </datalist> -->
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500">Driver Name</label>
@@ -546,6 +589,9 @@ const inputClass =
         </div>
       </section>
     </form>
-    <Loading v-if="loading || slotLoading || blockLoading || floorLoading" parentClass="flex justify-center" />
+    <Loading
+      v-if="loading || slotLoading || blockLoading || floorLoading"
+      parentClass="flex justify-center"
+    />
   </section>
 </template>
