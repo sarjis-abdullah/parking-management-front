@@ -25,7 +25,14 @@ const list = ref([]);
 const loadingError = ref(null);
 const isLoading = ref(true);
 const serverErrors = ref(null);
-
+const startDate = ref("");
+const endDate = ref("");
+const disabledFilterClasses = computed(()=> {
+  if (isLoading.value || !startDate.value || !endDate.value) {
+    return true
+  }
+  return false
+})
 //pagination
 const page = ref(1);
 const perPage = ref(10);
@@ -34,7 +41,11 @@ const total = ref(null);
 const totalPerPage = ref(null);
 
 const searchQuery = computed(() => {
-  return `?page=${page.value}&per_page=${perPage.value}&include=p.createdByUser`;
+  let query = `?page=${page.value}&per_page=${perPage.value}&include=p.createdByUser`;
+  if (startDate.value && endDate.value) {
+    query += `&start_date=${startDate.value}&end_date=${endDate.value}`;
+  }
+  return query;
 });
 
 const loadData = async () => {
@@ -63,7 +74,6 @@ const deleteRecord = async (id) => {
       isClosing.value = true;
       const res = await PlaceService.delete(id);
       list.value = list.value.filter((item) => item.id != id);
-
       serverErrors.value = {};
       // handleReset();
     } catch (error) {
@@ -78,7 +88,7 @@ const closeCash = async () => {
     try {
       isClosing.value = true;
       const res = await CashFlowService.closeCash();
-
+      loadData()
       serverErrors.value = {};
     } catch (error) {
       serverErrors.value = error.errors;
@@ -142,17 +152,69 @@ const updateRecord = async (id) => {
     isUpdating.value = false;
   }
 };
+watch(() => searchQuery.value, (newValue, oldValue) => {
+  loadData();
+}, {
+  immediate: true,
+  deep:true
+})
 const onPageChanged = (p) => {
   page.value = p;
   loadData();
 };
 onMounted(() => {
-  loadData();
+  // loadData();
 });
 </script>
 <template>
   <div class="rounded-lg bg-slate-[#A8A8A8] shadow-lg p-6">
     <div class="md:mt-8 flow-root">
+      <section class="grid md:grid-cols-5 gap-2 mb-8">
+        <div class="grid gap-2">
+          <div class="flex items-end">
+            <div class="grid gap-2 w-full">
+              <label class="text-gray-500">Start date</label>
+              <input
+                :class="inputClass"
+                v-model="startDate"
+                type="date"
+                placeholder="e.g. 20/01/2024"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="grid gap-2">
+          <div class="flex items-end">
+            <div class="grid gap-2 w-full">
+              <label class="text-gray-500">End date</label>
+              <input
+                :class="inputClass"
+                v-model="endDate"
+                type="date"
+                placeholder="e.g. 20/12/2024"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="grid gap-2" v-if="endDate && startDate">
+          <div>
+            <div></div>
+            <button
+              @click="()=> {
+                endDate = ''
+                startDate = ''
+              }"
+              class="text-white px-4 py-2 rounded-md cursor-pointer"
+            >
+              <XMarkIcon
+              class="h-5 w-5 text-red-500 cursor-pointer mr-2 mb-3"
+              aria-hidden="true"
+            />
+            </button>
+          </div>
+        </div>
+      </section>
       <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
           <!-- <OrderFilters
@@ -173,12 +235,14 @@ onMounted(() => {
                 :disabled="isClosing"
                 class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700 w-full md:w-auto text-center"
               >
-                Close cash</button>
+                Cash close
+              </button>
               <NuxtLink
                 to="/add/cashflow"
                 class="bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600 w-full md:w-auto text-center"
-              >           
-                Add opening balance</NuxtLink>
+              >
+                Add opening balance</NuxtLink
+              >
             </div>
           </header>
 
@@ -265,7 +329,7 @@ onMounted(() => {
                     <div class="flex items-center">
                       <div>
                         <div class="font-medium text-gray-900">
-                          {{ formatDate(singleData.date, 'DD-MM-YYYY') }}
+                          {{ formatDate(singleData.date, "DD-MM-YYYY") }}
                         </div>
                       </div>
                     </div>
