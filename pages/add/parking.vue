@@ -22,6 +22,8 @@ import AutoComplete from "@/components/common/AutoComplete.vue";
 definePageMeta({
   layout: "auth-layout",
 });
+const DISTRICT_CODE_CHITTAGONG = "Chatto metro"
+const DISTRICT_CODE_DHAKA = "Dhaka metro"
 const defaultData = {
   vehicleNumber: "",
   driverName: "",
@@ -31,7 +33,9 @@ const defaultData = {
   category: "",
   floor: "",
   tariff: "",
+  districtCode: DISTRICT_CODE_CHITTAGONG,
 };
+const districtCodes = computed(()=> [DISTRICT_CODE_CHITTAGONG, DISTRICT_CODE_DHAKA])
 const serverErrors = ref({});
 const state = reactive(defaultData);
 const rules = computed(() => {
@@ -67,11 +71,12 @@ const handleReset = async () => {
     state[key] = "";
   }
   selectedSlot.value = null;
+  state.districtCode = DISTRICT_CODE_CHITTAGONG;
   // formRef.value?.reset();
 };
 const parkingData = computed(() => {
   return {
-    vehicle_no: state.vehicleNumber,
+    vehicle_no: state.districtCode + ' ' + state.vehicleNumber,
     driver_name: state.driverName,
     driver_mobile: state.driverMobile,
     place_id: state.place,
@@ -244,11 +249,11 @@ const handleChosen = (data) => {
   // router.push({ query: newQuery });
 };
 const resetSearch = () => {
-  state.vehicleNumber = '';
-  state.driverName = '';
-  state.driverMobile = '';
+  state.vehicleNumber = "";
+  state.driverName = "";
+  state.driverMobile = "";
   // categories.value.push(data.category);
-  state.category = '';
+  state.category = "";
   // const newQuery = {
   //   ...route.query,
   // };
@@ -259,9 +264,9 @@ const resetSearch = () => {
   // }
 };
 const createNewVehicle = () => {
-  state.driverName = '';
-  state.driverMobile = '';
-  state.category = '';
+  state.driverName = "";
+  state.driverMobile = "";
+  state.category = "";
 };
 const search = async () => {
   let query = "?include=p.category";
@@ -340,14 +345,32 @@ const inputClass =
           <label class="text-gray-500"
             >Vehicle Number<span class="text-red-500">*</span></label
           >
-          <AutoComplete
-            v-model="state.vehicleNumber"
-            @chosen="handleChosen"
-            @resetSearch="resetSearch"
-            @createNew="createNewVehicle"
-            placeholder="Search for vehicle"
-            :showNoDataMsg="false"
-          ></AutoComplete>
+          <section class="md:grid gap-2" style="grid-template-columns: 28% 69%">
+            <div class="mb-2 md:mb-0">
+              <select
+                class="focus:outline-none bg-none"
+                :class="inputClass"
+                style="background: none"
+                name="place"
+                v-model="state.districtCode"
+              >
+                <option v-for="item in districtCodes" :key="item" :value="item">
+                  {{ item }}
+                </option>
+                <!-- Add more options as needed -->
+              </select>
+            </div>
+            <div>
+              <AutoComplete
+                v-model="state.vehicleNumber"
+                @chosen="handleChosen"
+                @resetSearch="resetSearch"
+                @createNew="createNewVehicle"
+                placeholder="Search for vehicle"
+                :showNoDataMsg="false"
+              ></AutoComplete>
+            </div>
+          </section>
           <!-- <input
             :class="inputClass"
             v-model="state.vehicleNumber"
