@@ -131,6 +131,7 @@
                             style="background: none"
                             name="place"
                             v-model="selectedDiscountType"
+                            @change="handleDiscountTypeChange"
                           >
                             <option
                               v-for="category in ['Discount', 'Coupon code']"
@@ -809,6 +810,9 @@ const parkingDataToCheckout = computed(() => {
       membership_discount: membershipDiscountAmount.value ?? 0,
     },
   };
+  if (couponCodeResponse.value) {
+    obj.payment.discount_id = couponCodeResponse.value.id
+  }
   return obj;
 });
 const emailTemplate = ref(null);
@@ -933,7 +937,7 @@ const applyCouponCode = async () => {
   if (!couponCode.value) {
     return;
   }
-  couponCodeResponse.value = []
+  couponCodeResponse.value = null
   try {
     const query = `?promo_code=${couponCode.value}`;
     const result = await DiscountService.getAll(query);
@@ -942,9 +946,15 @@ const applyCouponCode = async () => {
       couponCodeResponse.value = result.data[0];
     }
   } catch (error) {
-    couponCodeResponse.value = []
+    couponCodeResponse.value = null
   }
 };
+
+const handleDiscountTypeChange = () => {
+  couponCodeResponse.value = null
+  couponCode.value = ''
+  instantDiscount.value = 0
+}
 watch(
   () => receivedAmount,
   (newValue, oldValue) => {

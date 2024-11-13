@@ -197,7 +197,7 @@ onMounted(() => {
             </div>
           </div>
         </div>
-        <div class="grid gap-2" v-if="endDate && startDate">
+        <div class="grid gap-2 items-end" v-if="endDate && startDate">
           <div>
             <div></div>
             <button
@@ -208,7 +208,7 @@ onMounted(() => {
               class="text-white px-4 py-2 rounded-md cursor-pointer"
             >
               <XMarkIcon
-              class="h-5 w-5 text-red-500 cursor-pointer mr-2 mb-3"
+              class="h-5 w-5 text-red-500 cursor-pointer"
               aria-hidden="true"
             />
             </button>
