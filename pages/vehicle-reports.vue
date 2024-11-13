@@ -9,8 +9,17 @@ import Loading from "@/components/common/Loading.vue";
 import Pagination from "@/components/common/Pagination.vue";
 import { XMarkIcon } from "@heroicons/vue/24/outline";
 import { PaymentService } from "~/services/PaymentService";
+import { mkConfig, generateCsv, download } from "export-to-csv";
 import AutoComplete from "@/components/common/AutoComplete.vue";
 
+const csvConfigVehicleEntryReports = mkConfig({
+  useKeysAsHeaders: true,
+  filename: "Vehicle-entry-reports",
+});
+const csvConfigDetails = mkConfig({
+  useKeysAsHeaders: true,
+  filename: "Date-wise vehicle reports",
+});
 definePageMeta({
   layout: "auth-layout",
 });
@@ -83,16 +92,12 @@ const getVehicleEntryReports = (extraQuery = "") => {
   activeReport.value = true;
   setTimeout(async () => {
     try {
-      let q = ''
-      if (extraQuery) {
-        query += extraQuery;
-      }
-      q += getQueryString(route.query) +
+      let q =
+        getQueryString(route.query) +
         `&page=${page.value}&per_page=${perPage.value}`;
-      console.log(extraQuery, 'extraQuery');
-        
-
-      console.log(q, 12345);
+      if (extraQuery != "") {
+        q += `${extraQuery}`;
+      }
       const res = await ReportService.getVehicle(q);
       vehicleEntryReports.value = res.data.data;
       const meta = res.data;
@@ -100,6 +105,9 @@ const getVehicleEntryReports = (extraQuery = "") => {
       lastPage.value = meta.last_page;
       total.value = meta.total;
       totalPerPage.value = res.data.data.length;
+      if (res.pdfUrl) {
+        window.open(res.pdfUrl, "_blank");
+      }
     } catch (error) {
       serverErros.value = error.errors;
     } finally {
@@ -109,23 +117,20 @@ const getVehicleEntryReports = (extraQuery = "") => {
 };
 const details = ref([]);
 const entryDate = ref("");
-const showDetails = async (date) => {
+const showDetails = async (date, extraQuery = "") => {
   try {
     entryDate.value = date;
-    // const q =
-    //       getQueryString(route.query) +
-    //       `&page=${page.value}&per_page=${perPage.value}`;
-    const q = `?entry_date=${date}`;
+    let q = `?entry_date=${date}`;
+    if (extraQuery != "") {
+      q += `${extraQuery}`;
+    }
     isLoading.value = true;
     const res = await ReportService.getDetailVehicleReport(q);
     console.log(res.data);
     details.value = res.data.details;
-    // vehicleEntryReports.value = res.data.data;
-    // const meta = res.data;
-    // page.value = meta.current_page;
-    // lastPage.value = meta.last_page;
-    // total.value = meta.total;
-    // totalPerPage.value = res.data.data.length;
+    if (res.data?.pdfUrl) {
+      window.open(res.data.pdfUrl, "_blank");
+    }
   } catch (error) {
     serverErros.value = error.errors;
   } finally {
@@ -150,6 +155,73 @@ const resetSearch = () => {
     router.push({ query: newQuery });
   }
 };
+
+const downloadCsv = () => {
+  isLoading.value = true;
+  const updatedArray = vehicleEntryReports.value.map((item) => {
+    return {
+      ...item,
+    };
+  });
+  const newArray = updatedArray.map((obj, index) => {
+    // Iterate over each property in the object
+    const newObj = {};
+    for (const key in obj) {
+      // Check if the property value is null
+      if (obj[key] == null || obj[key] == undefined) {
+        newObj[key] = "";
+      } else {
+        newObj[key] = obj[key].toString();
+      }
+    }
+    return {
+      "SL No": index + 1,
+      Date: newObj.entry_date,
+      'Vehicle entries count': newObj.vehicle_entries,
+    };
+  });
+  const csv = generateCsv(csvConfigVehicleEntryReports)(newArray);
+  download(csvConfigVehicleEntryReports)(csv);
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 1000);
+}
+const downloadDetailsCsv = () => {
+  isLoading.value = true;
+  const updatedArray = details.value.map((item) => {
+    return {
+      ...item,
+      vehicle: item?.vehicle?.number,
+      driver_mobile: item?.vehicle?.driver_mobile,
+      driver_name: item?.vehicle?.driver_name,
+    };
+  });
+  const newArray = updatedArray.map((obj, index) => {
+    // Iterate over each property in the object
+    const newObj = {};
+    for (const key in obj) {
+      // Check if the property value is null
+      if (obj[key] == null || obj[key] == undefined) {
+        newObj[key] = "";
+      } else {
+        newObj[key] = obj[key].toString();
+      }
+    }
+    return {
+      "SL No": index + 1,
+      'In time': newObj.in_time,
+      'Out time': newObj.out_time,
+      'Vehicle Info': newObj.vehicle,
+      'Driver Name': newObj.driver_name,
+      'Driver Mobile': newObj.driver_mobile,
+    };
+  });
+  const csv = generateCsv(csvConfigDetails)(newArray);
+  download(csvConfigDetails)(csv);
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 1000);
+}
 
 watch(
   route,
@@ -521,9 +593,37 @@ onMounted(() => {
   </Pagination>
 
   <section v-if="!isLoading && details?.length">
-    <h2 style="text-align: center; margin-top: 20px; padding: 1rem">
-      Details ({{ entryDate }})
-    </h2>
+    <header
+      class="flex justify-between"
+    >
+      <div>
+        <h2
+          style="text-align: center; margin-top: 20px"
+          class="text-2xl font-bold text-gray-800 p-4"
+        >
+          Date-wise vehicle reports ({{ entryDate }})
+        </h2>
+      </div>
+      <section
+        class="flex items-end gap-2 p-4"
+        v-if="vehicleEntryReports?.length"
+      >
+        <button
+          :disabled="isLoading"
+          @click="showDetails(entryDate, '&format=pdf')"
+          class="border px-2 py-1 rounded-md cursor-pointer"
+        >
+          Download PDF
+        </button>
+        <button
+          :disabled="isLoading"
+          @click="downloadDetailsCsv"
+          class="border px-2 py-1 rounded-md cursor-pointer"
+        >
+          Download CSV
+        </button>
+      </section>
+    </header>
     <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px">
       <thead>
         <tr>
