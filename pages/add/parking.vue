@@ -76,7 +76,8 @@ const handleReset = async () => {
 };
 const parkingData = computed(() => {
   return {
-    vehicle_no: state.districtCode + ' ' + state.vehicleNumber,
+    district_code: state.districtCode,
+    vehicle_no: state.vehicleNumber,
     driver_name: state.driverName,
     driver_mobile: state.driverMobile,
     place_id: state.place,
@@ -367,6 +368,7 @@ const inputClass =
                 @resetSearch="resetSearch"
                 @createNew="createNewVehicle"
                 placeholder="Search for vehicle"
+                :districtCode="state.districtCode"
                 :showNoDataMsg="false"
               ></AutoComplete>
             </div>
