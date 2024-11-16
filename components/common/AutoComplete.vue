@@ -75,6 +75,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  districtCode: {
+    type: String,
+    default: '',
+  },
   inputClass: {
     type: String,
     required: false,
@@ -110,6 +114,9 @@ const search = async () => {
     let query = "";
     if (searchTerm.value) {
       query += `?query=${searchTerm.value}`;
+    }
+    if (props.districtCode) {
+      query += `&district_code=${props.districtCode}`
     }
     const result = await VehicleService.getAll(query);
     if (result?.data?.length) {

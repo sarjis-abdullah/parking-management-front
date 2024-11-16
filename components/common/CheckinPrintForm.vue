@@ -349,8 +349,8 @@ const itemClass = `display: flex;justify-content: space-between; border-bottom: 
 const myButton = ref(null);
 const router = useRouter()
 const onClose = () => {
-  router.go(-1)
-  // emit("onClose");
+  // router.go(-1)
+  emit("onClose");
 };
 const parking = computed(()=> {
   if (!(props.pdfData && props.pdfData.length)) {

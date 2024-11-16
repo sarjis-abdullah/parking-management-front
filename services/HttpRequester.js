@@ -11,9 +11,16 @@ export class HttpRequester extends BaseHttpRequester {
     return HttpRequester.instance;
   }
 
-  static async get(url) {
+  static async get(url, auth = true) {
     try {
-      const response = await fetch(this.BASE_URL + url, this.getHeaders());
+      let req = {}
+      if (auth) {
+        req = {
+          ...this.getHeaders(),
+        }
+      }
+      console.log(req, 'reque');
+      const response = await fetch(this.BASE_URL + url, req);
       if (response.ok) {
         return await response.json();
       } else {
@@ -51,13 +58,20 @@ export class HttpRequester extends BaseHttpRequester {
       }
     }
   }
-  static async put(url, data) {
+  static async put(url, data, auth = true) {
     try {
-      const response = await fetch(this.BASE_URL + url, {
+      let req = req = {
         method: "PUT",
-        ...this.getHeaders(),
         body: JSON.stringify(data),
-      });
+      }
+      if (auth) {
+        req = {
+          ...req,
+          ...this.getHeaders(),
+        }
+      }
+      console.log(req, 'reque');
+      const response = await fetch(this.BASE_URL + url, req);
       if (response.ok) {
         const res = await response.json();
         this.handleMessage("Entry updated successfully.");

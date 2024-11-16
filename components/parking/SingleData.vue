@@ -137,7 +137,7 @@
       class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
     >
       <div class="flex flex-col gap-2">
-        <button
+        <!-- <button
           :disabled="repayLoading"
           v-if="isPartialPayment"
           @click="payDUe"
@@ -166,7 +166,7 @@
           class="bg-green-600 text-white rounded-md text-center py-1"
         >
           Scan to pay
-        </button>
+        </button> -->
         <nuxt-link
           class="bg-orange-300 text-white rounded-md text-center py-1"
           :to="`/parking-checkin/${singleData.barcode}?view=1`"

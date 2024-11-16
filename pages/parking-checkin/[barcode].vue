@@ -6,7 +6,7 @@
           <div v-if="!loadingError && !isLoading">
        
 
-            <div v-if="serverErrors" class="text-center py-10">
+            <div v-if="serverErrors && Object.keys(serverErrors)?.length" class="text-center py-10">
               <p class="text-xl text-gray-400">
                 {{ serverErrors }}
               </p>
@@ -21,7 +21,7 @@
           </div>
           <CheckinPrintForm
             :show="showInvoice"
-            @onClose="showInvoice = true"
+            @onClose="showInvoice = false"
             :pdfData="list"
             :barcodeImage="barcodeImage"
           />
