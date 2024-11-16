@@ -13,13 +13,12 @@ export class HttpRequester extends BaseHttpRequester {
 
   static async get(url, auth = true) {
     try {
-      let req = {}
-      if (auth) {
-        req = {
-          ...this.getHeaders(),
-        }
+      const req = {
+        ...this.getHeaders(),
       }
-      console.log(req, 'reque');
+      if (!auth) {
+        // delete req.headers.Authorization
+      }
       const response = await fetch(this.BASE_URL + url, req);
       if (response.ok) {
         return await response.json();
@@ -60,15 +59,13 @@ export class HttpRequester extends BaseHttpRequester {
   }
   static async put(url, data, auth = true) {
     try {
-      let req = req = {
+      const req = {
         method: "PUT",
+        ...this.getHeaders(),
         body: JSON.stringify(data),
       }
-      if (auth) {
-        req = {
-          ...req,
-          ...this.getHeaders(),
-        }
+      if (!auth) {
+        delete req.headers.Authorization
       }
       console.log(req, 'reque');
       const response = await fetch(this.BASE_URL + url, req);
@@ -134,10 +131,10 @@ export class HttpRequester extends BaseHttpRequester {
     let error = "";
     if (status == 401) {
       this.handleMessage("Un-authenticated!", false);
-      window.location.href = "/";
+      // window.location.href = "/";
     } else if (status == 403) {
       this.handleMessage("Un-authorized", false);
-      window.location.href = "/";
+      // window.location.href = "/";
     } else if (status == 422) {
       this.handleMessage("Bad input", false);
     } else if (status >= 400 && status < 500) {

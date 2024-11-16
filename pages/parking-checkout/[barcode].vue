@@ -656,8 +656,11 @@ const finalTotalAmount = computed(()=> {
 const listAllData = computed(() => {
   const item = parkingResponse.value;
   let presentTime = moment();
-  if (item.out_time) {
+  if (item?.out_time) {
     presentTime = moment(item.out_time);
+  }
+  if (!item?.in_time) {
+    return
   }
   const duration = moment.duration(presentTime.diff(item.in_time));
   const hours = Math.floor(duration.asHours());
@@ -778,7 +781,7 @@ const loadData = async () => {
       serverErrors.value = {};
     } else {
       const errors = {
-        no_data: [`"No data available for this barcode"`],
+        no_data: [`"No data available "`],
       };
       throw new CustomError("Data error", errors);
     }

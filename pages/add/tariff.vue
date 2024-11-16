@@ -215,7 +215,7 @@ const inputClass =
           />
         </div>
         <div class="grid gap-2">
-          <label class="text-gray-500">Payment rate type</label>
+          <label class="text-gray-500">Payment rate</label>
           <select
             class="focus:outline-none bg-none"
             :class="inputClass"
@@ -224,7 +224,7 @@ const inputClass =
             v-model="state.paymentRateType"
           >
             <option value="half_hourly">Half-hourly</option>
-            <option value="hourly">Hourly</option>
+            <!-- <option value="hourly">Hourly</option> -->
           </select>
         </div>
         

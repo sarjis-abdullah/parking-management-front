@@ -9,6 +9,7 @@ import { CategoryService } from "~/services/CategoryService";
 import { FloorService } from "~/services/FloorService";
 import ClientErrors from "@/components/common/ClientErrors.vue";
 import ServerError from "@/components/common/Error.vue";
+import { PlaceService } from "~/services/PlaceService";
 
 definePageMeta({
   layout: "auth-layout",
@@ -16,12 +17,14 @@ definePageMeta({
 const defaultData = {
   name: "",
   floor: "",
+  place: "",
 };
 const serverErrors = ref({});
 const state = reactive(defaultData);
 const rules = computed(() => {
   return {
     name: { required: helpers.withMessage("Name is required", required) },
+    place: { required: helpers.withMessage("Place is required", required) },
     floor: { required: helpers.withMessage("Floor is required", required) },
   };
 });
@@ -43,8 +46,10 @@ const postItem = async () => {
     const obj = {
       ...state,
       floor_id: state.floor,
+      place_id: state.place,
     };
     delete obj.floor;
+    delete obj.place;
     await BlockService.create(obj);
     serverErrors.value = {};
     handleReset();
@@ -64,26 +69,21 @@ const onSubmit = async () => {
     console.log("Please fillup the form!");
   }
 };
-const blocks = ref([]);
-const getblocks = async () => {
-  const { data } = await BlockService.getAll("");
-  blocks.value = data;
-};
-const categories = ref([]);
-const getCategories = async () => {
-  const { data } = await CategoryService.getAll();
-  categories.value = data;
-};
+
 const floors = ref([]);
 const getFloors = async () => {
-  const { data } = await FloorService.getAll(``);
+  const query = state.place ? `?place_id=${state.place}` : ''
+  const { data } = await FloorService.getAll(query);
+  state.floor = ''
   floors.value = data;
 };
-const handleblockChange = () => {
-  getFloors();
+const places = ref([]);
+const getPlaces = async () => {
+  const { data } = await PlaceService.getAll(``);
+  places.value = data;
 };
 onMounted(() => {
-  getFloors();
+  getPlaces();
   // getCategories();
 });
 
@@ -111,6 +111,26 @@ const inputClass =
         </div>
         <div class="grid gap-2">
           <label class="text-gray-500"
+            >Place<span class="text-red-500">*</span></label
+          >
+          <select
+            class="focus:outline-none bg-none"
+            :class="inputClass"
+            style="background: none"
+            name="floor"
+            v-model="state.place"
+            @change="getFloors"
+          >
+            <option disabled :value="''">Select place name</option>
+            <option v-for="place in places" :key="place.id" :value="place.id">
+              {{ place.name }}
+            </option>
+            <!-- Add more options as needed -->
+          </select>
+          <!-- <ServerErrorMessage :errors="validator.block.$errors" /> -->
+        </div>
+        <div class="grid gap-2">
+          <label class="text-gray-500"
             >Floor<span class="text-red-500">*</span></label
           >
           <select
@@ -119,10 +139,8 @@ const inputClass =
             style="background: none"
             name="floor"
             v-model="state.floor"
-            :key="state.floor"
-            @change="handleblockChange"
           >
-            <option disabled :value="''">Select block name</option>
+            <option disabled :value="''">Select floor name</option>
             <option v-for="floor in floors" :key="floor.id" :value="floor.id">
               {{ floor.name }}
             </option>
