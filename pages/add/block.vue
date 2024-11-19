@@ -72,6 +72,7 @@ const onSubmit = async () => {
 
 const floors = ref([]);
 const getFloors = async () => {
+  floors.value = []
   const query = state.place ? `?place_id=${state.place}` : ''
   const { data } = await FloorService.getAll(query);
   state.floor = ''

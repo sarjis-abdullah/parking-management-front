@@ -31,7 +31,7 @@ const rules = computed(() => {
   return {
     name: { required: helpers.withMessage("Name is required", required) },
     place: { required: helpers.withMessage("Place is required", required) },
-    category: {},
+    category: {required: helpers.withMessage("Category is required", required)},
     floor: { required: helpers.withMessage("Floor is required", required) },
     block: { required: helpers.withMessage("Block is required", required) },
     remarks: {},
@@ -90,6 +90,8 @@ const getPlaces = async () => {
 };
 const blocks = ref([]);
 const getBlocks = async () => {
+  blocks.value = []
+  state.block = ''
   const { data } = await BlockService.getAll(`?floor_id=${state.floor}`);
   blocks.value = data;
 };
@@ -98,12 +100,19 @@ const getFloors = async () => {
   const { data } = await FloorService.getAll(`?place_id=${state.place}`);
   floors.value = data;
 };
+const categories = ref([]);
+const getCategories = async () => {
+  const { data } = await CategoryService.getAll(``);
+  categories.value = data;
+};
 const handlePlaceChange = () => {
+  floors.value = []
+  state.floor = ''
   getFloors();
 };
 onMounted(() => {
   getPlaces();
-  // getCategories();
+  getCategories();
 });
 
 const inputClass =
@@ -207,16 +216,28 @@ const inputClass =
             </option>
           </select>
         </div>
-        <!-- <div class="grid gap-2">
-          <label class="text-gray-500">Identity</label>
-          <input
+        <div class="grid gap-2">
+          <label class="text-gray-500">Category<span class="text-red-500">*</span></label>
+          <select
+            class="focus:outline-none bg-none"
             :class="inputClass"
-            v-model="state.identity"
+            style="background: none"
+            name="place"
+            v-model="state.category"
+          >
+            <option disabled :value="''">Select category name</option>
+            <option v-for="category in categories" :key="category.id" :value="category.id">
+              {{ category.name }}
+            </option>
+          </select>
+          <!-- <input
+            :class="inputClass"
+            v-model="state.category"
             type="text"
-            placeholder="e.g. corrola 2012 model"
-          />
+            placeholder="Car/Bike etc."
+          /> -->
           <ServerErrorMessage :errors="validator.identity.$errors" />
-        </div> -->
+        </div>
         <div class="grid gap-2">
           <label class="text-gray-500">Remarks</label>
           <input
