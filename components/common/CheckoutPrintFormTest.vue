@@ -31,9 +31,9 @@
             <DialogPanel class="relative" :class="[maxWidth, minWidth]">
               <div>
                 <div
-                  class="inline-block text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl my-[70px] sm:my-[100px] max-w-[50mm] opacity-100 translate-y-0 sm:scale-100"
+                  class="inline-block text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl my-[70px] sm:my-[100px] sm:align-middle sm:max-w-xl sm:w-auto md:max-w-5xl opacity-100 translate-y-0 sm:scale-100"
                 >
-                  <div style="background-color: white; padding: 1rem;">
+                  <div style="background-color: white;">
                     <div>
                       <div>
                         <!-- <div class="flex items-center justify-between">
@@ -64,10 +64,10 @@
                         </div> -->
                         <section
                           id="receipt"
-                          ref="captureRef"
                           style="
                             word-spacing: normal;
-                            background-color: rgb(255, 255, 255);
+                            background-color: white;
+                            padding: 1rem;
                           "
                         >
                           <div
@@ -76,7 +76,7 @@
                               padding: 0;
                               text-size-adjust: 100%;
                               background-color: rgb(255, 255, 255);
-                              max-width: 50mm;
+                              max-width: 58mm;
                             "
                           >
                             <table style="width: 100%">
@@ -190,7 +190,7 @@
                                             font-weight: 400;
                                             line-height: 12px;
                                             list-style-type: none;
-                                            padding-bottom: 20px;
+                                            padding-bottom: 4px;
                                             color: rgb(0, 0, 0);
                                           "
                                         >
@@ -260,7 +260,7 @@
                         </section>
                         <div
                           class="no-print focus-product-search"
-                          style="text-align: center; margin: 15px 0px 20px"
+                          style="text-align: center; margin-bottom: 8px;"
                         >
                           <button
                             class="hover:bg-gray-200"
@@ -272,7 +272,7 @@
                               align-items: center;
                               border: 2px solid rgb(204, 204, 204);
                               border-radius: 5px;
-                              padding: 10px 20px;
+                              padding: 5px 10px;
                               text-decoration: none;
                               font-family: Inter;
                               font-size: 8px;
@@ -280,7 +280,7 @@
                               line-height: 15.73px;
                               color: rgb(0, 0, 0);
                             "
-                            @click="exportImage"
+                            @click="printReceipt"
                           >
                             Print
                           </button>
@@ -308,8 +308,6 @@ import {
   TransitionRoot,
 } from "@headlessui/vue";
 import { formatDate } from "@/utils/index.js";
-import { toPng } from "html-to-image";
-
 import { XMarkIcon } from "@heroicons/vue/20/solid";
 import moment from "moment";
 const props = defineProps({
@@ -452,25 +450,6 @@ const checkoutData = computed(() => {
     },
   ];
 });
-const captureRef = ref(null);
-
-const exportImage = async () => {
-  try {
-    if (captureRef.value) {
-      const dataUrl = await toPng(captureRef.value, {
-        width: 220, // Adjust for approximate 50mm (220px ~ 50mm at 96dpi)
-      });
-
-      // Create a link and download the image
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = parking.value?.barcode ? parking.value?.barcode + "checkout.png" : "exported-content.png";
-      link.click();
-    }
-  } catch (error) {
-    console.error("Error exporting image:", error);
-  }
-};
 function printReceipt() {
   //window.print();
   const content = document.getElementById("receipt").innerHTML;
@@ -494,7 +473,7 @@ function printReceipt() {
 
               /* Customize printed content size */
               #print-content {
-                width: 50mm; /* Adjust this value to control content width */
+                width: 58mm; /* Adjust this value to control content width */
                 margin: auto;
               }
 
@@ -534,15 +513,15 @@ onMounted(() => {
 });
 </script>
 
-<style>
+<style scoped>
 body {
   font-family: Arial, sans-serif;
-  padding: 0;
+  padding: 20px;
 }
 
 #receipt {
   max-width: 58mm; /* Size for small printed receipts */
-  font-size: 12px; /* Reduce font size */
+  font-size: 8px; /* Reduce font size */
 }
 
 /* Print-specific CSS */
