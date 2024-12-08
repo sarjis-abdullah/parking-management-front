@@ -31,9 +31,9 @@
             <DialogPanel class="relative" :class="[maxWidth, minWidth]">
               <div>
                 <div
-                  class="inline-block text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl my-[70px] sm:my-[100px] max-w-[58mm] opacity-100 translate-y-0 sm:scale-100"
+                  class="inline-block text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl my-[70px] sm:my-[100px] max-w-[50mm] opacity-100 translate-y-0 sm:scale-100"
                 >
-                  <div class="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
+                  <div class="bg-white">
                     <div class="sm:flex sm:items-start">
                       <div
                         class="mt-3 text-center sm:mt-0 sm:ml-0 sm:text-left"
@@ -79,7 +79,7 @@
                               padding: 0;
                               text-size-adjust: 100%;
                               background-color: rgb(255, 255, 255);
-                              max-width: 300px;
+                              max-width: 50mm;
                             "
                           >
                             <table style="width: 100%">
@@ -461,7 +461,7 @@ const exportImage = async () => {
   try {
     if (captureRef.value) {
       const dataUrl = await toPng(captureRef.value, {
-        width: 220, // Adjust for approximate 58mm (220px ~ 58mm at 96dpi)
+        width: 220, // Adjust for approximate 50mm (220px ~ 50mm at 96dpi)
       });
 
       // Create a link and download the image
@@ -497,7 +497,7 @@ function printReceipt() {
 
               /* Customize printed content size */
               #print-content {
-                width: 58mm; /* Adjust this value to control content width */
+                width: 50mm; /* Adjust this value to control content width */
                 margin: auto;
               }
 
@@ -544,7 +544,7 @@ body {
 }
 
 #receipt {
-  max-width: 58mm; /* Size for small printed receipts */
+  max-width: 50mm; /* Size for small printed receipts */
   font-size: 10px; /* Reduce font size */
 }
 
@@ -559,7 +559,7 @@ body {
   #receipt {
     margin: 0;
     padding: 0;
-    max-width: 58mm; /* Set fixed width for receipt */
+    max-width: 50mm; /* Set fixed width for receipt */
     height: auto;
     border: none;
   }
@@ -581,7 +581,7 @@ body {
   /* Ensure content fits in one page */
   html,
   body {
-    max-width: 58mm;
+    max-width: 50mm;
     height: auto;
     overflow: hidden; /* Prevent content overflow */
   }
