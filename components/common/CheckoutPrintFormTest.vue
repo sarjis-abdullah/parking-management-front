@@ -33,7 +33,7 @@
                 <div
                   class="inline-block text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl my-[70px] sm:my-[100px] sm:align-middle sm:max-w-xl sm:w-auto md:max-w-5xl opacity-100 translate-y-0 sm:scale-100"
                 >
-                  <div style="background-color: white;">
+                  <div style="background-color: white">
                     <div>
                       <div>
                         <!-- <div class="flex items-center justify-between">
@@ -64,6 +64,7 @@
                         </div> -->
                         <section
                           id="receipt"
+                          ref="captureArea"
                           style="
                             word-spacing: normal;
                             background-color: white;
@@ -98,7 +99,11 @@
                                     >
                                       Khulshi Mart
                                     </div>
-                                    <div style="font-weight: 500; font-size: 8px">VEHICLE CHECK-OUT RECEIPT</div>
+                                    <div
+                                      style="font-weight: 500; font-size: 8px"
+                                    >
+                                      VEHICLE CHECK-OUT RECEIPT
+                                    </div>
                                   </td>
                                 </tr>
                                 <tr>
@@ -153,9 +158,9 @@
                                           "
                                         >
                                           Transaction No:
-                                          <span style="font-weight: 400"
-                                            >{{transactionId}}</span
-                                          >
+                                          <span style="font-weight: 400">{{
+                                            transactionId
+                                          }}</span>
                                         </li>
                                       </span>
                                       <li
@@ -231,7 +236,8 @@
                                   >
                                     <img
                                       :src="
-                                        'data:image/png;base64,' + parking?.barcode_image
+                                        'data:image/png;base64,' +
+                                        parking?.barcode_image
                                       "
                                       alt="barcode"
                                       style="width: auto"
@@ -260,7 +266,7 @@
                         </section>
                         <div
                           class="no-print focus-product-search"
-                          style="text-align: center; margin-bottom: 8px;"
+                          style="text-align: center; margin-bottom: 8px"
                         >
                           <button
                             class="hover:bg-gray-200"
@@ -300,6 +306,8 @@
 
 <script setup>
 import { defineProps, onMounted, ref } from "vue";
+import html2canvas from "html2canvas";
+
 import {
   Dialog,
   DialogPanel,
@@ -340,19 +348,21 @@ const myButton = ref(null);
 const onClose = () => {
   emit("onClose");
 };
-const parking = computed(()=> {
+const parking = computed(() => {
   if (!(props.pdfData && props.pdfData.length)) {
-    return '';
+    return "";
   }
-  return props.pdfData[0].parking
-
-})
+  return props.pdfData[0].parking;
+});
 const checkoutData = computed(() => {
   if (!(props.pdfData && props.pdfData.length)) {
     return [];
   }
   const payment = props.pdfData[0];
-  const bool = route.query?.transaction_id && route.query?.batch_payment && payment.paid_amount > 0
+  const bool =
+    route.query?.transaction_id &&
+    route.query?.batch_payment &&
+    payment.paid_amount > 0;
   if (bool) {
     return [
       {
@@ -363,12 +373,12 @@ const checkoutData = computed(() => {
         key: "Payment method",
         value: payment.method,
       },
-    ]
+    ];
   }
   const parking = payment.parking;
   // Extract relevant fields from the data
   const outTime = new Date(parking.out_time);
-  let currentTime = 0
+  let currentTime = 0;
   if (parking.out_time) {
     currentTime = moment(parking.out_time);
   }
@@ -377,7 +387,8 @@ const checkoutData = computed(() => {
   const minutes = Math.floor(duration.minutes());
   const seconds = Math.floor(duration.seconds());
 
-  const checkoutTime = formatDate(outTime, 'DD-MM-YYYY') + ' ' + formatDate(outTime, 'hh:mm A'),
+  const checkoutTime =
+      formatDate(outTime, "DD-MM-YYYY") + " " + formatDate(outTime, "hh:mm A"),
     vehicleNo = parking.vehicle.number,
     type = parking.category.name,
     block = parking.place.name,
@@ -386,7 +397,9 @@ const checkoutData = computed(() => {
     totalMinutes = minutes,
     totalSeconds = seconds,
     parkingFee = parseFloat(payment.payable_amount),
-    discounts = parseFloat(payment.discount_amount) + parseFloat(payment.membership_discount),
+    discounts =
+      parseFloat(payment.discount_amount) +
+      parseFloat(payment.membership_discount),
     floor = parking.floor.name,
     totalAmount = parseFloat(payment.paid_amount), // Assuming no additional calculations needed
     totalDue = parseFloat(payment.due_amount), // Assuming no additional calculations needed
@@ -450,7 +463,22 @@ const checkoutData = computed(() => {
     },
   ];
 });
-function printReceipt() {
+async function printReceipt() {
+  const element = document.getElementById("receipt");
+  try {
+    const canvas = await html2canvas(element, {
+  scale: 1, // Increase for higher resolution
+  width: 175, // Match Sunmi's paper width
+});
+    const image = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = image;
+    link.download = "screenshot.png";
+    link.click(); // Download the image
+  } catch (error) {
+    console.error("Error capturing image:", error);
+  }
+  return;
   //window.print();
   const content = document.getElementById("receipt").innerHTML;
 
@@ -504,8 +532,10 @@ function printReceipt() {
   newWindow.print();
   emit("onClose");
 }
-const route = useRoute()
-const transactionId = computed(()=> route.query?.transaction_id ?? parking.value?.barcode)
+const route = useRoute();
+const transactionId = computed(
+  () => route.query?.transaction_id ?? parking.value?.barcode
+);
 onMounted(() => {
   if (myButton.value) {
     myButton.value.focus();
