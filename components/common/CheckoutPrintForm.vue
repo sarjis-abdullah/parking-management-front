@@ -96,12 +96,12 @@
                                       style="
                                         margin: 0px;
                                         font-weight: 500;
-                                        font-size: 16px;
+                                        font-size: 8px;
                                       "
                                     >
                                       Khulshi Mart
                                     </div>
-                                    <div style="font-weight: 500; font-size: 10px">VEHICLE CHECK-OUT RECEIPT</div>
+                                    <div style="font-weight: 500; font-size: 8px">VEHICLE CHECK-OUT RECEIPT</div>
                                   </td>
                                 </tr>
                                 <tr>
@@ -109,7 +109,7 @@
                                     <li
                                       style="
                                         font-family: Inter;
-                                        font-size: 10px;
+                                        font-size: 8px;
                                         font-weight: 500;
                                         line-height: 12px;
                                         list-style-type: none;
@@ -125,7 +125,7 @@
                                     <li
                                       style="
                                         font-family: Inter;
-                                        font-size: 10px;
+                                        font-size: 8px;
                                         font-weight: 500;
                                         line-height: 12px;
                                         list-style-type: none;
@@ -147,7 +147,7 @@
                                         ><li
                                           style="
                                             font-family: Inter;
-                                            font-size: 10px;
+                                            font-size: 8px;
                                             font-weight: 500;
                                             line-height: 12px;
                                             list-style-type: none;
@@ -164,7 +164,7 @@
                                       <li
                                         style="
                                           font-family: Inter;
-                                          font-size: 10px;
+                                          font-size: 8px;
                                           font-weight: 500;
                                           line-height: 12px;
                                           list-style-type: none;
@@ -189,7 +189,7 @@
                                           class="border-b-0"
                                           style="
                                             font-family: Inter;
-                                            font-size: 10px;
+                                            font-size: 8px;
                                             font-weight: 400;
                                             line-height: 12px;
                                             list-style-type: none;
@@ -250,7 +250,7 @@
                                     text-align: center;
                                     margin-top: 5px;
                                     font-family: Inter;
-                                    font-size: 10px;
+                                    font-size: 8px;
                                     font-weight: 400;
                                     line-height: 12px;
                                   "
@@ -278,7 +278,7 @@
                               padding: 10px 20px;
                               text-decoration: none;
                               font-family: Inter;
-                              font-size: 10px;
+                              font-size: 8px;
                               font-weight: 600;
                               line-height: 15.73px;
                               color: rgb(0, 0, 0);
@@ -492,7 +492,7 @@ function printReceipt() {
                 margin: 0;
                 padding: 0;
                 font-family: Arial, sans-serif;
-                font-size: 10px;
+                font-size: 8px;
               }
 
               /* Customize printed content size */
@@ -507,7 +507,7 @@ function printReceipt() {
                 margin-bottom: 10px;
               }
               p {
-                font-size: 10px;
+                font-size: 8px;
                 line-height: 1.5;
               }
               button {
@@ -545,7 +545,7 @@ body {
 
 #receipt {
   max-width: 50mm; /* Size for small printed receipts */
-  font-size: 10px; /* Reduce font size */
+  font-size: 8px; /* Reduce font size */
 }
 
 /* Print-specific CSS */
