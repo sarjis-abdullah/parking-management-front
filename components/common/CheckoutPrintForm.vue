@@ -67,9 +67,11 @@
                         <hr class="my-2" />
                         <section
                           id="receipt"
+                          ref="captureRef"
                           style="
+                            padding: 1rem;
                             word-spacing: normal;
-                            background-color: rgb(229, 229, 229);
+                            background-color: rgb(255, 255, 255);
                           "
                         >
                           <div
@@ -282,7 +284,7 @@
                               line-height: 15.73px;
                               color: rgb(0, 0, 0);
                             "
-                            @click="printReceipt"
+                            @click="exportImage"
                           >
                             Print
                           </button>
@@ -310,6 +312,8 @@ import {
   TransitionRoot,
 } from "@headlessui/vue";
 import { formatDate } from "@/utils/index.js";
+import { toPng } from "html-to-image";
+
 import { XMarkIcon } from "@heroicons/vue/20/solid";
 import moment from "moment";
 const props = defineProps({
@@ -452,6 +456,25 @@ const checkoutData = computed(() => {
     },
   ];
 });
+const captureRef = ref(null);
+
+const exportImage = async () => {
+  try {
+    if (captureRef.value) {
+      const dataUrl = await toPng(captureRef.value, {
+        width: 220, // Adjust for approximate 58mm (220px ~ 58mm at 96dpi)
+      });
+
+      // Create a link and download the image
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = parking.value?.barcode ? parking.value?.barcode + ".png" : "exported-content.png";
+      link.click();
+    }
+  } catch (error) {
+    console.error("Error exporting image:", error);
+  }
+};
 function printReceipt() {
   //window.print();
   const content = document.getElementById("receipt").innerHTML;

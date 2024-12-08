@@ -67,9 +67,11 @@
                         <hr class="my-2" />
                         <section
                           id="receipt"
+                          ref="captureRef"
                           style="
+                          padding: 1rem;
                             word-spacing: normal;
-                            background-color: rgb(229, 229, 229);
+                            background-color: rgb(255, 255, 255);
                           "
                         >
                           <div
@@ -161,12 +163,12 @@
                                           "
                                         >
                                           Invoice No:
-                                          <span style="font-weight: 400"
-                                            >{{ parking?.barcode }}</span
-                                          >
+                                          <span style="font-weight: 400">{{
+                                            parking?.barcode
+                                          }}</span>
                                         </li>
                                       </span>
-                                      <li
+                                      <!-- <li
                                         style="
                                           font-family: Inter;
                                           font-size: 12px;
@@ -180,7 +182,7 @@
                                         Served By:<span style="font-weight: 400"
                                           >Super admin</span
                                         >
-                                      </li>
+                                      </li> -->
                                     </ul>
                                   </td>
                                 </tr>
@@ -220,14 +222,9 @@
                                 </tr>
                               </tbody>
                             </table>
-                            <table style="display: flex;">
+                            <table style="display: flex">
                               <tfoot style="margin: auto">
-                                <div
-                                  style="
-                                    position: relative;
-                                    width: 100%;
-                                  "
-                                >
+                                <div style="position: relative; width: 100%">
                                   <div
                                     style="
                                       border: 1px solid rgba(0, 0, 0, 0.1);
@@ -286,7 +283,7 @@
                               line-height: 15.73px;
                               color: rgb(0, 0, 0);
                             "
-                            @click="printReceipt"
+                            @click="exportImage"
                           >
                             Print
                           </button>
@@ -307,6 +304,7 @@
 <script setup>
 import { formatDate } from "@/utils/index.js";
 import { defineProps, onMounted, ref } from "vue";
+import { toPng } from "html-to-image";
 import moment from "moment";
 import {
   Dialog,
@@ -347,20 +345,20 @@ const currentDate = moment().format("DD-MM-YYYY");
 const currentTime = moment().format("hh:mm A");
 const itemClass = `display: flex;justify-content: space-between; border-bottom: 1px dashed rgb(131, 131, 131); padding: 4px 0 4px 0`;
 const myButton = ref(null);
-const router = useRouter()
+const router = useRouter();
 const onClose = () => {
   // router.go(-1)
   emit("onClose");
 };
-const parking = computed(()=> {
+const parking = computed(() => {
   if (!(props.pdfData && props.pdfData.length)) {
-    return ''
+    return "";
   }
-  return props.pdfData[0]
-})
+  return props.pdfData[0];
+});
 const checkoutData = computed(() => {
   if (!(props.pdfData && props.pdfData.length)) {
-    return []
+    return [];
   }
   const item = props.pdfData[0];
 
@@ -407,7 +405,28 @@ const checkoutData = computed(() => {
     },
   ];
 });
+
+const captureRef = ref(null);
+
+const exportImage = async () => {
+  try {
+    if (captureRef.value) {
+      const dataUrl = await toPng(captureRef.value, {
+        width: 220, // Adjust for approximate 58mm (220px ~ 58mm at 96dpi)
+      });
+
+      // Create a link and download the image
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = parking.value?.barcode ? parking.value?.barcode + ".png" : "exported-content.png";
+      link.click();
+    }
+  } catch (error) {
+    console.error("Error exporting image:", error);
+  }
+};
 function printReceipt() {
+  return;
   //window.print();
   const content = document.getElementById("receipt").innerHTML;
 
@@ -459,7 +478,7 @@ function printReceipt() {
   // Close the new document stream and trigger print
   newWindow.document.close();
   newWindow.print();
-  onClose()
+  onClose();
 }
 onMounted(() => {
   if (myButton.value) {
