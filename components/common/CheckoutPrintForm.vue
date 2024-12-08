@@ -468,7 +468,7 @@ const exportImage = async () => {
       // Create a link and download the image
       const link = document.createElement("a");
       link.href = dataUrl;
-      link.download = parking.value?.barcode ? parking.value?.barcode + ".png" : "exported-content.png";
+      link.download = parking.value?.barcode ? parking.value?.barcode + "checkout.png" : "exported-content.png";
       link.click();
     }
   } catch (error) {
