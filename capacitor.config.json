@@ -2,5 +2,9 @@
   "appId": "com.parkingmanagement.app",
   "appName": "parking-management",
   "webDir": "dist",
-  "bundledWebRuntime": false
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "http://localhost:3001",
+    "cleartext": true,
+  },
 }
