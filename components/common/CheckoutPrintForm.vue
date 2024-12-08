@@ -67,10 +67,15 @@
                         <hr class="my-2" />
                         <section
                           id="receipt"
+
                           ref="captureRef"
                           style="
                             word-spacing: normal;
                             background-color: rgb(255, 255, 255);
+                            max-width: 50mm;
+                            margin: auto;
+                            display: flex;
+                            justify-content: center;
                           "
                         >
                           <div
@@ -557,7 +562,7 @@ body {
 
   /* Style the receipt to fit onto a small printed page */
   #receipt {
-    margin: 0;
+    margin: 0 auto;
     padding: 0;
     max-width: 50mm; /* Set fixed width for receipt */
     height: auto;
