@@ -21,7 +21,9 @@
       const exportImage = async () => {
         try {
           if (captureRef.value) {
-            const dataUrl = await toPng(captureRef.value);
+            const dataUrl = await toPng(captureRef.value, {
+            width: 220, // Adjust for approximate 58mm (220px ~ 58mm at 96dpi)
+          });
   
             // Create a link and download the image
             const link = document.createElement('a');
