@@ -1,0 +1,6 @@
+{
+  "appId": "com.parkingmanagement.app",
+  "appName": "parking-management",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
