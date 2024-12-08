@@ -31,9 +31,9 @@
             <DialogPanel class="relative" :class="[maxWidth, minWidth]">
               <div>
                 <div
-                  class="inline-block text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl my-[70px] sm:my-[100px] max-w-[50mm] opacity-100 translate-y-0 sm:scale-100"
+                  class="inline-block text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl my-[70px] sm:my-[100px] sm:align-middle sm:max-w-xl sm:w-auto md:max-w-5xl opacity-100 translate-y-0 sm:scale-100"
                 >
-                  <div class="bg-white">
+                  <div class="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-start">
                       <div
                         class="mt-3 text-center sm:mt-0 sm:ml-0 sm:text-left"
@@ -67,10 +67,9 @@
                         <hr class="my-2" />
                         <section
                           id="receipt"
-                          ref="captureRef"
                           style="
                             word-spacing: normal;
-                            background-color: rgb(255, 255, 255);
+                            background-color: rgb(229, 229, 229);
                           "
                         >
                           <div
@@ -79,7 +78,7 @@
                               padding: 0;
                               text-size-adjust: 100%;
                               background-color: rgb(255, 255, 255);
-                              max-width: 50mm;
+                              max-width: 300px;
                             "
                           >
                             <table style="width: 100%">
@@ -96,12 +95,12 @@
                                       style="
                                         margin: 0px;
                                         font-weight: 500;
-                                        font-size: 8px;
+                                        font-size: 20px;
                                       "
                                     >
                                       Khulshi Mart
                                     </div>
-                                    <div style="font-weight: 500; font-size: 8px">VEHICLE CHECK-OUT RECEIPT</div>
+                                    <div style="font-weight: 500; font-size: 12px">VEHICLE CHECK-OUT RECEIPT</div>
                                   </td>
                                 </tr>
                                 <tr>
@@ -109,7 +108,7 @@
                                     <li
                                       style="
                                         font-family: Inter;
-                                        font-size: 8px;
+                                        font-size: 12px;
                                         font-weight: 500;
                                         line-height: 12px;
                                         list-style-type: none;
@@ -125,7 +124,7 @@
                                     <li
                                       style="
                                         font-family: Inter;
-                                        font-size: 8px;
+                                        font-size: 12px;
                                         font-weight: 500;
                                         line-height: 12px;
                                         list-style-type: none;
@@ -147,7 +146,7 @@
                                         ><li
                                           style="
                                             font-family: Inter;
-                                            font-size: 8px;
+                                            font-size: 12px;
                                             font-weight: 500;
                                             line-height: 12px;
                                             list-style-type: none;
@@ -164,7 +163,7 @@
                                       <li
                                         style="
                                           font-family: Inter;
-                                          font-size: 8px;
+                                          font-size: 12px;
                                           font-weight: 500;
                                           line-height: 12px;
                                           list-style-type: none;
@@ -189,7 +188,7 @@
                                           class="border-b-0"
                                           style="
                                             font-family: Inter;
-                                            font-size: 8px;
+                                            font-size: 12px;
                                             font-weight: 400;
                                             line-height: 12px;
                                             list-style-type: none;
@@ -250,7 +249,7 @@
                                     text-align: center;
                                     margin-top: 5px;
                                     font-family: Inter;
-                                    font-size: 8px;
+                                    font-size: 12px;
                                     font-weight: 400;
                                     line-height: 12px;
                                   "
@@ -278,12 +277,12 @@
                               padding: 10px 20px;
                               text-decoration: none;
                               font-family: Inter;
-                              font-size: 8px;
+                              font-size: 12px;
                               font-weight: 600;
                               line-height: 15.73px;
                               color: rgb(0, 0, 0);
                             "
-                            @click="exportImage"
+                            @click="printReceipt"
                           >
                             Print
                           </button>
@@ -311,8 +310,6 @@ import {
   TransitionRoot,
 } from "@headlessui/vue";
 import { formatDate } from "@/utils/index.js";
-import { toPng } from "html-to-image";
-
 import { XMarkIcon } from "@heroicons/vue/20/solid";
 import moment from "moment";
 const props = defineProps({
@@ -455,25 +452,6 @@ const checkoutData = computed(() => {
     },
   ];
 });
-const captureRef = ref(null);
-
-const exportImage = async () => {
-  try {
-    if (captureRef.value) {
-      const dataUrl = await toPng(captureRef.value, {
-        width: 220, // Adjust for approximate 50mm (220px ~ 50mm at 96dpi)
-      });
-
-      // Create a link and download the image
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = parking.value?.barcode ? parking.value?.barcode + "checkout.png" : "exported-content.png";
-      link.click();
-    }
-  } catch (error) {
-    console.error("Error exporting image:", error);
-  }
-};
 function printReceipt() {
   //window.print();
   const content = document.getElementById("receipt").innerHTML;
@@ -492,12 +470,12 @@ function printReceipt() {
                 margin: 0;
                 padding: 0;
                 font-family: Arial, sans-serif;
-                font-size: 8px;
+                font-size: 12px;
               }
 
               /* Customize printed content size */
               #print-content {
-                width: 50mm; /* Adjust this value to control content width */
+                width: 58mm; /* Adjust this value to control content width */
                 margin: auto;
               }
 
@@ -507,7 +485,7 @@ function printReceipt() {
                 margin-bottom: 10px;
               }
               p {
-                font-size: 8px;
+                font-size: 12px;
                 line-height: 1.5;
               }
               button {
@@ -540,12 +518,12 @@ onMounted(() => {
 <style>
 body {
   font-family: Arial, sans-serif;
-  padding: 0;
+  padding: 20px;
 }
 
 #receipt {
-  max-width: 50mm; /* Size for small printed receipts */
-  font-size: 8px; /* Reduce font size */
+  width: 58mm; /* Size for small printed receipts */
+  font-size: 12px; /* Reduce font size */
 }
 
 /* Print-specific CSS */
@@ -559,7 +537,7 @@ body {
   #receipt {
     margin: 0;
     padding: 0;
-    max-width: 50mm; /* Set fixed width for receipt */
+    width: 58mm; /* Set fixed width for receipt */
     height: auto;
     border: none;
   }
@@ -581,7 +559,7 @@ body {
   /* Ensure content fits in one page */
   html,
   body {
-    max-width: 50mm;
+    width: 58mm;
     height: auto;
     overflow: hidden; /* Prevent content overflow */
   }
