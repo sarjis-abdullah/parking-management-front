@@ -464,7 +464,9 @@ const checkoutData = computed(() => {
   ];
 });
 async function printReceipt() {
+  onClose()
   const element = document.getElementById("receipt");
+  element.style.padding = 0
   try {
     const canvas = await html2canvas(element, {
   scale: 1, // Increase for higher resolution
