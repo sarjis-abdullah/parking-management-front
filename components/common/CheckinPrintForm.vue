@@ -2,7 +2,7 @@
   <TransitionRoot as="template" :show="true">
     <Dialog as="div" class="relative z-50" @close="onClose">
       <TransitionChild
-        as="template"
+        as="template" 
         enter="ease-out duration-300"
         enter-from="opacity-0"
         enter-to="opacity-100"
