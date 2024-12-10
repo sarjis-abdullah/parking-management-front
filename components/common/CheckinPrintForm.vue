@@ -326,7 +326,7 @@ const props = defineProps({
     default: "sm:max-w-sm",
   },
   minWidth: {
-    type: String,
+    type: String, 
     default: "sm:min-w-sm",
   },
   barcodeImage: {
