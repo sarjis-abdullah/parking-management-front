@@ -78,7 +78,6 @@
                               padding: 0;
                               text-size-adjust: 100%;
                               background-color: rgb(255, 255, 255);
-                              max-width: 300px;
                             "
                           >
                             <table style="width: 100%">
@@ -475,7 +474,7 @@ function printReceipt() {
 
               /* Customize printed content size */
               #print-content {
-                width: 58mm; /* Adjust this value to control content width */
+                max-width: 75mm; /* Adjust this value to control content width */
                 margin: auto;
               }
 
@@ -522,7 +521,7 @@ body {
 }
 
 #receipt {
-  width: 58mm; /* Size for small printed receipts */
+  max-width: 75mm; /* Size for small printed receipts */
   font-size: 12px; /* Reduce font size */
 }
 
@@ -537,7 +536,7 @@ body {
   #receipt {
     margin: 0;
     padding: 0;
-    width: 58mm; /* Set fixed width for receipt */
+    max-width: 75mm; /* Set fixed width for receipt */
     height: auto;
     border: none;
   }
