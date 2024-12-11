@@ -217,7 +217,7 @@
                             <table style="display: flex">
                               <tfoot style="margin: auto">
                                 <div
-                                  v-if="parking.paid_now < 1"
+                                  v-if="parking?.barcode_image"
                                   style="
                                     position: relative;
                                     width: 100%;
