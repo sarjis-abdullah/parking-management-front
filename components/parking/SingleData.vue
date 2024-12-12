@@ -86,7 +86,7 @@
             <span>Type: </span>
             <span
               class="rounded-md text-center text-white p-1"
-              :class="isPartialPayment ? 'bg-orange-500' : 'bg-green-600'"
+              :class="isPartialPayment || singleData?.payment?.status !== 'success' ? 'bg-orange-500' : 'bg-green-600'"
             >
               {{ singleData?.payment?.payment_type }}</span
             >
