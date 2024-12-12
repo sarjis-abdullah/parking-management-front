@@ -99,82 +99,72 @@
                                     >
                                       Khulshi Mart
                                     </div>
-                                    <div style="font-weight: 500; font-size: 14px">VEHICLE CHECK-OUT RECEIPT</div>
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td class="flex justify-between mt-1">
-                                    <li
-                                      style="
-                                        font-family: Inter;
-                                        font-size: 14px;
-                                        font-weight: 500;
-                                        line-height: 12px;
-                                        list-style-type: none;
-                                        color: rgb(0, 0, 0);
-                                        margin-bottom: 5px;
-                                      "
+                                    <div
+                                      style="font-weight: 500; font-size: 15px"
                                     >
-                                      Date:
-                                      <span style="font-weight: 400">{{
-                                        currentDate
-                                      }}</span>
-                                    </li>
-                                    <li
-                                      style="
-                                        font-family: Inter;
-                                        font-size: 14px;
-                                        font-weight: 500;
-                                        line-height: 12px;
-                                        list-style-type: none;
-                                        color: rgb(0, 0, 0);
-                                        margin-bottom: 5px;
-                                      "
-                                    >
-                                      Time:
-                                      <span style="font-weight: 400">{{
-                                        currentTime
-                                      }}</span>
-                                    </li>
+                                      VEHICLE CHECK-OUT RECEIPT
+                                    </div>
                                   </td>
                                 </tr>
                                 <tr>
                                   <td>
-                                    <ul style="padding-left: 0px; margin: 0px">
-                                      <span class="flex justify-between"
-                                        ><li
-                                          style="
-                                            font-family: Inter;
-                                            font-size: 14px;
-                                            font-weight: 500;
-                                            line-height: 12px;
-                                            list-style-type: none;
-                                            color: rgb(0, 0, 0);
-                                            margin-bottom: 5px;
-                                          "
-                                        >
-                                          Transaction No:
-                                          <span style="font-weight: 400"
-                                            >{{transactionId}}</span
-                                          >
-                                        </li>
-                                      </span>
-                                      <li
+                                    <li
+                                      style="
+                                        font-family: Inter;
+                                        font-size: 15px;
+                                        line-height: 12px;
+                                        list-style-type: none;
+                                        color: rgb(0, 0, 0);
+                                        margin-bottom: 5px;
+                                      "
+                                    >
+                                      <div
                                         style="
-                                          font-family: Inter;
-                                          font-size: 14px;
-                                          font-weight: 500;
-                                          line-height: 12px;
-                                          list-style-type: none;
-                                          color: rgb(0, 0, 0);
-                                          margin-bottom: 5px;
+                                          display: flex;
+                                          justify-content: center;
+                                          padding: 4px 0;
                                         "
                                       >
-                                        Served By:<span style="font-weight: 400"
-                                          >Admin</span
-                                        >
-                                      </li>
-                                    </ul>
+                                        <span>Date:</span>
+                                        <span style="font-weight: 400">{{
+                                          currentDate
+                                        }}</span>
+                                      </div>
+                                      <div
+                                        style="
+                                          display: flex;
+                                          justify-content: center;
+                                          padding: 4px 0;
+                                        "
+                                      >
+                                        <span>Time:</span>
+                                        <span style="font-weight: 400">{{
+                                          currentTime
+                                        }}</span>
+                                      </div>
+                                      <div
+                                        style="
+                                          display: flex;
+                                          justify-content: center;
+                                          padding: 4px 0;
+                                        "
+                                      >
+                                        <span> Transaction No:</span>
+
+                                        <span>{{ transactionId }}</span>
+                                      </div>
+                                      <div
+                                        style="
+                                          display: flex;
+                                          justify-content: center;
+                                          padding: 4px 0;
+                                        "
+                                      >
+                                        <span> Served By:</span>
+
+                                        <span>Admin</span>
+                                      </div>
+                                    </li>
                                   </td>
                                 </tr>
                                 <tr>
@@ -187,7 +177,7 @@
                                           class="border-b-0"
                                           style="
                                             font-family: Inter;
-                                            font-size: 14px;
+                                            font-size: 15px;
                                             font-weight: 400;
                                             line-height: 12px;
                                             list-style-type: none;
@@ -205,9 +195,6 @@
                                           </div>
                                         </li>
                                       </ul>
-                                      <ul
-                                        style="padding-left: 0px; margin: 0px"
-                                      ></ul>
                                     </div>
                                   </td>
                                 </tr>
@@ -232,7 +219,8 @@
                                   >
                                     <img
                                       :src="
-                                        'data:image/png;base64,' + parking?.barcode_image
+                                        'data:image/png;base64,' +
+                                        parking?.barcode_image
                                       "
                                       alt="barcode"
                                       style="width: auto"
@@ -248,7 +236,7 @@
                                     text-align: center;
                                     margin-top: 5px;
                                     font-family: Inter;
-                                    font-size: 14px;
+                                    font-size: 15px;
                                     font-weight: 400;
                                     line-height: 12px;
                                   "
@@ -276,7 +264,7 @@
                               padding: 10px 20px;
                               text-decoration: none;
                               font-family: Inter;
-                              font-size: 14px;
+                              font-size: 15px;
                               font-weight: 600;
                               line-height: 15.73px;
                               color: rgb(0, 0, 0);
@@ -341,19 +329,21 @@ const myButton = ref(null);
 const onClose = () => {
   emit("onClose");
 };
-const parking = computed(()=> {
+const parking = computed(() => {
   if (!(props.pdfData && props.pdfData.length)) {
-    return '';
+    return "";
   }
-  return props.pdfData[0].parking
-
-})
+  return props.pdfData[0].parking;
+});
 const checkoutData = computed(() => {
   if (!(props.pdfData && props.pdfData.length)) {
     return [];
   }
   const payment = props.pdfData[0];
-  const bool = route.query?.transaction_id && route.query?.batch_payment && payment.paid_amount > 0
+  const bool =
+    route.query?.transaction_id &&
+    route.query?.batch_payment &&
+    payment.paid_amount > 0;
   if (bool) {
     return [
       {
@@ -364,12 +354,12 @@ const checkoutData = computed(() => {
         key: "Payment method",
         value: payment.method,
       },
-    ]
+    ];
   }
   const parking = payment.parking;
   // Extract relevant fields from the data
   const outTime = new Date(parking.out_time);
-  let currentTime = 0
+  let currentTime = 0;
   if (parking.out_time) {
     currentTime = moment(parking.out_time);
   }
@@ -378,7 +368,8 @@ const checkoutData = computed(() => {
   const minutes = Math.floor(duration.minutes());
   const seconds = Math.floor(duration.seconds());
 
-  const checkoutTime = formatDate(outTime, 'DD-MM-YYYY') + ' ' + formatDate(outTime, 'hh:mm A'),
+  const checkoutDate = formatDate(outTime, "DD-MM-YYYY"),
+    checkoutTime = formatDate(outTime, "hh:mm A"),
     vehicleNo = parking.vehicle.number,
     type = parking.category.name,
     block = parking.place.name,
@@ -387,12 +378,18 @@ const checkoutData = computed(() => {
     totalMinutes = minutes,
     totalSeconds = seconds,
     parkingFee = parseFloat(payment.payable_amount),
-    discounts = parseFloat(payment.discount_amount) + parseFloat(payment.membership_discount),
+    discounts =
+      parseFloat(payment.discount_amount) +
+      parseFloat(payment.membership_discount),
     floor = parking.floor.name,
     totalAmount = parseFloat(payment.paid_amount), // Assuming no additional calculations needed
     totalDue = parseFloat(payment.due_amount), // Assuming no additional calculations needed
     paymentMethod = payment.method;
   return [
+    {
+      key: "Checkout date",
+      value: checkoutDate,
+    },
     {
       key: "Checkout time",
       value: checkoutTime,
@@ -469,7 +466,7 @@ function printReceipt() {
                 margin: 0;
                 padding: 0;
                 font-family: Arial, sans-serif;
-                font-size: 14px;
+                font-size: 15px;
               }
 
               /* Customize printed content size */
@@ -484,7 +481,7 @@ function printReceipt() {
                 margin-bottom: 10px;
               }
               p {
-                font-size: 14px;
+                font-size: 15px;
                 line-height: 1.5;
               }
               button {
@@ -505,8 +502,10 @@ function printReceipt() {
   newWindow.print();
   emit("onClose");
 }
-const route = useRoute()
-const transactionId = computed(()=> route.query?.transaction_id ?? parking.value?.barcode)
+const route = useRoute();
+const transactionId = computed(
+  () => route.query?.transaction_id ?? parking.value?.barcode
+);
 onMounted(() => {
   if (myButton.value) {
     myButton.value.focus();
@@ -522,7 +521,7 @@ body {
 
 #receipt {
   max-width: 75mm; /* Size for small printed receipts */
-  font-size: 14px; /* Reduce font size */
+  font-size: 15px; /* Reduce font size */
 }
 
 /* Print-specific CSS */
