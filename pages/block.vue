@@ -60,7 +60,7 @@ const deleteRecord = async (id) => {
   if (confirm("Are you sure to delete this record?")) {
     try {
       isDeleting.value = true;
-      const res = await SlotService.delete(id);
+      const res = await BlockService.delete(id);
       list.value = list.value.filter((item) => item.id != id);
 
       serverErrors.value = {};
