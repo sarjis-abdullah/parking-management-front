@@ -63,7 +63,7 @@ const routeQuery = computed(() => {
 const barcode = route.params.barcode;
 
 const searchQuery = computed(() => {
-  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.vehicle`;
+  return `?barcode=${barcode}&include=p.slot,p.category,p.place,p.floor,p.vehicle,s.block`;
 });
 
 const barcodeImage = ref("");

@@ -14,7 +14,7 @@ const router = useRouter();
 const showInvoice = ref(false);
 const responses = ref(null);
 const includeQuery = computed(
-  () => `?include=p.parking,p.place,p.category,p.slot,p.floor,p.vehicle`
+  () => `?include=p.parking,p.place,p.category,p.slot,p.floor,p.vehicle,s.block`
 );
 
 watch(

@@ -363,6 +363,7 @@ const checkoutData = computed(() => {
   if (parking.out_time) {
     currentTime = moment(parking.out_time);
   }
+  console.log(parking, 'parking');
   const duration = moment.duration(currentTime.diff(parking.in_time));
   const hours = Math.floor(duration.asHours());
   const minutes = Math.floor(duration.minutes());
@@ -372,8 +373,9 @@ const checkoutData = computed(() => {
     checkoutTime = formatDate(outTime, "hh:mm A"),
     vehicleNo = parking.vehicle.number,
     type = parking.category.name,
-    block = parking.place.name,
+    place = parking.place.name,
     slot = parking.slot.name,
+    block = parking?.slot?.block?.name,
     totalHours = hours,
     totalMinutes = minutes,
     totalSeconds = seconds,
@@ -401,6 +403,10 @@ const checkoutData = computed(() => {
     {
       key: "Type",
       value: type,
+    },
+    {
+      key: "Place",
+      value: place,
     },
     {
       key: "Block",
