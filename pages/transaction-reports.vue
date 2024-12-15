@@ -14,6 +14,7 @@ import AutoComplete from "@/components/common/AutoComplete.vue";
 import { CategoryService } from "~/services/CategoryService";
 import QrcodeVue from "qrcode.vue";
 import { mkConfig, generateCsv, download } from "export-to-csv";
+import ServerError from "@/components/common/Error.vue";
 
 definePageMeta({
   layout: "auth-layout",
@@ -51,6 +52,19 @@ const page = ref(1);
 const showConfirmModal = ref(false);
 const checkoutLoading = ref(false);
 const showTransactions = ref(false);
+const refNumber = ref('');
+const transactionNumber = ref('');
+const serverErrors = ref({});
+const paymentMethods = ref([
+  "cash",
+  "bkash",
+  "nagad",
+  "rocket",
+  "upay",
+  "tap",
+  "online",
+  "others",
+]);
 
 const downloadCsv = () => {
   isLoading.value = true;
@@ -160,7 +174,7 @@ const getTransactions = (extraQuery = "") => {
   activeReport.value = true;
   showTransactions.value = true;
   selected.value = [];
-  transactions.value = []
+  transactions.value = [];
   setTimeout(async () => {
     try {
       let q = getQueryString(route.query);
@@ -482,7 +496,8 @@ const qrCodeUrl = computed(
     `${BASE_API_URL}payment/pay-all?paymentIds=${paymentIds.value}&paymentMethod=online`
 );
 const confirmPay = async () => {
-  const query = `?paymentIds=${paymentIds.value}&paymentMethod=${selectedPaymentMethod.value}&process=app`;
+  const paymentQuery = `&reference_number=${transactionNumber.value}&txn_number=${refNumber.value}`
+  const query = `?paymentIds=${paymentIds.value}&paymentMethod=${selectedPaymentMethod.value}&process=app${paymentQuery}`;
   try {
     checkoutLoading.value = true;
     const result = await PaymentService.payAll(query);
@@ -494,6 +509,7 @@ const confirmPay = async () => {
       // vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
     }
   } catch (error) {
+    serverErrors.value = error.errors;
   } finally {
     checkoutLoading.value = false;
   }
@@ -542,11 +558,11 @@ onMounted(() => {
           />
         </div>
         <XMarkIcon
-            v-if="transactionId"
-            @click="transactionId = ''"
-            class="h-5 w-5 text-red-500 cursor-pointer mr-2 mb-3"
-            aria-hidden="true"
-          />
+          v-if="transactionId"
+          @click="transactionId = ''"
+          class="h-5 w-5 text-red-500 cursor-pointer mr-2 mb-3"
+          aria-hidden="true"
+        />
       </div>
       <div class="grid gap-2">
         <div class="flex items-end">
@@ -1189,7 +1205,7 @@ onMounted(() => {
         v-model="selectedPaymentMethod"
       >
         <option
-          v-for="category in ['cash', 'online']"
+          v-for="category in paymentMethods"
           :key="category"
           :value="category"
         >
@@ -1197,31 +1213,51 @@ onMounted(() => {
         </option>
       </select>
     </div>
+    <div
+      class="grid grid-cols-2 gap-2 items-center pb-2 mt-4"
+    >
+      <input
+        class="focus:outline-none bg-none text-right"
+        :class="inputClass"
+        type="number"
+        v-model="refNumber"
+        placeholder="Reference number"
+      />
+      <input
+        class="focus:outline-none bg-none text-right"
+        :class="inputClass"
+        type="number"
+        v-model="transactionNumber"
+        placeholder="Transaction number"
+      />
+    </div>
     <div class="mt-6">
-      <qrcode-vue
+      <!-- <qrcode-vue
         v-if="selectedPaymentMethod == 'online'"
         :value="qrCodeUrl"
         :size="300"
         level="H"
         class="m-auto"
-      />
+      /> -->
       <p
         class="text-indigo-600 text font-bold border-b rounded-md px-4 py-2 text-center mt-4"
       >
-        {{ selectedPaymentMethod == "online" ? "Scan & pay" : "Payable" }}
+        <!-- {{ selectedPaymentMethod == "online" ? "Scan & pay" : "Payable" }} -->
+        Payable
         <strong>{{ "৳ " + totalPayableForSelectedTransaction }}</strong>
       </p>
     </div>
+    <ServerError :error="serverErrors" />
     <template v-slot:footer>
       <div class="flex justify-end gap-2 mt-4">
         <button
           @click="showConfirmModal = false"
           class="px-2 py-1 border-red-300 rounded-md"
         >
-          {{ selectedPaymentMethod == "cash" ? "Cancel" : "Done" }}
+          <!-- {{ selectedPaymentMethod == "cash" ? "Cancel" : "Done" }} -->
+          Cancel
         </button>
         <button
-          v-if="selectedPaymentMethod == 'cash'"
           :disabled="checkoutLoading"
           @click="confirmPay"
           :class="
@@ -1231,7 +1267,7 @@ onMounted(() => {
           "
           class="px-2 py-1 border-gray-300 rounded-md"
         >
-          Confirm pay
+          Confirm payment
         </button>
       </div>
     </template>

@@ -23,11 +23,21 @@ export class HttpRequester extends BaseHttpRequester {
       if (response.ok) {
         return await response.json();
       } else {
-        throw await this.handleError(response);
+        const responseBody = await response.text(); // Get response body as text
+        const error = new Error(response.statusText);
+        error.response = {
+          ...response,
+          body: responseBody, // Attach response body to the error object
+        };
+        this.handleError(response);
+        throw error;
       }
     } catch (error) {
       console.log(error);
-      throw error;
+      // throw error;
+      if (error?.response?.body) {
+        return Promise.reject(JSON.parse(error.response.body));
+      }
     }
   }
   static async post(url, data) {
