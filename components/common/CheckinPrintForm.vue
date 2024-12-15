@@ -204,7 +204,6 @@
                                 <div style="position: relative; width: 100%">
                                   <div
                                     style="
-                                      border: 1px solid rgba(0, 0, 0, 0.1);
                                       display: flex;
                                       justify-content: center;
                                     "
