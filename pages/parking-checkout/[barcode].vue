@@ -77,7 +77,6 @@
                           "
                         >
                           <dt
-                            data-v-61884e8b=""
                             style="
                               font-size: 0.875rem;
                               color: rgb(107, 114, 128);
@@ -94,7 +93,7 @@
                             v-model="paymentMethod"
                           >
                             <option
-                              v-for="category in ['cash', 'online']"
+                              v-for="category in paymentMethods"
                               :key="category"
                               :value="category"
                             >
@@ -104,6 +103,22 @@
                           <span v-else class="capitalize">
                             {{ paymentMethod }}
                           </span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 items-center pb-2" v-if="authUser?.id && paymentMethod != 'cash'">
+                          <input
+                            class="focus:outline-none bg-none text-right"
+                            :class="inputClass"
+                            type="number"
+                            v-model="refNumber"
+                            placeholder="Reference number"
+                          />
+                          <input
+                            class="focus:outline-none bg-none text-right"
+                            :class="inputClass"
+                            type="number"
+                            v-model="transactionNumber"
+                            placeholder="Transaction number"
+                          />
                         </div>
                         <div
                           v-if="!parkingResponse.out_time"
@@ -156,10 +171,13 @@
                               min="0"
                             />
                             <span v-else>
-                              {{'৳ ' + instantDiscount}}
+                              {{ "৳ " + instantDiscount }}
                             </span>
                           </div>
-                          <div class="flex justify-between items-center gap-1" v-else>
+                          <div
+                            class="flex justify-between items-center gap-1"
+                            v-else
+                          >
                             <input
                               class="focus:outline-none bg-none text-right max-w-[6rem]"
                               :class="inputClass"
@@ -291,32 +309,43 @@
                     class="mx-4 mt-4 px-3"
                   >
                     <button
-                      v-if="paymentMethod=='cash'"
                       @click="showPaymentConfirmModaDialog()"
                       :disabled="disabledPaymentButton"
-                      :class="disabledPaymentButton ? 'bg-slate-500' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500 '"
+                      :class="
+                        disabledPaymentButton
+                          ? 'bg-slate-500'
+                          : 'bg-green-600 hover:bg-green-700 focus:ring-green-500 '
+                      "
                       class="rounded-md border w-full border-transparent px-3 py-2 text-white text-base font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50"
                     >
                       Payment
                     </button>
-                    <button
-                    v-if="paymentMethod=='online' && authUser?.id"
+                    <!-- <button
+                      v-if="paymentMethod == 'online' && authUser?.id"
                       @click="toggleQrCode"
                       :disabled="disabledPaymentButton"
-                      :class="disabledPaymentButton ? 'bg-slate-500' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500 '"
+                      :class="
+                        disabledPaymentButton
+                          ? 'bg-slate-500'
+                          : 'bg-green-600 hover:bg-green-700 focus:ring-green-500 '
+                      "
                       class="mt-2 rounded-md border w-full border-transparent px-3 py-2 text-white text-base font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50"
                     >
                       Payment by QR code
-                    </button>
-                    <button
-                    v-else-if="paymentMethod=='online' && !authUser?.id"
+                    </button> -->
+                    <!-- <button
+                      v-else-if="paymentMethod == 'online' && !authUser?.id"
                       @click="confirmCheckout"
                       :disabled="checkoutLoading"
-                      :class="checkoutLoading ? 'bg-slate-500' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500 '"
+                      :class="
+                        checkoutLoading
+                          ? 'bg-slate-500'
+                          : 'bg-green-600 hover:bg-green-700 focus:ring-green-500 '
+                      "
                       class="mt-2 rounded-md border w-full border-transparent px-3 py-2 text-white text-base font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50"
                     >
                       Continue
-                    </button>
+                    </button> -->
                   </div>
                 </div>
               </div>
@@ -512,6 +541,18 @@ const searchQuery = computed(() => {
 });
 const parkingResponse = ref(null);
 const receivedAmountRef = ref(null);
+const transactionNumber = ref('');
+const refNumber = ref('');
+const paymentMethods = ref([
+  "cash",
+  "bkash",
+  "nagad",
+  "rocket",
+  "upay",
+  "tap",
+  "online",
+  "others",
+]);
 const currentTime = ref(moment());
 const durationInMinutes = computed(() => {
   const result = parkingResponse.value;
@@ -527,7 +568,7 @@ const durationInMinutes = computed(() => {
   // Extract total time in minutes
   return Math.ceil(duration.asMinutes());
 });
-const formatDecimalNumber = (number) => Number(number).toFixed(2)
+const formatDecimalNumber = (number) => Number(number).toFixed(2);
 const totalParkingFees = computed(() => {
   const durations = durationInMinutes.value;
   const halfHourSegments = Math.ceil(durations / 30); // Number of half-hour segments
@@ -614,45 +655,48 @@ const membershipDiscountAmount = computed(() => {
   }
   return discount;
 });
-const calculatedCouponDiscount = computed(()=> {
-  let couponDis = 0
-  if (couponCodeResponse.value?.id && couponCodeResponse.value?.is_active && selectedDiscountType.value != 'Discount') {
-     
-     let discount = 0
-     const {discount_type, amount} = couponCodeResponse.value
-     if (discount_type == "percentage") {
+const calculatedCouponDiscount = computed(() => {
+  let couponDis = 0;
+  if (
+    couponCodeResponse.value?.id &&
+    couponCodeResponse.value?.is_active &&
+    selectedDiscountType.value != "Discount"
+  ) {
+    let discount = 0;
+    const { discount_type, amount } = couponCodeResponse.value;
+    if (discount_type == "percentage") {
       if (amount) {
         discount = (totalParkingFees.value * parseFloat(amount)) / 100;
       }
     } else if (discount_type == "flat") {
       discount = parseFloat(amount) ?? 0;
     }
-    couponDis = Number(discount).toFixed(2)
-     return {
-      key: 'Discount on Promocode',
-      value: formatDecimalNumber(Math.abs(parseFloat(couponDis)))
-     }
-  }
-  if (instantDiscount.value && selectedDiscountType.value == 'Discount') {
-    couponDis = Number(instantDiscount.value).toFixed(2)
+    couponDis = Number(discount).toFixed(2);
     return {
-      key: 'Instant discount',
+      key: "Discount on Promocode",
       value: formatDecimalNumber(Math.abs(parseFloat(couponDis))),
-    }
+    };
   }
-  return 0
-})
+  if (instantDiscount.value && selectedDiscountType.value == "Discount") {
+    couponDis = Number(instantDiscount.value).toFixed(2);
+    return {
+      key: "Instant discount",
+      value: formatDecimalNumber(Math.abs(parseFloat(couponDis))),
+    };
+  }
+  return 0;
+});
 
-const totalDiscount = computed(()=> {
-  let cDiscount = parseFloat(calculatedCouponDiscount.value?.value ?? 0)
-  return Math.floor(membershipDiscountAmount.value + cDiscount)
-})
+const totalDiscount = computed(() => {
+  let cDiscount = parseFloat(calculatedCouponDiscount.value?.value ?? 0);
+  return Math.floor(membershipDiscountAmount.value + cDiscount);
+});
 
-const finalTotalAmount = computed(()=> {
+const finalTotalAmount = computed(() => {
   return Number(
-        Math.round(Number(totalParkingFees.value - totalDiscount.value))
-      ).toFixed(2)
-})
+    Math.round(Number(totalParkingFees.value - totalDiscount.value))
+  ).toFixed(2);
+});
 const listAllData = computed(() => {
   const item = parkingResponse.value;
   let presentTime = moment();
@@ -660,7 +704,7 @@ const listAllData = computed(() => {
     presentTime = moment(item.out_time);
   }
   if (!item?.in_time) {
-    return
+    return;
   }
   const duration = moment.duration(presentTime.diff(item.in_time));
   const hours = Math.floor(duration.asHours());
@@ -700,44 +744,46 @@ const listAllData = computed(() => {
     {
       key: "Parking fee",
       value: "৳ " + Number(totalParkingFees.value).toFixed(2),
-    }
+    },
   ];
 
-  if (item?.vehicle?.status == 'checked_out' && item?.payment?.discount_amount) {
+  if (
+    item?.vehicle?.status == "checked_out" &&
+    item?.payment?.discount_amount
+  ) {
     list.push({
       key: "Total discount",
-      value: "৳ " + item?.payment?.discount_amount
-    })
+      value: "৳ " + item?.payment?.discount_amount,
+    });
 
     list.push({
       key: "Payable amount",
-      value: "৳ " + item?.payment?.payable_amount
-    })
+      value: "৳ " + item?.payment?.payable_amount,
+    });
 
     list.push({
       key: "Paid amount",
-      value: "৳ " + item?.payment?.paid_amount
-    })
-    return list
-  }else {
+      value: "৳ " + item?.payment?.paid_amount,
+    });
+    return list;
+  } else {
     list.push({
       key: "Membership Discount",
       value: "৳ " + Number(membershipDiscountAmount.value).toFixed(2),
-    })
+    });
   }
 
   if (calculatedCouponDiscount.value?.value) {
-    const {key, value} = calculatedCouponDiscount.value
+    const { key, value } = calculatedCouponDiscount.value;
     list.push({
       key,
-      value: "৳ " + value
+      value: "৳ " + value,
     });
   }
 
   list.push({
     key: "Subtotal",
-    value:
-      "৳ " + finalTotalAmount.value,
+    value: "৳ " + finalTotalAmount.value,
   });
   return list;
 });
@@ -756,7 +802,7 @@ const loadData = async () => {
       if (result.out_time) {
         currentTime.value = moment(result.out_time);
       }
-     
+
       /*
       //old calculation
       return {
@@ -811,10 +857,12 @@ const parkingDataToCheckout = computed(() => {
       // payable_amount: finalTotalAmount.value,
       discount_amount: parseFloat(calculatedCouponDiscount.value?.value ?? 0),
       membership_discount: membershipDiscountAmount.value ?? 0,
+      txn_number: transactionNumber.value ?? 0,
+      reference_number: refNumber.value ?? 0,
     },
   };
   if (couponCodeResponse.value) {
-    obj.payment.discount_id = couponCodeResponse.value.id
+    obj.payment.discount_id = couponCodeResponse.value.id;
   }
   return obj;
 });
@@ -859,32 +907,37 @@ const showAlertMessage = computed(() => {
   } else if (subtotal < receivedAmount.value) {
     return "Are you sure receiving more amount than total?";
   }
-  const amount = Number(parseFloat(receivedAmount.value)).toFixed(2)
-  const remaining = Number(parseFloat(subtotal) - parseFloat(receivedAmount.value)).toFixed(2)
-  return `You are paying ৳ ${amount} towards a ৳ ${subtotal} subtotal. A remaining balance of ৳ ${remaining} will be due.`
+  const amount = Number(parseFloat(receivedAmount.value)).toFixed(2);
+  const remaining = Number(
+    parseFloat(subtotal) - parseFloat(receivedAmount.value)
+  ).toFixed(2);
+  return `You are paying ৳ ${amount} towards a ৳ ${subtotal} subtotal. A remaining balance of ৳ ${remaining} will be due.`;
 });
 
-const disabledPaymentButton = computed(()=> {
-  const fTotalAmount = parseFloat(finalTotalAmount.value)
+const disabledPaymentButton = computed(() => {
+  const fTotalAmount = parseFloat(finalTotalAmount.value);
   if (fTotalAmount < 0) {
-    return true
+    return true;
   }
 
-  const parkingFee = parseFloat(totalParkingFees.value ?? 0)
-  const amount = parseFloat(receivedAmount.value ?? 0) + parseFloat(totalDiscount.value ?? 0)
+  const parkingFee = parseFloat(totalParkingFees.value ?? 0);
+  const amount =
+    parseFloat(receivedAmount.value ?? 0) +
+    parseFloat(totalDiscount.value ?? 0);
   if (amount > parkingFee) {
-    return true
+    return true;
   }
   if (totalParkingFees.value < totalDiscount.value) {
-    return true
+    return true;
   }
-  return false
-})
+  return false;
+});
 
 const payDue = async () => {
   const payable_amount = parseFloat(duePayment.value.payable_amount);
   const paid_amount = parseFloat(duePayment.value.paid_amount);
-  const remaining = payable_amount - paid_amount - membershipDiscountAmount.value;
+  const remaining =
+    payable_amount - paid_amount - membershipDiscountAmount.value;
   if (receivedAmount.value == remaining) {
     const obj = {
       paid_amount:
@@ -922,25 +975,25 @@ const toggleQrCode = () => {
     paymentMethod: paymentMethod.value,
   };
 
-  if (selectedDiscountType.value == 'Discount') {
-    newQuery.instantDiscount = instantDiscount.value
-  }else {
+  if (selectedDiscountType.value == "Discount") {
+    newQuery.instantDiscount = instantDiscount.value;
+  } else {
     if (couponCodeResponse.value?.id && couponCode.value) {
-      newQuery.couponCode = couponCode.value
+      newQuery.couponCode = couponCode.value;
     }
   }
-  
+
   router.push({ query: newQuery });
 };
-const closeQrCodeModal = ()=> {
-  showQrCode.value = false
+const closeQrCodeModal = () => {
+  showQrCode.value = false;
   router.push({ query: {} });
-}
+};
 const applyCouponCode = async () => {
   if (!couponCode.value) {
     return;
   }
-  couponCodeResponse.value = null
+  couponCodeResponse.value = null;
   try {
     const query = `?promo_code=${couponCode.value}`;
     const result = await DiscountService.getAll(query);
@@ -949,15 +1002,15 @@ const applyCouponCode = async () => {
       couponCodeResponse.value = result.data[0];
     }
   } catch (error) {
-    couponCodeResponse.value = null
+    couponCodeResponse.value = null;
   }
 };
 
 const handleDiscountTypeChange = () => {
-  couponCodeResponse.value = null
-  couponCode.value = ''
-  instantDiscount.value = 0
-}
+  couponCodeResponse.value = null;
+  couponCode.value = "";
+  instantDiscount.value = 0;
+};
 watch(
   () => receivedAmount,
   (newValue, oldValue) => {
@@ -998,20 +1051,20 @@ watch(
         ...route.query,
       };
       if (route.query.receivedAmount) {
-        receivedAmount.value = route.query.receivedAmount
+        receivedAmount.value = route.query.receivedAmount;
       }
       if (route.query.selectedDiscountType) {
-        selectedDiscountType.value = route.query.selectedDiscountType
+        selectedDiscountType.value = route.query.selectedDiscountType;
       }
       if (route.query.paymentMethod) {
-        paymentMethod.value = route.query.paymentMethod
+        paymentMethod.value = route.query.paymentMethod;
       }
       if (route.query.instantDiscount) {
-        instantDiscount.value = route.query.instantDiscount
+        instantDiscount.value = route.query.instantDiscount;
       }
       if (route.query.couponCode) {
-        couponCode.value = route.query.couponCode
-        applyCouponCode()
+        couponCode.value = route.query.couponCode;
+        applyCouponCode();
       }
 
       router.push({ query: newQuery });
@@ -1023,7 +1076,7 @@ watch(
   finalTotalAmount,
   (o, n) => {
     if (finalTotalAmount.value == 0) {
-      receivedAmount.value = 0
+      receivedAmount.value = 0;
     }
   },
   { deep: true, immediate: true }

@@ -240,9 +240,9 @@ const paidAmount = computed(() => {
   return Number(parseFloat(singleData?.payment?.paid_amount)).toFixed(2);
 });
 const discountAmount = computed(() => {
-  return Number(parseFloat(singleData?.payment?.discount_amount ?? 0)).toFixed(
-    2
-  );
+  const membership_discount = parseFloat(singleData?.payment?.membership_discount ?? 0)
+  const discount_amount = parseFloat(singleData?.payment?.discount_amount ?? 0)
+  return Number(membership_discount + discount_amount).toFixed(2)
 });
 const dueAmount = computed(() => {
   return Number(parseFloat(singleData?.payment?.due_amount ?? 0)).toFixed(2);
