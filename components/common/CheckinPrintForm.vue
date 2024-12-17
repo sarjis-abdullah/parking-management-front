@@ -345,8 +345,8 @@ const checkoutData = computed(() => {
     floor = item.floor.name,
     driverName = item.vehicle?.driver_name,
     driverMobile = item.vehicle?.driver_mobile,
-    checkInDate = formatDate(item.vehicle?.in_time, "hh:mm A"),
-    checkInTime = formatDate(item.vehicle?.in_time, "DD-MM-YYYY");
+    checkInTime = formatDate(item.vehicle?.in_time, "hh:mm A"),
+    checkInDate = formatDate(item.vehicle?.in_time, "DD-MM-YYYY");
   return [
     {
       key: "Checkin Date",
