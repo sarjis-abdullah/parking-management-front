@@ -531,11 +531,9 @@ const inputClass =
         <label class="text-gray-500"
           >Slot<span class="text-red-500">*</span></label
         >
-        <ul class="grid gap-2">
-          <li v-for="(slot, index) in slots" :key="slot.id">
-            <!-- <span v-if="slots?.length">{{ floor.name }}</span> -->
-            <ul class="grid grid-cols-3 md:grid-cols-6 gap-2">
+        <ul class="grid gap-2 grid-cols-3 md:grid-cols-5">
               <li
+              v-for="(slot, index) in slots" :key="slot.id"
                 class="flex flex-col gap-1 items-center p-4 border text-white rounded-md"
                 :class="getSlotClasses(slot)"
                 @click="handleSelectedSlot(slot)"
@@ -559,8 +557,7 @@ const inputClass =
                 </div>
               </li>
             </ul>
-          </li>
-        </ul>
+          
         <!-- <select
             class="focus:outline-none bg-none"
             :class="inputClass"
