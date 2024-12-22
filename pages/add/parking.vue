@@ -157,11 +157,17 @@ const slotLoading = ref(false);
 const getSlots = async () => {
   try {
     slotLoading.value = true;
-    const { data } = await SlotService.getAll(
-      `?block_id=${selectedBlock.value}`
-    );
+    let query = '';
+
+    if (selectedBlock.value) {
+      query += `${query ? '&' : '?'}block_id=${selectedBlock.value}`;
+    }
+
+    if (state.category) {
+      query += `${query ? '&' : '?'}category_id=${state.category}`;
+    }
+    const { data } = await SlotService.getAll(query);
     slots.value = data;
-    u;
   } catch (error) {
   } finally {
     slotLoading.value = false;
@@ -489,6 +495,7 @@ const inputClass =
             style="background: none"
             name="place"
             v-model="state.category"
+            @change="getSlots"
           >
             <option disabled :value="''">Select vehicle category</option>
             <option
@@ -524,6 +531,10 @@ const inputClass =
           <!-- <ServerErrorMessage :errors="validator.tariff.$errors" /> -->
         </div>
       </section>
+      <Loading
+      v-if="loading || slotLoading || blockLoading || floorLoading"
+      parentClass="flex justify-center"
+    />
       <div
         class="grid gap-2 rounded-lg bg-indigo-100 shadow-lg p-6"
         v-if="slots && slots.length"
@@ -611,9 +622,6 @@ const inputClass =
         </div>
       </section>
     </form>
-    <Loading
-      v-if="loading || slotLoading || blockLoading || floorLoading"
-      parentClass="flex justify-center"
-    />
+    
   </section>
 </template>
