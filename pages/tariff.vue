@@ -199,6 +199,12 @@ onMounted(() => {
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
+                    Type
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
                     Start date
                   </th>
                   <th
@@ -246,6 +252,11 @@ onMounted(() => {
                         </div>
                       </div>
                     </div>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-5 text-sm">
+                    <span class="text-white  px-2 py-1 rounded" :class="singleData?.type == 'hourly' ? 'bg-blue-400' : 'bg-indigo-600'">{{
+                      singleData?.type
+                    }}</span>
                   </td>
                   <td class="whitespace-nowrap px-3 py-5 text-sm">
                     <div v-if="singleData.editMode">
@@ -315,11 +326,11 @@ onMounted(() => {
                         :key="item.id"
                       >
                         <span v-if="singleData?.parking_rates?.length == 1">
-                          Each half hour rate {{ item.rate }} taka
+                          Each {{singleData.modifiedType}} rate {{ item.rate }} taka
                         </span>
                         <span v-else>
                           {{
-                            index == 0 ? "First half hour" : "Next half hour"
+                            index == 0 ? "First " + singleData.modifiedType : "Next " + singleData.modifiedType
                           }}
                           {{ item.rate }} taka
                         </span>

@@ -224,7 +224,7 @@ const inputClass =
             v-model="state.paymentRateType"
           >
             <option value="half_hourly">Half-hourly</option>
-            <!-- <option value="hourly">Hourly</option> -->
+            <option value="hourly">Hourly</option>
           </select>
         </div>
         

@@ -572,14 +572,15 @@ const formatDecimalNumber = (number) => Number(number).toFixed(2);
 const totalParkingFees = computed(() => {
   const durations = durationInMinutes.value;
   const halfHourSegments = Math.ceil(durations / 30); // Number of half-hour segments
+  const hourlySegments = Math.ceil(durations / 60);
 
   let total = 0.0;
 
-  // Ensure rates are sorted by id or another relevant field
-  // rates.sort((a, b) => a.id - b.id);
   const rates = parking_rates.value;
+  const isHourly = rates[0]?.type === "hourly"
+  const segments = isHourly ? hourlySegments : halfHourSegments;
   if (rates.length) {
-    for (let i = 0; i < halfHourSegments; i++) {
+    for (let i = 0; i < segments; i++) {
       // Use the last rate if i exceeds the number of rate objects
       const rate =
         i < rates.length ? rates[i].rate : rates[rates.length - 1].rate;
@@ -798,7 +799,15 @@ const loadData = async () => {
       parkingId.value = result.id;
       vehicleId.value = result?.vehicle?.id;
       vehicle.value = result?.vehicle;
-      parking_rates.value = result.tariff.parking_rates;
+      if (result.tariff?.parking_rates?.length){
+        const rates = result.tariff.parking_rates
+        parking_rates.value = rates.map((rate) => {
+          return {
+            ...rate,
+            type: result.tariff.type,
+          };
+        });
+      }
       if (result.out_time) {
         currentTime.value = moment(result.out_time);
       }
