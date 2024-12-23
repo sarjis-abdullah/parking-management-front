@@ -157,14 +157,14 @@ const slotLoading = ref(false);
 const getSlots = async () => {
   try {
     slotLoading.value = true;
-    let query = '';
+    let query = '?order_direction=asc';
 
     if (selectedBlock.value) {
-      query += `${query ? '&' : '?'}block_id=${selectedBlock.value}`;
+      query += `&block_id=${selectedBlock.value}`;
     }
 
     if (state.category) {
-      query += `${query ? '&' : '?'}category_id=${state.category}`;
+      query += `&category_id=${state.category}`;
     }
     const { data } = await SlotService.getAll(query);
     slots.value = data;
