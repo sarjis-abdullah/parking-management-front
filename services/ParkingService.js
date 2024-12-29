@@ -4,7 +4,7 @@ export class ParkingService {
   static requester = HttpRequester.httpRequester();
   static async getAll(query='') {
     try {
-      return await HttpRequester.get(`parking${query}`, false);
+      return await HttpRequester.get(`parking${query}`);
     } catch (err) {
       throw err;
     }
@@ -26,8 +26,7 @@ export class ParkingService {
   }
   static async handleCheckout(id, data) {
     try {
-      console.log(data, 'data');
-      return await HttpRequester.put('parking-check-out/' + id, data, false);
+      return await HttpRequester.put('parking-check-out/' + id, data);
     } catch (err) {
       throw err;
     }

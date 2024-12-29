@@ -13,7 +13,6 @@
   ```
 -->
 <template>
-  
   <div>
     <TransitionRoot as="template" :show="sidebarOpen">
       <Dialog
@@ -138,6 +137,17 @@
                       </ul>
                     </li>
                   </ul>
+                  <section class="mt-4">
+                    <div class="flex justify-center">
+                      <button
+                        type="button"
+                        @click="logout"
+                        class="bg-red-600 text-white px-2 py-1 rounded-md"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </section>
                 </nav>
               </div>
             </DialogPanel>
@@ -172,9 +182,13 @@
             >
               <div @click.prevent="toggleMenu(index)" class="flex gap-2">
                 <!-- Use the icon dynamically -->
-                 <img v-if="item.imageIcon" :src="item.imageIcon" class="h-6 w-6"/>
+                <img
+                  v-if="item.imageIcon"
+                  :src="item.imageIcon"
+                  class="h-6 w-6"
+                />
                 <component
-                v-else
+                  v-else
                   class="h-6 w-6 shrink-0 text-[#3591ca] group-hover:text-indigo-600"
                   :is="item.icon"
                 ></component>
@@ -200,6 +214,17 @@
               </ul>
             </li>
           </ul>
+          <section class="mt-4">
+            <div class="flex justify-center">
+              <button
+              @click="logout"
+                type="button"
+                class="bg-red-600 text-white px-2 py-1 rounded-md"
+              >
+                Logout
+              </button>
+            </div>
+          </section>
         </nav>
       </div>
     </div>
@@ -284,7 +309,9 @@ watch(
   }
 );
 const routeName = computed(() => useRoute().name);
-const authUser = computed(()=> window && window.localStorage && localStorage.getItem("LOGIN_ACCOUNT"));
+const authUser = computed(
+  () => window && window.localStorage && localStorage.getItem("LOGIN_ACCOUNT")
+);
 const getTitle = computed(() => {
   switch (routeName.value) {
     case "dashboard":
@@ -350,6 +377,14 @@ const checkout = () => {
 };
 
 const sidebarOpen = ref(false);
+
+const logout = () => {
+  if (window && window.localStorage) {
+    localStorage.removeItem("LOGIN_ACCOUNT");
+    localStorage.removeItem("ACCESS_TOKEN");
+    window.location.href = "/";
+  }
+};
 onMounted(() => {
   console.log(123, "auth layout");
 });

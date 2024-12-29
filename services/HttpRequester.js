@@ -74,9 +74,9 @@ export class HttpRequester extends BaseHttpRequester {
         ...this.getHeaders(),
         body: JSON.stringify(data),
       }
-      if (!auth) {
-        delete req.headers.Authorization
-      }
+      // if (!auth) {
+      //   delete req.headers.Authorization
+      // }
       console.log(req, 'reque');
       const response = await fetch(this.BASE_URL + url, req);
       if (response.ok) {
@@ -141,10 +141,10 @@ export class HttpRequester extends BaseHttpRequester {
     let error = "";
     if (status == 401) {
       this.handleMessage("Un-authenticated!", false);
-      // window.location.href = "/";
+      window.location.href = "/";
     } else if (status == 403) {
       this.handleMessage("Un-authorized", false);
-      // window.location.href = "/";
+      window.location.href = "/";
     } else if (status == 422) {
       this.handleMessage("Bad input", false);
     } else if (status >= 400 && status < 500) {
