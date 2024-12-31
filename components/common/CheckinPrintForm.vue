@@ -100,7 +100,7 @@
                                         line-height: 30px;
                                       "
                                     >
-                                      Khulshi Mart
+                                      Arcadia
                                     </div>
                                     <div
                                       style="font-weight: 500; font-size: 15px"
@@ -231,7 +231,7 @@
                                     line-height: 12px;
                                   "
                                 >
-                                  Thank you for choosing Khulshi Mart
+                                  Thank you for choosing Arcadia
                                 </div>
                               </tfoot>
                             </table>
