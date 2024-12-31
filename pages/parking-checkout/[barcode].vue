@@ -29,7 +29,7 @@
                         "
                       >
                         <img
-                          src="/assets/khulshi.png"
+                          src="/assets/khulshi-icon.jpeg"
                           style="max-height: 3rem"
                           alt="Your Company"
                         />
