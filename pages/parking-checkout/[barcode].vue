@@ -67,9 +67,9 @@
                           class="focus:outline-none bg-none text-right max-w-[10rem]"
                           :class="inputClass"
                           type="time"
-                          v-model="selectableCurrentTime"
-                          :min="minTime"
-                          :max="maxTime"
+                          v-model="checkoutTime"
+                         
+                          @change="updateTime"
                           :disabled="disableCurrentTime"
                         />
                       </div>
@@ -584,13 +584,15 @@ const paymentMethods = ref([
   "others",
 ]);
 const currentTime = ref(dayjs());
+const selectOuttime = ref(dayjs());
+
 const durationInMinutes = computed(() => {
   const result = parkingResponse.value;
   if (!result) {
     return 0;
   }
   const inTime = dayjs(result.in_time);
-  const differenceInMillis = currentTime.value.diff(inTime);
+  const differenceInMillis = currentTime.value.diff(inTime); //todo
 
   const durationInMinutes = Math.ceil(differenceInMillis / (1000 * 60));
   return durationInMinutes;
@@ -725,12 +727,13 @@ const finalTotalAmount = computed(() => {
     Math.round(Number(totalParkingFees.value - totalDiscount.value))
   ).toFixed(2);
 });
-const selectOuttime = ref(null);
 const listAllData = computed(() => {
   const item = parkingResponse.value;
   let presentTime = dayjs();
   if (item?.out_time) {
     presentTime = dayjs(item.out_time);
+  }else {
+    presentTime = dayjs(currentTime.value);
   }
   if (!item?.in_time) {
     return;
@@ -818,6 +821,15 @@ const listAllData = computed(() => {
   });
   return list;
 });
+const updateTime = () => {
+  if (checkoutTime.value) {
+    const [hours, minutes] = checkoutTime.value.split(":").map(Number);
+    currentTime.value = currentTime.value
+      .hour(hours)
+      .minute(minutes)
+      .second(0); // Reset seconds to 0 for consistency
+  }
+};
 const loadData = async () => {
   try {
     isLoading.value = true;
@@ -839,30 +851,10 @@ const loadData = async () => {
         });
       }
       if (result.out_time) {
-        currentTime.value = dayjs(result.out_time);
+        const out_time = result.out_time
+        currentTime.value = dayjs(out_time);
+        checkoutTime.value = formatDate(out_time);
       }
-
-      /*
-      //old calculation
-      return {
-        "Vehicle Number": item.vehicle?.number,
-        Place: item.place?.name,
-        Category: item.category?.name,
-        Floor: item.floor?.name,
-        Slot: item.slot?.name,
-        "Driver Name": item.vehicle?.driver_name,
-        "Driver Mobile": item.vehicle?.driver_mobile,
-        // "Check-in-Time": item.in_time ? formatDate(item.in_time) : "--",
-        "Check-out-Time": formatDate(currentTime.value),
-        Status:
-          item.vehicle?.status == "checked_in" ? "Checked-in" : "Checked-out",
-        Duration: totalTime,
-        "Total Amount": totalParkingFees.value + "৳",
-        "Discount Applied": Number(discount).toFixed(2) + "৳",
-        Subtotal:
-          Math.round(Number(totalParkingFees.value - discount).toFixed(2)) + "৳",
-      };
-      */
       serverErrors.value = {};
     } else {
       const errors = {
@@ -924,7 +916,6 @@ const confirmCheckout = async () => {
 
     // print();
     if (result?.data?.redirect_url) {
-      console.log(123456, result);
       window.location.href = result.data.redirect_url;
     } else {
       vehicle.value = { ...result?.data?.vehicle, status: "checked_out" };
@@ -952,17 +943,21 @@ const showAlertMessage = computed(() => {
   ).toFixed(2);
   return `You are paying ৳ ${amount} towards a ৳ ${subtotal} subtotal. A remaining balance of ৳ ${remaining} will be due.`;
 });
-const selectableCurrentTime = ref(dayjs());
+const checkoutTime = ref(formatDate(dayjs(), "HH:mm"));
 const minTime = ref(dayjs());
 const maxTime = ref(dayjs());
 const disableCurrentTime = ref(false);
 const checkoutTimeError = computed(() => {
-  const error = `Please select a time between ${minTime.value} and ${maxTime.value}.`;
-  if (!selectableCurrentTime.value){
+  const lowerTime = minTime.value.format("HH:mm");
+  const lowerTime12 = minTime.value.format("hh:mm A");
+  const upperTime = maxTime.value.format("HH:mm");
+  const upperTime12 = maxTime.value.format("hh:mm A");
+  const error = `Please select a time between ${lowerTime12} and ${upperTime12}.`;
+  if (!currentTime.value){
     return error
   }
-  const selected = selectableCurrentTime.value;
-  if (selected < minTime.value || selected > maxTime.value) {
+  const selected = formatDate(currentTime.value, "HH:mm");
+  if (selected < lowerTime || selected > upperTime) {
     return error
   } 
   return "";
@@ -1050,7 +1045,6 @@ const applyCouponCode = async () => {
   try {
     const query = `?promo_code=${couponCode.value}`;
     const result = await DiscountService.getAll(query);
-    console.log(result, 1234);
     if (result?.data?.length) {
       couponCodeResponse.value = result.data[0];
     }
@@ -1135,29 +1129,14 @@ watch(
   { deep: true, immediate: true }
 );
 
-watch(
-  parkingResponse,
-  (o, n) => {
-    const item = parkingResponse.value;
-    const past = dayjs().subtract(10, "minutes");
-    const future = dayjs().add(10, "minutes"); // 10 minutes from now
-
-    // Format times as `HH:mm` (24-hour clock for time input)
-    minTime.value = past.format("HH:mm");
-    maxTime.value = future.format("HH:mm");
-
-    let time = ''
-    if (item?.out_time) {
-      time = dayjs(item.out_time);
-    }else {
-      time = dayjs();
-    }
-    selectableCurrentTime.value = formatDate(time, "hh:mm");
-  },
-  { deep: true, immediate: true }
-);
 onMounted(() => {
   loadData();
+  minTime.value = dayjs().subtract(10, "minutes");
+  maxTime.value = dayjs().add(10, "minutes"); // 10 minutes from now
+
+  // Format times as `HH:mm` (24-hour clock for time input)
+  // minTime.value = past.format("HH:mm");
+  // maxTime.value = future.format("HH:mm");
 });
 </script>
 <style scoped>
