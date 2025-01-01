@@ -48,6 +48,32 @@
 
                     <dl style="margin-top: 0.75rem">
                       <div
+                        v-if="!parkingResponse.out_time"
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          border-top: 1px solid rgb(229, 231, 235);
+                          padding-top: 1rem;
+                        "
+                      >
+                        <dt
+                          data-v-61884e8b=""
+                          style="font-size: 0.875rem; color: rgb(107, 114, 128)"
+                        >
+                          Checkout time
+                        </dt>
+                        <input
+                          class="focus:outline-none bg-none text-right max-w-[10rem]"
+                          :class="inputClass"
+                          type="time"
+                          v-model="selectableCurrentTime"
+                          :min="minTime"
+                          :max="maxTime"
+                          :disabled="disableCurrentTime"
+                        />
+                      </div>
+                      <div
                         v-for="(item, index) in listAllData"
                         :key="index"
                         style="
@@ -104,7 +130,10 @@
                             {{ paymentMethod }}
                           </span>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 items-center pb-2" v-if="authUser?.id && paymentMethod != 'cash'">
+                        <div
+                          class="grid grid-cols-2 gap-2 items-center pb-2"
+                          v-if="authUser?.id && paymentMethod != 'cash'"
+                        >
                           <input
                             class="focus:outline-none bg-none text-right"
                             :class="inputClass"
@@ -308,6 +337,7 @@
                     v-if="vehicle?.status != 'checked_out'"
                     class="mx-4 mt-4 px-3"
                   >
+                  <p class="text-red-500 text-sm pb-2" v-if="checkoutTimeError">{{checkoutTimeError}}</p>
                     <button
                       @click="showPaymentConfirmModaDialog()"
                       :disabled="disabledPaymentButton"
@@ -494,7 +524,7 @@ import AddMembership from "@/components/membership/AddMembership.vue";
 import Errors from "@/components/common/Error.vue";
 import { ParkingService } from "~/services/ParkingService";
 import { formatDate } from "@/utils/index";
-import moment from "moment";
+import dayjs from "dayjs";
 import { PaymentService } from "~/services/PaymentService";
 import QrcodeVue from "qrcode.vue";
 import { DiscountService } from "~/services/DiscountService";
@@ -541,8 +571,8 @@ const searchQuery = computed(() => {
 });
 const parkingResponse = ref(null);
 const receivedAmountRef = ref(null);
-const transactionNumber = ref('');
-const refNumber = ref('');
+const transactionNumber = ref("");
+const refNumber = ref("");
 const paymentMethods = ref([
   "cash",
   "bkash",
@@ -553,20 +583,17 @@ const paymentMethods = ref([
   "online",
   "others",
 ]);
-const currentTime = ref(moment());
+const currentTime = ref(dayjs());
 const durationInMinutes = computed(() => {
   const result = parkingResponse.value;
   if (!result) {
     return 0;
   }
-  const inTime = moment(result.in_time);
+  const inTime = dayjs(result.in_time);
   const differenceInMillis = currentTime.value.diff(inTime);
 
-  // Create a duration object
-  const duration = moment.duration(differenceInMillis);
-
-  // Extract total time in minutes
-  return Math.ceil(duration.asMinutes());
+  const durationInMinutes = Math.ceil(differenceInMillis / (1000 * 60));
+  return durationInMinutes;
 });
 const formatDecimalNumber = (number) => Number(number).toFixed(2);
 const totalParkingFees = computed(() => {
@@ -577,7 +604,7 @@ const totalParkingFees = computed(() => {
   let total = 0.0;
 
   const rates = parking_rates.value;
-  const isHourly = rates[0]?.type === "hourly"
+  const isHourly = rates[0]?.type === "hourly";
   const segments = isHourly ? hourlySegments : halfHourSegments;
   if (rates.length) {
     for (let i = 0; i < segments; i++) {
@@ -698,25 +725,28 @@ const finalTotalAmount = computed(() => {
     Math.round(Number(totalParkingFees.value - totalDiscount.value))
   ).toFixed(2);
 });
+const selectOuttime = ref(null);
 const listAllData = computed(() => {
   const item = parkingResponse.value;
-  let presentTime = moment();
+  let presentTime = dayjs();
   if (item?.out_time) {
-    presentTime = moment(item.out_time);
+    presentTime = dayjs(item.out_time);
   }
   if (!item?.in_time) {
     return;
   }
-  const duration = moment.duration(presentTime.diff(item.in_time));
-  const hours = Math.floor(duration.asHours());
-  const minutes = Math.floor(duration.minutes());
-  const seconds = Math.floor(duration.seconds());
+  const differenceInMillis = dayjs(presentTime).diff(dayjs(item.in_time));
+
+  const hours = Math.floor(differenceInMillis / (1000 * 60 * 60)); // Convert to hours
+  const minutes = Math.floor((differenceInMillis % (1000 * 60 * 60)) / (1000 * 60)); // Remainder converted to minutes
+  const seconds = Math.floor((differenceInMillis % (1000 * 60)) / 1000); // Remainder converted to seconds
+
   const totalTime = `${hours}h ${minutes}m ${seconds}s`;
 
   const list = [
     {
-      key: "Checkout Time",
-      value: formatDate(presentTime),
+      key: "Checkout date",
+      value: formatDate(presentTime, "DD-MM-YYYY"),
     },
     {
       key: "Vehicle No",
@@ -799,8 +829,8 @@ const loadData = async () => {
       parkingId.value = result.id;
       vehicleId.value = result?.vehicle?.id;
       vehicle.value = result?.vehicle;
-      if (result.tariff?.parking_rates?.length){
-        const rates = result.tariff.parking_rates
+      if (result.tariff?.parking_rates?.length) {
+        const rates = result.tariff.parking_rates;
         parking_rates.value = rates.map((rate) => {
           return {
             ...rate,
@@ -809,7 +839,7 @@ const loadData = async () => {
         });
       }
       if (result.out_time) {
-        currentTime.value = moment(result.out_time);
+        currentTime.value = dayjs(result.out_time);
       }
 
       /*
@@ -922,10 +952,24 @@ const showAlertMessage = computed(() => {
   ).toFixed(2);
   return `You are paying ৳ ${amount} towards a ৳ ${subtotal} subtotal. A remaining balance of ৳ ${remaining} will be due.`;
 });
-
+const selectableCurrentTime = ref(dayjs());
+const minTime = ref(dayjs());
+const maxTime = ref(dayjs());
+const disableCurrentTime = ref(false);
+const checkoutTimeError = computed(() => {
+  const error = `Please select a time between ${minTime.value} and ${maxTime.value}.`;
+  if (!selectableCurrentTime.value){
+    return error
+  }
+  const selected = selectableCurrentTime.value;
+  if (selected < minTime.value || selected > maxTime.value) {
+    return error
+  } 
+  return "";
+});
 const disabledPaymentButton = computed(() => {
   const fTotalAmount = parseFloat(finalTotalAmount.value);
-  if (fTotalAmount < 0) {
+  if (fTotalAmount < 0 || checkoutTimeError.value) {
     return true;
   }
 
@@ -1087,6 +1131,28 @@ watch(
     if (finalTotalAmount.value == 0) {
       receivedAmount.value = 0;
     }
+  },
+  { deep: true, immediate: true }
+);
+
+watch(
+  parkingResponse,
+  (o, n) => {
+    const item = parkingResponse.value;
+    const past = dayjs().subtract(10, "minutes");
+    const future = dayjs().add(10, "minutes"); // 10 minutes from now
+
+    // Format times as `HH:mm` (24-hour clock for time input)
+    minTime.value = past.format("HH:mm");
+    maxTime.value = future.format("HH:mm");
+
+    let time = ''
+    if (item?.out_time) {
+      time = dayjs(item.out_time);
+    }else {
+      time = dayjs();
+    }
+    selectableCurrentTime.value = formatDate(time, "hh:mm");
   },
   { deep: true, immediate: true }
 );
