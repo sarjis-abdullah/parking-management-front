@@ -120,21 +120,7 @@ const onSubmit = async () => {
     loading.value = false;
   }
 };
-const places = ref([]);
-const selectedFloor = ref("");
-const getPlaces = async () => {
-  try {
-    selectedFloor.value = "";
-    floors.value = [];
-    loading.value = true;
-    const { data } = await PlaceService.getAll("");
-    places.value = data;
-    return Promise.resolve(data);
-  } catch (error) {
-  } finally {
-    loading.value = false;
-  }
-};
+
 const blocks = ref([]);
 const blockLoading = ref(false);
 const getBlocks = async () => {
@@ -144,6 +130,12 @@ const getBlocks = async () => {
       `?floor_id=${selectedFloor.value}`
     );
     blocks.value = data;
+
+    if (blocks.value?.length == 1) {
+      const item = blocks.value[0]
+      selectedBlock.value = item.id
+      getSlots()
+    }
   } catch (error) {
   } finally {
     blockLoading.value = false;
@@ -177,7 +169,7 @@ const getSlots = async () => {
 const categories = ref([]);
 const categoryLoading = ref(false);
 const getCategories = async () => {
-  loading.value = true;
+  // loading.value = true;
   try {
     state.category = "";
     categoryLoading.value = true;
@@ -187,7 +179,7 @@ const getCategories = async () => {
   } catch (error) {
   } finally {
     categoryLoading.value = false;
-    loading.value = false;
+    // loading.value = false;
   }
 };
 const floors = ref([]);
@@ -205,10 +197,35 @@ const getFloors = async () => {
   try {
     const { data } = await FloorService.getAll(query);
     floors.value = data;
+    if (floors.value?.length == 1) {
+      const item = floors.value[0]
+      selectedFloor.value = item.id
+      getBlocks()
+    }
     return Promise.resolve(data);
   } catch (error) {
   } finally {
     floorLoading.value = false;
+  }
+};
+const places = ref([]);
+const selectedFloor = ref("");
+const getPlaces = async () => {
+  try {
+    selectedFloor.value = "";
+    floors.value = [];
+    // loading.value = true;
+    const { data } = await PlaceService.getAll("");
+    places.value = data;
+    if (places.value?.length == 1) {
+      const item = places.value[0]
+      state.place = item.id
+      getFloors()
+    }
+    return Promise.resolve(data);
+  } catch (error) {
+  } finally {
+    // loading.value = false;
   }
 };
 const handlePlaceChange = () => {
@@ -316,17 +333,18 @@ const debouncedSearch = useDebounce(search, 500);
 const tariffs = ref([]);
 const geTtariffs = async () => {
   try {
-    loading.value = true;
+    // loading.value = true;
     const { data } = await TariffService.getAll();
     tariffs.value = data;
     return Promise.resolve(data);
   } catch (error) {
   } finally {
-    loading.value = false;
+    // loading.value = false;
   }
 };
 onMounted(async () => {
   try {
+    loading.value = true
     await getPlaces();
     await getCategories();
     // await getFloors();
@@ -334,6 +352,7 @@ onMounted(async () => {
   } catch (error) {
   } finally {
     initialLoading.value = false;
+    loading.value = false
   }
 });
 
