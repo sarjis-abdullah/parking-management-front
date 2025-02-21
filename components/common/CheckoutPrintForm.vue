@@ -102,7 +102,7 @@
                                     <div
                                       style="font-weight: 500; font-size: 15px"
                                     >
-                                      VEHICLE CHECK-OUT RECEIPT
+                                    PARKING INVOICE
                                     </div>
                                   </td>
                                 </tr>
@@ -147,6 +147,7 @@
                                           display: flex;
                                           justify-content: center;
                                           padding: 4px 0;
+                                          font-size: 12px;
                                         "
                                       >
                                         <span> Transaction No:</span>
@@ -404,34 +405,34 @@ const checkoutData = computed(() => {
       key: "Type",
       value: type,
     },
-    {
-      key: "Place",
-      value: place,
-    },
-    {
-      key: "Block",
-      value: block,
-    },
+    // {
+    //   key: "Place",
+    //   value: place,
+    // },
+    // {
+    //   key: "Block",
+    //   value: block,
+    // },
     {
       key: "Slot",
       value: slot,
     },
+    // {
+    //   key: "Floor",
+    //   value: floor,
+    // },
     {
-      key: "Floor",
-      value: floor,
+      key: "Duration",
+      value: totalHours + "h:" + totalMinutes + "m",
     },
-    {
-      key: "Total hours",
-      value: totalHours + " hour(s)",
-    },
-    {
-      key: "Total minutes",
-      value: totalMinutes + " minute(s)",
-    },
-    {
-      key: "Total seconds",
-      value: totalSeconds + " second(s)",
-    },
+    // {
+    //   key: "Total minutes",
+    //   value: totalMinutes + " minute(s)",
+    // },
+    // {
+    //   key: "Total seconds",
+    //   value: totalSeconds + " second(s)",
+    // },
     {
       key: "Parking fee",
       value: "৳ " + parkingFee,
@@ -444,10 +445,10 @@ const checkoutData = computed(() => {
       key: "Total amount",
       value: "৳ " + totalAmount,
     },
-    {
-      key: "Total due",
-      value: "৳ " + totalDue,
-    },
+    // {
+    //   key: "Total due",
+    //   value: "৳ " + totalDue,
+    // },
     {
       key: "Payment method",
       value: paymentMethod,

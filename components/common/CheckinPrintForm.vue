@@ -105,7 +105,7 @@
                                     <div
                                       style="font-weight: 500; font-size: 15px"
                                     >
-                                      VEHICLE CHECK-IN RECEIPT
+                                      PARKING INVOICE
                                     </div>
                                   </td>
                                 </tr>
@@ -201,7 +201,7 @@
                             </table>
                             <table style="display: flex">
                               <tfoot style="margin: auto">
-                                <div style="position: relative; width: 100%">
+                                <!-- <div style="position: relative; width: 100%">
                                   <div
                                     style="
                                       display: flex;
@@ -220,7 +220,7 @@
                                   <div
                                     style="position: absolute; inset: 0"
                                   ></div>
-                                </div>
+                                </div> -->
                                 <div
                                   style="
                                     text-align: center;
@@ -364,22 +364,22 @@ const checkoutData = computed(() => {
       key: "Type",
       value: type,
     },
-    {
-      key: "Place",
-      value: place,
-    },
-    {
-      key: "Block",
-      value: block,
-    },
+    // {
+    //   key: "Place",
+    //   value: place,
+    // },
+    // {
+    //   key: "Block",
+    //   value: block,
+    // },
     {
       key: "Slot",
       value: slot,
     },
-    {
-      key: "Floor",
-      value: floor,
-    },
+    // {
+    //   key: "Floor",
+    //   value: floor,
+    // },
     {
       key: "Driver",
       value: driverName,

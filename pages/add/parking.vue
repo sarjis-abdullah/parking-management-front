@@ -435,7 +435,7 @@ const inputClass =
           />
           <!-- <ServerErrorMessage :errors="validator.driverMobile.$errors" /> -->
         </div>
-        <div class="grid gap-2">
+        <div class="grid gap-2" v-if="false">
           <label class="text-gray-500"
             >Place<span class="text-red-500">*</span></label
           >
@@ -456,7 +456,7 @@ const inputClass =
           <!-- <ServerErrorMessage :errors="validator.place.$errors" /> -->
         </div>
 
-        <div class="grid gap-2">
+        <div class="grid gap-2" v-if="false">
           <label class="text-gray-500"
             >Floor<span class="text-red-500">*</span></label
           >
@@ -480,7 +480,7 @@ const inputClass =
           </select>
           <!-- <ServerErrorMessage :errors="validator.category.$errors" /> -->
         </div>
-        <div class="grid gap-2">
+        <div class="grid gap-2" v-if="false">
           <label class="text-gray-500"
             >Block<span class="text-red-500">*</span></label
           >
@@ -555,13 +555,13 @@ const inputClass =
       parentClass="flex justify-center"
     />
       <div
-        class="grid gap-2 rounded-lg bg-indigo-100 shadow-lg p-6"
+        class="grid gap-2 rounded-lg bg-indigo-100 shadow-lg p-2 md:p-6"
         v-if="slots && slots.length"
       >
         <label class="text-gray-500"
           >Slot<span class="text-red-500">*</span></label
         >
-        <ul class="grid gap-2 grid-cols-3 md:grid-cols-5">
+        <ul class="grid gap-2 grid-cols-2 md:grid-cols-5">
               <li
               v-for="(slot, index) in slots" :key="slot.id"
                 class="flex flex-col gap-1 items-center p-4 border text-white rounded-md"
