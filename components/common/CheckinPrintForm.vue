@@ -110,7 +110,7 @@
                                   </td>
                                 </tr>
                                 <tr>
-                                  <td class="flex justify-between mt-1">
+                                  <td class="flex justify-center mt-1">
                                     <li
                                       style="
                                         font-family: Inter;
@@ -155,14 +155,13 @@
                                         <span>Invoice No:</span>
 
                                         <span style="font-weight: 400">{{
-                                          parking?.barcode
+                                          formattedTransactionId
                                         }}</span>
                                       </div>
                                     </li>
-                                    
                                   </td>
                                 </tr>
-                                
+
                                 <tr>
                                   <td>
                                     <div style="margin-top: 10px">
@@ -330,6 +329,9 @@ const parking = computed(() => {
     return "";
   }
   return props.pdfData[0];
+});
+const formattedTransactionId = computed(() => {
+  return String(parking.value?.id ?? 0).padStart(6, "0");
 });
 const checkoutData = computed(() => {
   if (!(props.pdfData && props.pdfData.length)) {
