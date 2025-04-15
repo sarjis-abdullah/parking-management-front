@@ -44,7 +44,7 @@ const paymentStatus = ref("");
 const transactions = ref([]);
 const isLoading = ref(false);
 const selectedPaymentLoading = ref(false);
-const perPage = ref(2);
+const perPage = ref(1);
 const lastPage = ref(null);
 const total = ref(null);
 const totalPerPage = ref(null);
@@ -616,7 +616,7 @@ onMounted(() => {
             <option disabled :value="''">Select</option>
             <option value="cash">Cash</option>
             <option value="ssl_commerz">SSL commerz</option>
-            <option value="due">Due</option>
+            <!-- <option value="due">Due</option> -->
             <!-- Add more options as needed -->
           </select>
           <XMarkIcon

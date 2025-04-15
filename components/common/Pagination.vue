@@ -1,10 +1,10 @@
 <template>
     <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-      <div class="flex flex-1 justify-between sm:hidden">
+      <!-- <div class="flex flex-1 justify-between sm:hidden">
         <a href="#" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Previous</a>
         <a href="#" class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Next</a>
-      </div>
-      <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+      </div> -->
+      <div class="flex flex-col md:flex-row md:flex-1 md:items-center md:justify-between">
         <div>
           <p class="text-sm text-gray-700">
             {{ ' ' }}
@@ -19,10 +19,10 @@
             <span class="font-medium">{{ total }}</span>
           </p>
         </div>
-        <div class="flex items-center gap-4">
+        <div class="flex flex-col md:flex-row md:items-center gap-4">
           <slot></slot>
           <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-            <a :class="currentPage > 1 ?'cursor-pointer' :''" @click.prevent="prev" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+            <!-- <a :class="currentPage > 1 ?'cursor-pointer' :''" @click.prevent="prev" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
               <span class="sr-only">Previous</span>
               <ChevronLeftIcon class="h-5 w-5" aria-hidden="true" />
             </a>
@@ -31,7 +31,25 @@
             <a :class="currentPage < lastPage ?'cursor-pointer' :''" @click="next" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
               <span class="sr-only">Next</span>
               <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
-            </a>
+            </a> -->
+            <template v-for="(page, index) in pagesToShow">
+            <a
+            
+            :key="index"
+            v-if="page === '...'"
+            class="relative items-center px-4 py-2 text-sm text-gray-400 inline-flex"
+          >
+            ...
+          </a>
+          <a
+            v-else
+            @click.prevent="navigate(page)"
+            :class="page === currentPage ? 'relative z-10 inline-flex items-center bg-indigo-600 px-4 py-2 text-sm font-semibold text-white' : 'relative items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 inline-flex'"
+            class="cursor-pointer"
+          >
+            {{ page }}
+          </a>
+        </template>
           </nav>
         </div>
       </div>
@@ -57,6 +75,26 @@
   })
   const emit = defineEmits(['onChange'])
   const pages = ref([]);
+
+  const maxVisible = 5; // Customize how many pages to show in the middle
+
+const pagesToShow = computed(() => {
+  const pages = [];
+  const half = Math.floor(maxVisible / 2);
+  const start = Math.max(2, currentPage.value - half);
+  const end = Math.min(props.lastPage - 1, currentPage.value + half);
+
+  if (start > 2) pages.push(1, '...');
+  else for (let i = 1; i < start; i++) pages.push(i);
+
+  for (let i = start; i <= end; i++) pages.push(i);
+
+  if (end < props.lastPage - 1) pages.push('...', props.lastPage);
+  else for (let i = end + 1; i <= props.lastPage; i++) pages.push(i);
+
+  return pages;
+});
+
   watch(props,(currentValue)=>{
     pages.value = [];
     for (let index = 1; index <= currentValue.lastPage; index++) {
