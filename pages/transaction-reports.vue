@@ -44,7 +44,7 @@ const paymentStatus = ref("");
 const transactions = ref([]);
 const isLoading = ref(false);
 const selectedPaymentLoading = ref(false);
-const perPage = ref(50);
+const perPage = ref(2);
 const lastPage = ref(null);
 const total = ref(null);
 const totalPerPage = ref(null);
@@ -116,7 +116,7 @@ function getQueryString(query) {
   }
 
   const params = new URLSearchParams(filteredQuery);
-  return `?${params.toString()}`;
+  return `?${params.toString()}&per_page=${perPage.value}&page=${page.value}`;
 }
 const totals = computed(() => {
   if (transactions.value && transactions.value.length) {
