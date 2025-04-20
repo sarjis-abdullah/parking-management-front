@@ -268,7 +268,7 @@ const durationInHours = computed(() => {
   const inHours = Math.ceil(duration.asHours());
   const inDays = Math.ceil(duration.asDays());
   if (inMin < 60) {
-    return inMin + " s";
+    return inMin + " m";
   } else if (inHours < 24) {
     return inHours + " h";
   }

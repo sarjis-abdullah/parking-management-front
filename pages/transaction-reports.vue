@@ -72,7 +72,7 @@ const downloadCsv = () => {
     return {
       ...item,
       vehicle: item.vehicle?.number,
-      durantion: `In: ${formatDate(item.parking?.in_time)}\nOut: ${formatDate(item.parking?.out_time)}\nDuration: ${durationInHours(item.parking)}`,
+      durantion: `Duration: ${durationInHours(item.parking)}`,
     };
   });
   const newArray = updatedArray.map((obj, index) => {
@@ -506,7 +506,7 @@ const durationInHours = (singleData)=> {
   const inHours = Math.ceil(duration.asHours());
   const inDays = Math.ceil(duration.asDays());
   if (inMin < 60) {
-    return inMin + " s";
+    return inMin + " m";
   } else if (inHours < 24) {
     return inHours + " h";
   }
@@ -1059,23 +1059,9 @@ onMounted(() => {
               <div>{{ formatDate(item.transaction_date, "hh:mm A") }}</div>
             </td>
             <td v-if="item.parking" class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-              <div>
-                <div class="flex justify gap-2">
-                  <span>{{ "In" }}: </span>
-                  <span>{{
-                    item.parking?.in_time ? formatDate(item.parking?.in_time) : "--"
-                  }}</span>
-                </div>
-                <div v-if="item.parking?.out_time" class="flex justify gap-2">
-                  <span>Out: </span>
-                  <span>{{
-                    item.parking?.out_time ? formatDate(item.parking?.out_time) : "--"
-                  }}</span>
-                </div>
-                <div v-if="item.parking?.out_time" class="flex justify gap-2">
-                  <span>Duration: </span>
-                  <span>{{ durationInHours(item.parking) }}</span>
-                </div>
+              <div v-if="item.parking?.out_time" class="flex justify gap-2">
+                <span>Duration: </span>
+                <span>{{ durationInHours(item.parking) }}</span>
               </div>
             </td>
 
