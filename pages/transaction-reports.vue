@@ -72,6 +72,7 @@ const downloadCsv = () => {
     return {
       ...item,
       vehicle: item.vehicle?.number,
+      durantion: `In: ${formatDate(item.parking?.in_time)}\nOut: ${formatDate(item.parking?.out_time)}\nDuration: ${durationInHours(item.parking)}`,
     };
   });
   const newArray = updatedArray.map((obj, index) => {
@@ -89,6 +90,7 @@ const downloadCsv = () => {
       "SL No": index + 1,
       Vehicle: newObj.vehicle,
       Date: newObj.transaction_date,
+      durantion: newObj.durantion,
       Payable: newObj.total_payable,
       Paid: newObj.total_paid,
       Discount: newObj.discount_amount,
@@ -485,6 +487,31 @@ const onPageChanged = (p) => {
 const handlePerpageChange = () => {
   getTransactions();
   // loadData();
+};
+const durationInHours = (singleData)=> {
+  const result = singleData.id;
+  if (!result) {
+    return 0;
+  }
+
+  const out_time = moment(singleData.out_time);
+  const in_time = moment(singleData.in_time);
+  const differenceInMillis = out_time.diff(in_time);
+
+  // Create a duration object
+  const duration = moment.duration(differenceInMillis);
+
+  // Extract total time in minutes
+  const inMin = Math.ceil(duration.asMinutes());
+  const inHours = Math.ceil(duration.asHours());
+  const inDays = Math.ceil(duration.asDays());
+  if (inMin < 60) {
+    return inMin + " s";
+  } else if (inHours < 24) {
+    return inHours + " h";
+  }
+
+  return inDays + " d";
 };
 const config = useRuntimeConfig();
 const BASE_API_URL = config.public.BASE_URL;
@@ -905,6 +932,16 @@ onMounted(() => {
                 background-color: #f2f2f2;
               "
             >
+              Duration
+            </th>
+            <th
+              style="
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+                background-color: #f2f2f2;
+              "
+            >
               Payable
             </th>
             <th
@@ -1020,6 +1057,26 @@ onMounted(() => {
             >
               <div>{{ formatDate(item.transaction_date, "DD-MM-YYYY") }}</div>
               <div>{{ formatDate(item.transaction_date, "hh:mm A") }}</div>
+            </td>
+            <td v-if="item.parking" class="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+              <div>
+                <div class="flex justify gap-2">
+                  <span>{{ "In" }}: </span>
+                  <span>{{
+                    item.parking?.in_time ? formatDate(item.parking?.in_time) : "--"
+                  }}</span>
+                </div>
+                <div v-if="item.parking?.out_time" class="flex justify gap-2">
+                  <span>Out: </span>
+                  <span>{{
+                    item.parking?.out_time ? formatDate(item.parking?.out_time) : "--"
+                  }}</span>
+                </div>
+                <div v-if="item.parking?.out_time" class="flex justify gap-2">
+                  <span>Duration: </span>
+                  <span>{{ durationInHours(item.parking) }}</span>
+                </div>
+              </div>
             </td>
 
             <td
