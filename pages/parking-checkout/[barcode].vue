@@ -948,16 +948,14 @@ const minTime = ref(dayjs());
 const maxTime = ref(dayjs());
 const disableCurrentTime = ref(false);
 const checkoutTimeError = computed(() => {
-  const lowerTime = minTime.value.format("HH:mm");
   const lowerTime12 = minTime.value.format("hh:mm A");
-  const upperTime = maxTime.value.format("HH:mm");
   const upperTime12 = maxTime.value.format("hh:mm A");
   const error = `Please select a time between ${lowerTime12} and ${upperTime12}.`;
   if (!currentTime.value){
     return error
   }
-  const selected = formatDate(currentTime.value, "HH:mm");
-  if (selected < lowerTime || selected > upperTime) {
+  const selected = currentTime.value.format("hh:mm A");
+  if (selected < lowerTime12 || selected > upperTime12) {
     return error
   } 
   return "";
