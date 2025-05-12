@@ -947,19 +947,29 @@ const checkoutTime = ref(formatDate(dayjs(), "HH:mm"));
 const minTime = ref(dayjs());
 const maxTime = ref(dayjs());
 const disableCurrentTime = ref(false);
+
 const checkoutTimeError = computed(() => {
-  const lowerTime12 = minTime.value.format("hh:mm A");
-  const upperTime12 = maxTime.value.format("hh:mm A");
-  const error = `Please select a time between ${lowerTime12} and ${upperTime12}.`;
-  if (!currentTime.value){
-    return error
+  if (!currentTime.value) {
+    return "Please select a time.";
   }
-  const selected = currentTime.value.format("hh:mm A");
-  if (selected < lowerTime12 || selected > upperTime12) {
-    return error
-  } 
+
+  const lower = minTime.value.startOf('minute');
+  const upper = maxTime.value.startOf('minute');
+  const selected = currentTime.value.startOf('minute');
+  console.log(lower, upper, selected);
+
+  const error = `Please select a time between ${lower.format("hh:mm A")} and ${upper.format("hh:mm A")}.`;
+
+  // if (selected.isSame(lower) || selected.isSame(upper)) {
+  //   return "";
+  // }
+  if (selected.isBefore(lower) || selected.isAfter(upper)) {
+    return error;
+  }
+
   return "";
 });
+
 const disabledPaymentButton = computed(() => {
   const fTotalAmount = parseFloat(finalTotalAmount.value);
   if (fTotalAmount < 0 || checkoutTimeError.value) {
